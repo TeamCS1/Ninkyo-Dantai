@@ -90,8 +90,8 @@ else
     
     if instance_exists(obj_grid_home_128)
     {
-        with obj_dropdown_home_customisation
-        
+        with obj_grid_home_128
+
         {
             instance_destroy();
         }

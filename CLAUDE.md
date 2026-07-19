@@ -146,6 +146,12 @@ Background on how core systems actually work, based on an in-depth review
   events (bed/cabinet/fridge) are skipped, matching the same
   `global.homeBuildingMode == false` style already used elsewhere in
   `obj_player_buruwasu` for its build-mode input handling.
+- `obj_home_customisation_controller`'s build-mode toggle correctly
+  destroys both the placement grid (`obj_grid_home_128`) and the furniture
+  dropdown (`obj_dropdown_home_customisation`) on exit — a copy-paste bug
+  used to `with obj_dropdown_home_customisation` twice instead of also
+  targeting `obj_grid_home_128`, leaking a new grid instance on every
+  toggle.
 
 ## Known issues
 
@@ -376,12 +382,6 @@ consistently:
   and `obj_bed` are all non-persistent, and `scr_save.gml`/`scr_load.gml`
   never reference furniture position/type — moved furniture resets the
   moment the room is left, not just on reload.
-- **Copy-paste bug leaks a grid instance on every build-mode toggle.**
-  `obj_home_customisation_controller`'s toggle event cleans up
-  `obj_dropdown_home_customisation` twice instead of also cleaning up
-  `obj_grid_home_128`, so the unconditional
-  `instance_create(0,0,obj_grid_home_128)` a few lines earlier leaks a new
-  grid instance every time build mode is toggled on.
 - **Dropdown menu leaks 9 UI instances per click.**
   `obj_dropdown_home_customisation`'s Pressed event calls
   `scr_CreateDropdownItems()` unconditionally on every click (both open and
