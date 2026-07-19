@@ -106,6 +106,42 @@ source before being recorded here.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
+- ~~**Most world props had no collision code at all.**~~ **Fixed.** Only 8
+  of the ~27 objects in the "Props" project folder (plus a few outside it)
+  had a Collision event registered in `obj_player_buruwasu` — everything
+  else, including `obj_street_lamp_post`, `obj_wall_mounted_oil_lamp(_custom)`,
+  `obj_pillar1_buruwasu`, `obj_bus_shelter`, `obj_mall3d_sign`,
+  `obj_sewer_pipe_prefab`, `obj_wooden_bench_no_back` (despite being marked
+  `solid`), `obj_dumpster`, `obj_billboard_future_beauty`,
+  `obj_jap_neon_sign_buruwasu`, `obj_small_tree_buruwasu`,
+  `obj_rounded_picnic_table(_canopy)`, `obj_prayer_shrine_part`,
+  `obj_euro_pallet`, `obj_fire_escape_three_floors`, `obj_burning_barrel`,
+  and `obj_electrical_box`, had zero collision handling — the player walked
+  straight through all of them. Added 19 new gated Collision events (same
+  `scr_ResolvePlayerAxisCollision(other)` pattern as the existing ones) for
+  all of these. **Not** added for: `obj_prayer_shrine_collectible` (a
+  pickup, walking into it is intentional, same as `obj_health_pack`);
+  `box_test_MTL` and `obj_fire_test` (dev/test objects, not placed in any
+  room); `obj_line_of_ladies` (placed in `rm_city_buruwasu` but has no
+  sprite/mask at all — `<spriteName>` and `<maskName>` are both
+  `<undefined>` — so it needs an actual sprite before collision would mean
+  anything; flagged separately below).
+- **Collision-mask/visual-size mismatch risk for 3D-model props.** Props
+  like the chain-link fence draw a `.d3d` model with its own independent
+  `d3d_transform_set_scaling`/rotation/translation, while the *collision*
+  box is a separate 2D sprite mask (e.g. `mash_16_64_actual`) scaled by
+  `image_xscale`/`image_yscale` — two unrelated scale systems. The fence
+  sets `image_xscale = 2.8; image_yscale = 0.5;`, giving a collision box of
+  roughly 45×32px, which may be much smaller than the actual rendered
+  fence model. Most other props use `image_xscale/yscale = 1`, which is
+  safer but still not verified against the real model footprint (`.d3d`
+  files are binary, not inspectable as text). This needs an in-editor
+  playtest per prop to confirm the hitbox roughly matches the visible mesh
+  — flagging rather than guessing at scale corrections blind.
+- **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
+  `<maskName>` are `<undefined>` in the object definition, yet it's placed
+  live in `rm_city_buruwasu`. It currently renders nothing and has no valid
+  collision mask to give it collision against even if wired up.
 - **Taxi icon collision is a no-op stub.** The `obj_taxi_icon` collision
   event (line ~250) is just `x = x` / `y = y`, while every sibling vehicle
   icon (car, scooter, truck, ambulance, police car) spawns a rideable vehicle
