@@ -14,7 +14,7 @@ The development manual is on the repo's Wiki.
   resource (object, script, room, sprite, etc.) must be registered here to be
   picked up by GameMaker.
 - `Ninkyo Dantai.gmx/objects/` — ~250 object definitions (`*.object.gmx`).
-- `Ninkyo Dantai.gmx/scripts/` — ~120 GML scripts (`*.gml`), mostly one
+- `Ninkyo Dantai.gmx/scripts/` — ~130 GML scripts (`*.gml`), mostly one
   function per file, using camelCase names (e.g. `characterStepEvent.gml`,
   `isCollisionCharacter.gml`).
 - `Ninkyo Dantai.gmx/rooms/` — room definitions (`*.room.gmx`), including city
@@ -62,15 +62,11 @@ GameMaker Studio 1.4 is used locally to compile and test the project. When
 compilation errors are provided, fix the underlying source files without
 introducing modern GML syntax.
 
-## Architecture notes & known issues
+## Architecture notes
 
-Findings from an in-depth review (2026-07-18) covering: player/collision,
-save/load & global state, NPC AI/spawning, the battle system (state machine +
-draw events), rendering/draw-state hygiene project-wide, the dialogue
-controller, the map system, and the home customisation system. File paths
-are relative to `Ninkyo Dantai.gmx/`. Ranked most severe first within each
-area. Every finding below was independently spot-checked against the actual
-source before being recorded here.
+Background on how core systems actually work, based on an in-depth review
+(2026-07-18) plus follow-up fixes. File paths are relative to
+`Ninkyo Dantai.gmx/`.
 
 ### Dead/orphaned code (do not extend, safe to ignore or remove)
 
@@ -86,199 +82,104 @@ source before being recorded here.
   which uses GameMaker's built-in `speed`/`direction`/`friction` plus
   per-collision-object events instead.
 - **`scripts/scr_load_script_SBB.gml`** is leftover from a different game
-  (references "Super Bandonio Bros" level names like
-  `worldOneLevelTwoStatus`, `qCratesDestroyedWorldOneLevelOne`) and is never
-  called anywhere. It also contains a real bug if it were ever wired up: line
-  46 reads `ini_read_real("save01", "global.deathsWorldOneLevelThree", 0)`
-  — every other line uses a bare key name, so this key would never match
-  anything actually written.
+  (references "Super Bandonio Bros" level names) and is never called
+  anywhere.
 - **`scripts/scr_save_configs.gml` / `scripts/scr_load_configs.gml`** (display
-  settings persistence: fullscreen, vsync, anti-aliasing, name tags) are
-  internally consistent with each other but are never called from the actual
-  options menu (`obj_main_menu_options`, `obj_optionsMenuBuruwasuController`,
-  etc.) — display settings likely don't persist across sessions as a result.
+  settings persistence) are internally consistent with each other but never
+  called from the actual options menu — display settings likely don't
+  persist across sessions as a result.
 - **`scripts/scr_BuruwasuDrawMap.gml` and `scripts/DrawArrowWaypoint.gml`**
-  are also unreferenced anywhere in the project (confirmed by grep), same as
+  are also unreferenced anywhere in the project, same as
   `characterDrawEvent.gml` above. Both also contain real bugs that would
-  surface immediately if ever wired up — see Map system and Rendering
-  sections below — so don't copy them as a starting point without fixing
-  those first.
+  surface immediately if ever wired up — see Map system and Rendering in
+  Known Issues — so don't copy them as a starting point without fixing those
+  first.
+
+### Collision system
+
+- Player-vs-world collision is **not** GameMaker's built-in `solid` flag
+  (several objects have it checked but it does nothing on its own) — it's a
+  per-object-type `Collision` event registered directly in
+  `obj_player_buruwasu.object.gmx`, one event per solid object. A prop with
+  no matching event in that object is invisible to the player, regardless of
+  its own `solid` setting.
+- Collision resolves X and Y independently via
+  `scripts/scr_ResolvePlayerAxisCollision.gml` (falling back to reverting
+  both axes only for genuine corner-clip cases), so the player slides along
+  surfaces on diagonal contact instead of stopping dead.
+- Every object in the "Props" folder and every building/shop exterior, the
+  elevator, the Chicken Licken dining booths, and the home-customisation
+  furniture (`obj_bed`/`obj_cabinet`/`obj_fridge`) now have a matching
+  Collision event (43 added in total). Deliberately left non-solid, based on
+  reading their actual Create code, not guessed: interaction/trigger markers
+  (`obj_taxi_corona`, `obj_custom_waypoint_buruwasu`,
+  `obj_gun_shop_corona_shine_of_light`, mall enter/exit triggers), pickups
+  (`obj_health_pack`, `obj_drop_bag_of_money`, `obj_ninkyo_baseball_bat`,
+  `obj_prayer_shrine_collectible`), and ground/ceiling decoration
+  (`obj_floor3d`, `obj_roof_modular_buruwasu`,
+  `obj_fire_escape_three_floors` — elevated on a building facade, not
+  reachable at ground level).
+- **Real 3D-model bounding boxes, computed from the model file itself.**
+  `.d3d` model files in this project turn out to be plain text (GameMaker's
+  own `d3d_model_save` format: version / vertex count / primitive-flags
+  header, then one `marker x y z nx ny nz u v color alpha` line per vertex),
+  not binary, so the true footprint can be measured instead of guessed.
+  `scripts/scr_GetModelBounds.gml` parses and caches a model's real
+  `[width, depth, height]`; `scripts/scr_ApplyModelCollisionBoundsScaled.gml`
+  sizes the calling instance's `image_xscale`/`image_yscale` from those
+  dimensions, multiplied by whatever scale the object's own Draw event
+  applies (`d3d_transform_set_scaling`/`add_scaling`) and swapped for
+  rotations of 90/270°. Rotation is passed in explicitly by a thin
+  per-object wrapper script (`scr_ApplyChainLinkFenceCollisionBounds`,
+  `scr_ApplyBedCollisionBounds`, etc.) rather than read off a hardcoded
+  variable name, since objects disagree on this (`zDirection` vs
+  `zRotation` vs no rotation variable at all). **The mask sprite must have
+  a centered origin** (`xorig`/`yorigin` at its middle) — an off-center
+  origin (e.g. `mask_32`'s `0,0`) produces a box that drifts away from the
+  instance instead of surrounding it, at any rotation. `mask_32_32_actual`
+  (centered, 32×32) is the established convention to use instead. Wired up
+  as a proof of concept for the chain-link fence and the home furniture;
+  most other 3D-model props still use a guessed `image_xscale`/`image_yscale`
+  and would need the same treatment to be verified rather than assumed.
+- **Build-mode gating.** While `global.homeBuildingMode` is true (toggled by
+  `obj_home_customisation_controller`), the player's furniture Collision
+  events (bed/cabinet/fridge) are skipped, matching the same
+  `global.homeBuildingMode == false` style already used elsewhere in
+  `obj_player_buruwasu` for its build-mode input handling.
+
+## Known issues
+
+Remaining open findings, ranked most severe first within each area. Every
+finding below was independently spot-checked against the actual source
+before being recorded here.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
-- ~~**Most world props had no collision code at all.**~~ **Fixed.** Only 8
-  of the ~27 objects in the "Props" project folder (plus a few outside it)
-  had a Collision event registered in `obj_player_buruwasu` — everything
-  else, including `obj_street_lamp_post`, `obj_wall_mounted_oil_lamp(_custom)`,
-  `obj_pillar1_buruwasu`, `obj_bus_shelter`, `obj_mall3d_sign`,
-  `obj_sewer_pipe_prefab`, `obj_wooden_bench_no_back` (despite being marked
-  `solid`), `obj_dumpster`, `obj_billboard_future_beauty`,
-  `obj_jap_neon_sign_buruwasu`, `obj_small_tree_buruwasu`,
-  `obj_rounded_picnic_table(_canopy)`, `obj_prayer_shrine_part`,
-  `obj_euro_pallet`, `obj_burning_barrel`, and `obj_electrical_box`, had
-  zero collision handling — the player walked straight through all of
-  them. Added 18 new gated Collision events (same
-  `scr_ResolvePlayerAxisCollision(other)` pattern as the existing ones) for
-  all of these. **Not** added for: `obj_prayer_shrine_collectible` (a
-  pickup, walking into it is intentional, same as `obj_health_pack`);
-  `box_test_MTL` and `obj_fire_test` (dev/test objects, not placed in any
-  room); `obj_line_of_ladies` (placed in `rm_city_buruwasu` but has no
-  sprite/mask at all — `<spriteName>` and `<maskName>` are both
-  `<undefined>` — so it needs an actual sprite before collision would mean
-  anything; flagged separately below); `obj_fire_escape_three_floors`
-  (attached above ground level on a building facade, not something the
-  player reaches at ground level — confirmed by the person who actually
-  knows the level layout, not something inferable from the code alone).
-- ~~**Every building/shop exterior, the elevator, dining booths, and home
-  furniture also had zero collision.**~~ **Fixed.** A follow-up audit of
-  *every* object that does any 3D drawing (65 total, found via grepping for
-  `d3d_model_draw`/`d3d_model_create`/`scr_load_model` across all of
-  `objects/*.object.gmx` — not just the "Props" folder) turned up a second,
-  larger wave: `obj_7_24_shop_block`, `obj_block_shop_sushi_bar001`,
-  `obj_eatery_joes_pizza2`, `obj_garage001`, `obj_house_block002`,
-  `obj_house_blue_block001`, `obj_house_green_block001`,
-  `obj_house_high_rise`, `obj_house_highrise`, `obj_house_red_block001`,
-  `obj_house_violet_block001`, `obj_modern_mall_interior_block`,
-  `obj_residential_house`, `obj_shop_computer_shop`,
-  `obj_shop_shine_of_light`, `obj_shopping_mall_block_exterior`, and
-  `obj_warehouse001` — every building/shop exterior in the game — had no
-  collision at all, meaning the player could walk straight through every
-  building wall in every city. Also missing: `obj_elevator` (its Create
-  event builds two solid `d3d_model_block` shapes — a real structure, not a
-  trigger), the three `obj_chicken_lickin_booth_0{0,1,2}` dining booths, and
-  the home-customisation furniture `obj_bed`/`obj_cabinet`/`obj_fridge`
-  (each of which literally has a `//setup collisions` comment in Create
-  followed only by `image_xscale`/`image_yscale` — collision was clearly
-  planned and never wired up, same half-finished pattern as the fence).
-  Added 24 more gated Collision events for all of these.
-  `obj_house_block002`/`obj_house_blue_block001` aren't currently placed in
-  any room (only referenced by `scr_minimap.gml`) but were added anyway so
-  the bug doesn't resurface if they're ever used. Note
-  `obj_house_highrise` and `obj_house_high_rise` are two separate,
-  near-identically-named objects — possible accidental duplicate, not
-  investigated further.
-- **Deliberately left non-solid (confirmed by reading their Create code,
-  not guessed):** `obj_taxi_corona` and `obj_custom_waypoint_buruwasu`
-  (both just spawn a glowing corona-cylinder model as an interaction
-  marker — same pattern as `obj_gun_shop_corona_shine_of_light`, all three
-  are "walk up and interact" triggers, not obstacles); `obj_enter_mall_trigger`/
-  `obj_exit_mall_trigger` (room-transition triggers); `obj_drop_bag_of_money`
-  and `obj_ninkyo_baseball_bat` (pickups); `obj_floor3d` and
-  `obj_roof_modular_buruwasu` (ground/ceiling decoration, not obstacles).
-- **`obj_land_mask` and `object192` are suspicious but left untouched.**
-  Both are placed only in `rm_city_ichihara`, and both have **identical**
-  Create-event code loading the same `TERRAIN/hill.d3d` model.
-  `object192` is GameMaker's auto-generated default name for a
-  never-renamed object — strong evidence it's an accidental leftover
-  duplicate of `obj_land_mask` rather than a second intentional hill.
-  Whether either (or both) should be solid is a design call (is this a
-  background hill players never reach, or terrain they walk around?) —
-  flagging rather than guessing.
-- ~~**Collision-mask/visual-size mismatch risk for 3D-model props.**~~
-  **Fence fixed as a proof of concept; the same risk remains open for
-  every other 3D-model prop.** Props like the chain-link fence draw a
-  `.d3d` model with its own independent
-  `d3d_transform_set_scaling`/rotation/translation, while the *collision*
-  box is a separate 2D sprite mask (e.g. `mash_16_64_actual`) scaled by
-  `image_xscale`/`image_yscale` — two unrelated scale systems, with no
-  guarantee the mask matches the model's real footprint. It turns out
-  `.d3d` files in this project are **not binary** — they're GameMaker's
-  own plain-text `d3d_model_save` format (`version` / `vertex count` /
-  `primitive flags` header, then one line per vertex: `marker x y z nx ny
-  nz u v color alpha`), so the true bounding box can be computed directly
-  by scanning the file. Added `scripts/scr_GetModelBounds.gml` (parses a
-  `.d3d` path into a cached `[width, depth, height]` ds_list — skips a
-  trailing all-zero terminator row GameMaker writes per primitive block,
-  and never touches the normal-vector fields since some are corrupted
-  `-nan(ind)` values in the source assets that would otherwise crash
-  `real()`) and `scripts/scr_ApplyModelCollisionBoundsScaled.gml` (sizes the
-  calling instance's `image_xscale`/`image_yscale` from those real
-  dimensions — multiplied by the same scale factor the object's own Draw
-  event passes to `d3d_transform_set_scaling`/`d3d_transform_add_scaling`,
-  since models are authored in local space then scaled up for display —
-  and swapping width/depth when a caller-supplied rotation angle is
-  90/270° so the mask matches what's actually drawn. The rotation is
-  passed in explicitly by each per-object wrapper script rather than read
-  off a hardcoded variable name, because objects disagree on this:
-  `obj_chain_link_fence_buruwasu` uses `zDirection`, `obj_bed` uses
-  `zRotation`, and `obj_cabinet`/`obj_fridge` have no rotation variable at
-  all (their Draw code hardcodes `d3d_transform_add_rotation_z(0)`, i.e.
-  never rotates) — `image_angle` is never touched by any of these props'
-  Draw code either, so none of it can be inferred generically). Wired up via
-  `scripts/scr_ApplyChainLinkFenceCollisionBounds.gml`, a thin no-argument
-  wrapper so each fence instance's room creation code can call it the same
-  way it already sets `zDirection` — added to all 16 placed fence instances
-  in `rm_city_buruwasu` (12 with a rotation override needed the call added
-  after their `zDirection = N;` line so it picks up the final value; the
-  other 4 default to `zDirection = 0` and are covered by the same call in
-  the object's own Create event). Measured result: the real model is
-  ~3.96×120.2 units (thin, long panel) vs. the old guessed 45×32px box —
-  confirms the mismatch was real and in the direction of "far too small
-  and the wrong aspect ratio," not just imprecise. This is a proof of
-  concept for one prop; several other 3D-model props still use a guessed
-  `image_xscale`/`image_yscale` and would need the same
-  `scr_ApplyModelCollisionBoundsScaled` wiring to be verified rather than
-  assumed.
-- **Important caveat found while swapping the fence's mask sprite:**
-  `scr_ApplyModelCollisionBoundsScaled` scales the mask sprite around its
-  own origin (`xorig`/`yorigin`), so it only produces a box centered on
-  the instance if that sprite's origin is centered too. `mask_32` (0,0
-  origin — top-left corner) produces a box that drifts entirely
-  down-and-right of the instance instead of surrounding it, regardless of
-  rotation — it isn't a rotation-logic bug, it affects every instance
-  using that sprite equally. The fence was switched to `mask_32_32_actual`
-  (16,16 origin — centered, same 32×32 size, and already the convention
-  used by a dozen other props). Any future prop wired up with this script
-  needs a **centered-origin** mask sprite, or the box will be positioned
-  wrong regardless of size.
-- ~~**Home furniture (`obj_bed`/`obj_cabinet`/`obj_fridge`) had zero real
-  collision and no build-mode gating.**~~ **Fixed.** All three were also
-  using `mask_32` (the same off-center-origin sprite as the fence bug
-  above) — switched to `mask_32_32_actual`. Added
-  `scripts/scr_ApplyBedCollisionBounds.gml`,
-  `scr_ApplyCabinetCollisionBounds.gml`, and `scr_ApplyFridgeCollisionBounds.gml`
-  (thin wrappers around `scr_ApplyModelCollisionBoundsScaled`, mirroring
-  the fence's pattern) to replace their placeholder `image_xscale/yscale
-  = 1.0` — each had a `//setup collisions` comment sitting directly above
-  those placeholder lines, i.e. collision sizing was clearly intended but
-  never actually computed. Matters more here than for the fence: the bed
-  and fridge draw their model at 3× and 4.8× scale respectively
-  (`d3d_transform_add_scaling`), which `scr_ApplyModelCollisionBoundsScaled`
-  now correctly multiplies in — getting this wrong would have undersized
-  the box by roughly 3-5× linearly, not just ~10% like the fence's
-  previously-unaccounted-for `1.1` Y-stretch (also fixed now, in the same
-  pass). The 3 gated Collision events for these props (added earlier, see
-  Player & collision above) were also updated to additionally check
-  `global.homeBuildingMode == false`, matching the exact style
-  already used elsewhere in `obj_player_buruwasu` for build-mode gating
-  (e.g. its keyboard-movement events) — so the player can walk through
-  furniture while placing/rearranging it in build mode, but collides with
-  it normally otherwise.
-- **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
-  `<maskName>` are `<undefined>` in the object definition, yet it's placed
-  live in `rm_city_buruwasu`. It currently renders nothing and has no valid
-  collision mask to give it collision against even if wired up.
 - **Taxi icon collision is a no-op stub.** The `obj_taxi_icon` collision
-  event (line ~250) is just `x = x` / `y = y`, while every sibling vehicle
-  icon (car, scooter, truck, ambulance, police car) spawns a rideable vehicle
-  and sets `global.inVehicle = true`. Touching the taxi icon currently does
-  nothing — looks like an unfinished feature.
+  event is just `x = x` / `y = y`, while every sibling vehicle icon (car,
+  scooter, truck, ambulance, police car) spawns a rideable vehicle and sets
+  `global.inVehicle = true`. Touching the taxi icon currently does nothing —
+  looks like an unfinished feature.
 - **Parked taxi (`obj_taxi_static`) ignores the no-clip debug toggle.**
-  Unlike every other solid prop (trees, benches, bins, fences, cones, boxes,
-  NPCs), which gate their `x = xprevious; y = yprevious;` revert behind
+  Unlike every other solid prop, which gates its collision revert behind
   `if global.enablePlayerCollisionsInWorldBuruwasu == true`, the taxi's
-  collision event does the revert unconditionally.
-- ~~**Collision reverts both axes at once.**~~ **Fixed.** All 11 gated
-  collision handlers used to do `x = xprevious; y = yprevious;` as a single
-  block, cancelling all motion on any diagonal contact instead of sliding
-  along the surface. They now call `scripts/scr_ResolvePlayerAxisCollision.gml`,
-  which reverts X and Y independently (falling back to reverting both only
-  for genuine corner-clip cases where neither axis alone is blocked).
+  collision event reverts unconditionally.
 - **`global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
   Set in `obj_global_buruwasu`'s Create event but read from player collision
   events; GMS1.4 doesn't guarantee Create-event order across differently
   named objects, so this is a latent "read before set" risk if instance
   order ever changes.
+- **`obj_land_mask` and `object192` are suspicious but left untouched.**
+  Both are placed only in `rm_city_ichihara`, and both have **identical**
+  Create-event code loading the same `TERRAIN/hill.d3d` model. `object192`
+  is GameMaker's auto-generated default name for a never-renamed object —
+  strong evidence it's an accidental leftover duplicate of `obj_land_mask`
+  rather than a second intentional hill. Whether either (or both) should be
+  solid is a design call, not something to guess at.
+- **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
+  `<maskName>` are `<undefined>` in the object definition, yet it's placed
+  live in `rm_city_buruwasu`. It currently renders nothing and has no valid
+  collision mask to give it collision against even if wired up.
 
 ### Save/load & global state
 
@@ -325,11 +226,10 @@ source before being recorded here.
   `var inst = instance_create(...)` and use `with (inst)`.
 - **`scripts/scr_alarmAI.gml`: `actiontelephonebox` state is dead and
   doesn't re-arm the alarm.** No code path ever sets
-  `characterstates.actiontelephonebox` (confirmed by project-wide grep),
-  and unlike the other cases in the same switch, its `case` block doesn't
-  reset `alarm[0]` before `break`. If this state is ever wired up in the
-  future without also fixing that, the NPC's AI loop will freeze
-  permanently once it enters this state.
+  `characterstates.actiontelephonebox`, and unlike the other cases in the
+  same switch, its `case` block doesn't reset `alarm[0]` before `break`. If
+  this state is ever wired up in the future without also fixing that, the
+  NPC's AI loop will freeze permanently once it enters this state.
 - **`objects/obj_battle_start_dialogue.object.gmx`: dialogue resolves the
   wrong encounter if two exist at once.** Its Step event finds the target
   via `instance_nearest(obj_player_buruwasu.x, obj_player_buruwasu.y,
@@ -346,12 +246,11 @@ source before being recorded here.
 ### Battle system (deep dive)
 
 - **State transitions live in a Draw event instead of Step.**
-  `obj_battle_encounter`'s Step event is an empty `battleStage` skeleton
-  (`if battleStage == 0 { }` / `== 1 { }` / `== 2 { }`); the actual side
-  effects — spawning `obj_battle_enemy_hud` and binding
+  `obj_battle_encounter`'s Step event is an empty `battleStage` skeleton;
+  the actual side effects — spawning `obj_battle_enemy_hud` and binding
   `hud.encounter_id = id` — happen in its **Draw GUI event** instead. Draw
-  isn't guaranteed to run under all conditions (e.g. app surface disabled),
-  so gameplay state changes shouldn't live there.
+  isn't guaranteed to run under all conditions, so gameplay state changes
+  shouldn't live there.
 - **Combat input and death detection also live in a Draw event.**
   `obj_battle_enemy_hud`'s Draw GUI event applies damage on
   `mouse_check_button_released(mb_left)` and separately re-checks
@@ -362,21 +261,18 @@ source before being recorded here.
   "Damage Dealt!") }` is a fixed-threshold check, not an edge/hit-timer
   check — once HP first drops below 90 this renders continuously for the
   rest of the fight.
-- **`draw_set_colour(c_aqua)` is never reset** in the same event (line
-  ~158) — confirmed no matching `draw_set_colour(c_white)` anywhere in that
-  object. Any later `draw_text` call anywhere in the project that doesn't
-  set its own color renders aqua from that point on (see Rendering section).
-- **`obj_battle_hud` is orphaned** — confirmed via grep: it is never
-  `instance_create`'d and not placed in any room, so its Draw GUI event
-  (meant to draw the HUD background frame) never runs. The enemy HUD's
-  text/healthbar currently render with no backing frame.
+- **`draw_set_colour(c_aqua)` is never reset** in the same event — confirmed
+  no matching `draw_set_colour(c_white)` anywhere in that object. Any later
+  `draw_text` call anywhere in the project that doesn't set its own color
+  renders aqua from that point on (see Rendering below).
+- **`obj_battle_hud` is orphaned** — never `instance_create`'d and not
+  placed in any room, so its Draw GUI event (meant to draw the HUD
+  background frame) never runs.
 - **Per-encounter isolation is broken.** `obj_battle_encounter` guards HUD
   and dialogue spawning with `!instance_exists(obj_battle_enemy_hud)` /
   `!instance_exists(obj_battle_start_dialogue)` — these check for *any*
-  instance of that object type, not one scoped to `id`, contradicting the
-  object's own comment about each encounter tracking only its own IDs. Only
-  one global HUD/dialogue can ever exist, so two concurrent encounters will
-  misbehave.
+  instance of that object type, not one scoped to `id`. Only one global
+  HUD/dialogue can ever exist, so two concurrent encounters will misbehave.
 - **No HP floor clamp** — `enemyCurrentHealth` can go negative before the
   death check tidies up; the healthbar can render a negative percentage for
   one frame. Minor.
@@ -393,60 +289,50 @@ consistently:
 - `obj_battle_enemy_hud` leaves color set to `c_aqua` (see Battle above).
 - `obj_waypoint_controller_buruwasu`'s Draw GUI event sets
   `draw_set_halign(fa_center)` and never restores `fa_left`.
-- `obj_car_icon` / `obj_taxi_icon` only call
-  `draw_set_alpha_test(false)` in the *out-of-range* branch, leaving alpha
-  testing on indefinitely whenever the in-range branch draws instead.
+- `obj_car_icon` / `obj_taxi_icon` only call `draw_set_alpha_test(false)`
+  in the *out-of-range* branch, leaving alpha testing on indefinitely
+  whenever the in-range branch draws instead.
 - `obj_bin_ashtray_buruwasu` and `obj_street_lamp_post` toggle
   `d3d_set_lighting` off for their own draw and don't reliably restore it —
   the dev's own code comment on the ashtray ("make sure house lighting is
   false. Somehow lighting works when off lmao") shows this is already known
   to be fragile. Lighting is only re-enabled once per frame centrally by
-  `obj_control` (via `scr_lightSource_Controller`, depth 1,000,000, drawn
-  first), so any lit object drawn after a lamp/ashtray at a lower depth in
-  the same frame renders flat/unlit until the next frame's reset.
-- `obj_main_menu_options`, `obj_notification_system_out`,
-  `obj_dropdown_home_customisation`, `obj_dropdown_slots`,
-  `obj_vending_machine_ui`, `obj_property_management_slots` all set
-  font/color in their Draw GUI events and never restore a default.
+  `obj_control`, so any lit object drawn after a lamp/ashtray at a lower
+  depth in the same frame renders flat/unlit until the next frame's reset.
+- Several menu/HUD objects (`obj_main_menu_options`,
+  `obj_notification_system_out`, `obj_dropdown_home_customisation`,
+  `obj_dropdown_slots`, `obj_vending_machine_ui`,
+  `obj_property_management_slots`) set font/color in their Draw GUI events
+  and never restore a default.
 - Good examples already in the codebase to model fixes on:
   `scr_DrawCollisionBoxModel.gml` (resets alpha/color/transform at the end)
   and `obj_cursor_grab_64` (checks `instance_exists` before dereferencing
   its target).
-- Other rendering bugs found:
-  - `scripts/DrawArrowWaypoint.gml` line 16 reads `_maxDistance`, which is
-    never declared — the actual variable is `_maxLength` (line 13). Dead
-    code today (unreferenced), but will throw immediately if ever wired up.
-  - `obj_gui_buruwasu`'s Draw GUI event computes
-    `global.currentHealthBar = (global.currentHealthCount /
-    global.currentHealthMaximum) * 100` (and the same for stamina) with no
-    guard against a zero max — a real divide-by-zero risk if either max
-    stat is ever zeroed elsewhere.
-  - `draw_text_shadow_tooltips.gml` hardcodes its draw position to
-    `(20, 1000)` regardless of caller-supplied coordinates, so if two
-    interactables (vending machine, shrine, gun shop, mall doors, taxi,
-    battle encounter) are ever in range at once, their prompts overwrite
-    each other at the same spot.
+- `scripts/DrawArrowWaypoint.gml` line 16 reads `_maxDistance`, which is
+  never declared — the actual variable is `_maxLength`. Dead code today,
+  but will throw immediately if ever wired up.
+- `obj_gui_buruwasu`'s Draw GUI event computes health/stamina bar
+  percentages with no guard against a zero max — a real divide-by-zero
+  risk if either max stat is ever zeroed elsewhere.
+- `draw_text_shadow_tooltips.gml` hardcodes its draw position to
+  `(20, 1000)` regardless of caller-supplied coordinates, so if two
+  interactables are ever in range at once, their prompts overwrite each
+  other at the same spot.
 
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
 - **Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
   Both this object and its near-clone `obj_battle_start_dialogue` define
-  only `message[0]` with `message_end = 0`, and advance with
-  `if (message_current < message_end) { message_current += 1 } else {
-  instance_destroy() }`. The counts match today, but the code's own comment
-  — *"if there are more messages left to show (0 -> 6, in our case)"* — is
-  leftover from a 7-line template, i.e. this exact desync has already
-  happened once before in this object's history. Adding a new line without
+  only `message[0]` with `message_end = 0`. The counts match today, but the
+  code's own comment — *"if there are more messages left to show (0 -> 6,
+  in our case)"* — is leftover from a 7-line template, i.e. this exact
+  desync has already happened once before. Adding a new line without
   bumping `message_end` will make it silently unreachable.
 - **Forced intro dialogue replays every time on 10+ rooms.** The same
-  instance (name `inst_4E5F0245`, identical hardcoded text) is placed
-  non-persistently in `rm_ShinjiHome`, `rm_chicken_licken`,
-  `rm_city_buruwasu`, `rm_city_ichihara`, `rm_city_konan`, `rm_city_nagoya`,
-  `rm_city_yokyohama`, and both template rooms. Its Draw GUI event shows
-  the box unconditionally on room load with no "already seen" flag, so
-  re-entering any of these rooms replays the same line every time — looks
-  like a template artifact copy-pasted into real rooms rather than intended
-  design.
+  instance (identical hardcoded text) is placed non-persistently across
+  most city/interior rooms. Its Draw GUI event shows the box unconditionally
+  on room load with no "already seen" flag, so re-entering any of these
+  rooms replays the same line every time.
 - Input handling is solid: line-advance correctly uses
   `keyboard_check_pressed`, only the hold-to-speed-up uses the level check
   `keyboard_check` — no held-key multi-line-skip bug.
@@ -456,12 +342,11 @@ consistently:
 - **`obj_buruwasu_map`'s Room Start event calls
   `room_instance_add(global.newRoomCityBuruwasuMap, 0, 0,
   obj_draw_map_buruwasu)`** — `obj_draw_map_buruwasu` is not a defined
-  object anywhere in the project (confirmed by listing `objects/` and
-  grepping the whole project). This runs every time the map screen is
-  entered. `scr_BuruwasuDrawMap.gml` (unreferenced elsewhere) looks like the
-  per-instance icon-draw code this object was meant to run, and it also
-  references an undeclared variable `gsc` (the rest of the project uses
-  `gui_scale`) — this looks like an abandoned/broken refactor.
+  object anywhere in the project. `scr_BuruwasuDrawMap.gml` (unreferenced
+  elsewhere) looks like the per-instance icon-draw code this object was
+  meant to run, and it also references an undeclared variable `gsc` (the
+  rest of the project uses `gui_scale`) — this looks like an
+  abandoned/broken refactor.
 - The `room_instance_add(...)` call above also runs **outside** the
   `if global.newRoomCityBuruwasuisGenerated == false` guard that correctly
   wraps the preceding `room_duplicate` — so it re-runs (and re-appends) on
@@ -470,34 +355,26 @@ consistently:
 - **Room-space/GUI-space mismatch for the debug map marker.** The middle
   mouse-press handler in `obj_buruwasu_map` stores room-space
   `mouse_x`/`mouse_y` into `global.targetedX/Y`, but the Draw GUI event then
-  draws that value directly with `draw_text` in GUI space — the marker
-  lands in the wrong spot whenever the view scrolls/zooms.
-  `obj_waypoint_controller_buruwasu` separately rescales the same globals
-  with a hardcoded `* 25000 / 3500` — fragile if room dimensions ever
-  change.
+  draws that value directly in GUI space — the marker lands in the wrong
+  spot whenever the view scrolls/zooms.
 - **`obj_ichihara_temp_map` is invisible.** Its Create event sets
   `image_alpha = 0` and nothing in the project ever restores it, yet it's
-  placed as the (scaled 25x/25x) background in `rm_city_ichihara` — that
-  city's backdrop currently renders fully transparent. (Note:
-  `obj_yokyohama_temp_map`, despite the similar "temp" name, has no such
-  bug and renders fine; `obj_ichihara_map`, a *different* object, is simply
-  orphaned/never placed in any room — don't conflate the three.)
-- No fast-travel/unlock validation exists to check, positively or
-  negatively — the only destination-selection mechanic found is an
-  in-city waypoint marker, no cross-city travel code path was located.
+  placed as the background in `rm_city_ichihara` — that city's backdrop
+  currently renders fully transparent.
+- No fast-travel/unlock validation exists to check — the only
+  destination-selection mechanic found is an in-city waypoint marker, no
+  cross-city travel code path was located.
 
 ### Home customisation system
 
 - **Placed furniture doesn't persist at all.** `obj_fridge`, `obj_cabinet`,
   and `obj_bed` are all non-persistent, and `scr_save.gml`/`scr_load.gml`
-  (the game's only save path) never reference furniture position/type —
-  moved furniture resets the moment the room is left, not just on reload.
+  never reference furniture position/type — moved furniture resets the
+  moment the room is left, not just on reload.
 - **Copy-paste bug leaks a grid instance on every build-mode toggle.**
-  `obj_home_customisation_controller`'s toggle event does
-  `if instance_exists(obj_grid_home_128) { with
-  obj_dropdown_home_customisation { instance_destroy(); } }` — the cleanup
-  targets the wrong object (the dropdown, already destroyed above) instead
-  of `obj_grid_home_128`, so the unconditional
+  `obj_home_customisation_controller`'s toggle event cleans up
+  `obj_dropdown_home_customisation` twice instead of also cleaning up
+  `obj_grid_home_128`, so the unconditional
   `instance_create(0,0,obj_grid_home_128)` a few lines earlier leaks a new
   grid instance every time build mode is toggled on.
 - **Dropdown menu leaks 9 UI instances per click.**
@@ -508,26 +385,22 @@ consistently:
 - **No placement validation at all.** `obj_placerParent`'s Draw GUI event
   moves `global.selectedTarget` by keyboard nudge with no `place_meeting`,
   no room-bounds clamp, and no check against other placed items — furniture
-  can be pushed off-room or stacked infinitely in one spot. (Also worth
-  noting the same architectural issue as elsewhere: input handling and
-  instance mutation both live in Draw, not Step.)
+  can be pushed off-room or stacked infinitely in one spot.
 - **"Nearest object" selection doesn't actually sort by distance.**
   `ds_list_sort(tempList, true)` sorts the raw ds_list *handles* stored in
   `tempList`, not the `dist` field inside each entry — selection order is
   effectively creation order, not proximity order.
 - **Leftover copy-paste flavor text.** `obj_dropdown_slots`' furniture
-  category rows ("Doors & Windows", "Kitchen", etc.) still carry verbatim
-  vending-machine descriptions (e.g. *"A carbonated Cola derived from fruit
-  ingredients"*) instead of furniture descriptions.
+  category rows still carry verbatim vending-machine descriptions (e.g.
+  *"A carbonated Cola derived from fruit ingredients"*) instead of
+  furniture descriptions.
 - **Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
   Create with no Destroy event to free it; `obj_wall_mounted_oil_lamp_custom`
   creates a child light instance and loads a model in Create with no
   Destroy event to clean either up.
-- The visible placement grid (`obj_grid_home_128`,
-  `obj_wooden_floor_home_128`) is purely cosmetic — there is no actual
+- The visible placement grid is purely cosmetic — there is no actual
   grid-snapping/world-to-cell math anywhere; movement is a raw per-keypress
-  pixel nudge, so the grid visual currently implies more precision than the
-  system delivers.
+  pixel nudge.
 
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
