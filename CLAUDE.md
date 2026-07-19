@@ -318,6 +318,16 @@ consistently:
   `(20, 1000)` regardless of caller-supplied coordinates, so if two
   interactables are ever in range at once, their prompts overwrite each
   other at the same spot.
+- **TO DO: `obj_elevator` (Shinji's Home) doesn't use the elevator texture
+  at most quality settings.** Its Draw GUI event switches on
+  `global.buildingQuality`, but only `case 5` (the highest setting) draws
+  with `spr_elevator_1024` — cases 1-4 all draw with `spr_block_house_*`,
+  the same generic texture `obj_house_block001` uses for a plain house
+  exterior. At every quality setting except the max, the elevator in the
+  home room visually looks like a house block instead of an elevator.
+  (Minor, adjacent: the `else` cleanup branch flushes
+  `spr_block_house_1024_1024`, a sprite this object never actually draws,
+  instead of `spr_elevator_1024`, the one `case 5` does use.)
 
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
