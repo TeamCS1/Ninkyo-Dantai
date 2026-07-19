@@ -210,7 +210,16 @@ source before being recorded here.
   concept for one prop; every other 3D-model prop still uses a guessed
   `image_xscale`/`image_yscale` and would need the same
   `scr_ApplyModelCollisionBounds` wiring to be verified rather than
-  assumed.
+  assumed. **Important caveat found while swapping the fence's mask
+  sprite:** `scr_ApplyModelCollisionBounds` scales the mask sprite around
+  its own origin (`xorig`/`yorigin`), so it only produces a box centered
+  on the instance if that sprite's origin is centered too. `mask_32`
+  (0,0 origin — top-left corner) produces a box that drifts entirely
+  down-and-right of the instance instead of surrounding it; the fence was
+  switched to `mask_32_32_actual` (16,16 origin — centered, same 32×32
+  size, and already the convention 12 other props use) instead. Any
+  future prop wired up with this script needs a **centered-origin** mask
+  sprite, or the box will be positioned wrong regardless of size.
 - **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
   `<maskName>` are `<undefined>` in the object definition, yet it's placed
   live in `rm_city_buruwasu`. It currently renders nothing and has no valid
