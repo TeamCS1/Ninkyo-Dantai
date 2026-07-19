@@ -115,9 +115,9 @@ source before being recorded here.
   `solid`), `obj_dumpster`, `obj_billboard_future_beauty`,
   `obj_jap_neon_sign_buruwasu`, `obj_small_tree_buruwasu`,
   `obj_rounded_picnic_table(_canopy)`, `obj_prayer_shrine_part`,
-  `obj_euro_pallet`, `obj_fire_escape_three_floors`, `obj_burning_barrel`,
-  and `obj_electrical_box`, had zero collision handling — the player walked
-  straight through all of them. Added 19 new gated Collision events (same
+  `obj_euro_pallet`, `obj_burning_barrel`, and `obj_electrical_box`, had
+  zero collision handling — the player walked straight through all of
+  them. Added 18 new gated Collision events (same
   `scr_ResolvePlayerAxisCollision(other)` pattern as the existing ones) for
   all of these. **Not** added for: `obj_prayer_shrine_collectible` (a
   pickup, walking into it is intentional, same as `obj_health_pack`);
@@ -125,7 +125,10 @@ source before being recorded here.
   room); `obj_line_of_ladies` (placed in `rm_city_buruwasu` but has no
   sprite/mask at all — `<spriteName>` and `<maskName>` are both
   `<undefined>` — so it needs an actual sprite before collision would mean
-  anything; flagged separately below).
+  anything; flagged separately below); `obj_fire_escape_three_floors`
+  (attached above ground level on a building facade, not something the
+  player reaches at ground level — confirmed by the person who actually
+  knows the level layout, not something inferable from the code alone).
 - ~~**Every building/shop exterior, the elevator, dining booths, and home
   furniture also had zero collision.**~~ **Fixed.** A follow-up audit of
   *every* object that does any 3D drawing (65 total, found via grepping for
