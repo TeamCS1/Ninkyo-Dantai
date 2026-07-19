@@ -176,11 +176,6 @@ before being recorded here.
   strong evidence it's an accidental leftover duplicate of `obj_land_mask`
   rather than a second intentional hill. Whether either (or both) should be
   solid is a design call, not something to guess at.
-- **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
-  `<maskName>` are `<undefined>` in the object definition, yet it's placed
-  live in `rm_city_buruwasu`. It currently renders nothing and has no valid
-  collision mask to give it collision against even if wired up.
-
 ### Save/load & global state
 
 - **~190 distinct `global.*` variables** are initialized ad-hoc across at
@@ -414,3 +409,18 @@ consistently:
 
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
+
+## As designed
+
+Things that look like bugs on first read but are intentional — confirmed by
+the person who actually knows the design intent, not something inferable
+from the code alone. Recorded so they don't get "fixed" again.
+
+- **`obj_line_of_ladies` having no `spriteName`/`maskName` is intentional,
+  not missing.** It draws its own `lineofladies.d3d` model directly via
+  `d3d_model_draw` in its Draw event (same pattern as every other 3D-model
+  prop), completely independent of the sprite/mask system — it does
+  visibly render, contrary to an earlier note in this file. It has no
+  sprite because it doesn't need one for collision: it's elevated
+  (`z = 223` in Create) and out of the player's reach at ground level, the
+  same reasoning that already applies to `obj_fire_escape_three_floors`.
