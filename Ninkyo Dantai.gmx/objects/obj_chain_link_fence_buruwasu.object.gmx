@@ -30,8 +30,7 @@ zIsTwoPoints = false; //used for map editor
 fence = scr_load_model(working_directory + "Assets\Buruwasu\chain_link_fence.d3d");
 zDirection = 0;
 //setup collisions
-image_xscale = 2.8;
-image_yscale = 0.5;
+scr_ApplyChainLinkFenceCollisionBounds();
 </string>
           </argument>
         </arguments>

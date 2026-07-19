@@ -174,18 +174,43 @@ source before being recorded here.
   Whether either (or both) should be solid is a design call (is this a
   background hill players never reach, or terrain they walk around?) —
   flagging rather than guessing.
-- **Collision-mask/visual-size mismatch risk for 3D-model props.** Props
-  like the chain-link fence draw a `.d3d` model with its own independent
+- ~~**Collision-mask/visual-size mismatch risk for 3D-model props.**~~
+  **Fence fixed as a proof of concept; the same risk remains open for
+  every other 3D-model prop.** Props like the chain-link fence draw a
+  `.d3d` model with its own independent
   `d3d_transform_set_scaling`/rotation/translation, while the *collision*
   box is a separate 2D sprite mask (e.g. `mash_16_64_actual`) scaled by
-  `image_xscale`/`image_yscale` — two unrelated scale systems. The fence
-  sets `image_xscale = 2.8; image_yscale = 0.5;`, giving a collision box of
-  roughly 45×32px, which may be much smaller than the actual rendered
-  fence model. Most other props use `image_xscale/yscale = 1`, which is
-  safer but still not verified against the real model footprint (`.d3d`
-  files are binary, not inspectable as text). This needs an in-editor
-  playtest per prop to confirm the hitbox roughly matches the visible mesh
-  — flagging rather than guessing at scale corrections blind.
+  `image_xscale`/`image_yscale` — two unrelated scale systems, with no
+  guarantee the mask matches the model's real footprint. It turns out
+  `.d3d` files in this project are **not binary** — they're GameMaker's
+  own plain-text `d3d_model_save` format (`version` / `vertex count` /
+  `primitive flags` header, then one line per vertex: `marker x y z nx ny
+  nz u v color alpha`), so the true bounding box can be computed directly
+  by scanning the file. Added `scripts/scr_GetModelBounds.gml` (parses a
+  `.d3d` path into a cached `[width, depth, height]` ds_list — skips a
+  trailing all-zero terminator row GameMaker writes per primitive block,
+  and never touches the normal-vector fields since some are corrupted
+  `-nan(ind)` values in the source assets that would otherwise crash
+  `real()`) and `scripts/scr_ApplyModelCollisionBounds.gml` (sizes the
+  calling instance's `image_xscale`/`image_yscale` from those real
+  dimensions, swapping width/depth when the instance's own `zDirection` is
+  rotated 90/270° so the mask matches what's actually drawn — `image_angle`
+  is never touched by these props' Draw code, so it can't be used to infer
+  orientation; `zDirection` is the only source of truth). Wired up via
+  `scripts/scr_ApplyChainLinkFenceCollisionBounds.gml`, a thin no-argument
+  wrapper so each fence instance's room creation code can call it the same
+  way it already sets `zDirection` — added to all 16 placed fence instances
+  in `rm_city_buruwasu` (12 with a rotation override needed the call added
+  after their `zDirection = N;` line so it picks up the final value; the
+  other 4 default to `zDirection = 0` and are covered by the same call in
+  the object's own Create event). Measured result: the real model is
+  ~3.96×120.2 units (thin, long panel) vs. the old guessed 45×32px box —
+  confirms the mismatch was real and in the direction of "far too small
+  and the wrong aspect ratio," not just imprecise. This is a proof of
+  concept for one prop; every other 3D-model prop still uses a guessed
+  `image_xscale`/`image_yscale` and would need the same
+  `scr_ApplyModelCollisionBounds` wiring to be verified rather than
+  assumed.
 - **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
   `<maskName>` are `<undefined>` in the object definition, yet it's placed
   live in `rm_city_buruwasu`. It currently renders nothing and has no valid

@@ -1,4 +1,5 @@
-///--- Globals Persists 
+///--- Globals Persists
+global.modelBoundsCache = -1; //ds_map, lazily created by scr_GetModelBounds
 global.mallCount = 100;
 global.cellCount = 25;
 global.yenAmount = 0;

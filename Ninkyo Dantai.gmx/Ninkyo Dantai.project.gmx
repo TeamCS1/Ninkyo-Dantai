@@ -1147,6 +1147,9 @@
       <script>scripts\scr_globals.gml</script>
       <script>scripts\scr_check_nearby_shrines.gml</script>
       <script>scripts\scr_ResolvePlayerAxisCollision.gml</script>
+      <script>scripts\scr_GetModelBounds.gml</script>
+      <script>scripts\scr_ApplyModelCollisionBounds.gml</script>
+      <script>scripts\scr_ApplyChainLinkFenceCollisionBounds.gml</script>
     </scripts>
     <scripts name="Memory DLL">
       <script>scripts\cleanmem_init.gml</script>

@@ -2896,7 +2896,7 @@
     <instance objName="obj_rubbish_skip" x="1664" y="1632" name="inst_4B08C36B" locked="0" code="zDirection = 0&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_house_block001" x="3072" y="1920" name="inst_E926892B" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_rubbish_skip" x="4344" y="2760" name="inst_AD4F152E" locked="0" code="zDirection = 0;&#xA;//old was 180&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="3712" y="1856" name="inst_942B50D9" locked="0" code="zDirection = 180;&#xA;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="3712" y="1856" name="inst_942B50D9" locked="0" code="zDirection = 180;&#xA;&#xA;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_bunch_of_boxes" x="4320" y="1346" name="inst_81D7C2AF" locked="0" code="zDirection = 0;&#xA;z = 3;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_roadh" x="10240" y="9600" name="inst_66BB78A2" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_roadh" x="10496" y="9600" name="inst_269D50FE" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
@@ -6687,7 +6687,7 @@
     <instance objName="obj_construction_dirt" x="22144" y="8192" name="inst_7CAA4799" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_enter_mall_trigger" x="6272" y="5056" name="inst_F64EADC7" locked="0" code="" scaleX="3.5" scaleY="3.5" colour="4294967295" rotation="0"/>
     <instance objName="obj_electrical_box" x="4099" y="2553" name="inst_68603117" locked="0" code="zDirection = 180;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="3712" y="1984" name="inst_CE63A38E" locked="0" code="zDirection = 180;&#xA;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="3712" y="1984" name="inst_CE63A38E" locked="0" code="zDirection = 180;&#xA;&#xA;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_house_block001" x="6144" y="1664" name="inst_92BEE40D" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_house_block001" x="6400" y="1664" name="inst_34EEBE08" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_alleyway_floor" x="10368" y="5632" name="inst_9B0BF723" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
@@ -6706,16 +6706,16 @@
     <instance objName="obj_chain_link_fence_buruwasu" x="10368" y="5568" name="inst_53A287A5" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_chain_link_fence_buruwasu" x="10368" y="5696" name="inst_FA69798D" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_chain_link_fence_buruwasu" x="10368" y="5824" name="inst_F8E77DA2" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5440" name="inst_F4877903" locked="0" code="zDirection = 180;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5568" name="inst_86E06982" locked="0" code="zDirection = 180;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5696" name="inst_E1CEF95B" locked="0" code="zDirection = 180;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5824" name="inst_E806D698" locked="0" code="zDirection = 180;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5312" name="inst_E4BCF141" locked="0" code="zDirection = 180;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5184" name="inst_C9BFECC2" locked="0" code="zDirection = 180;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="10944" y="5120" name="inst_7256AB53" locked="0" code="zDirection = 270;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11072" y="5120" name="inst_813DC5B3" locked="0" code="zDirection = 270;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11200" y="5120" name="inst_61774034" locked="0" code="zDirection = 270;" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
-    <instance objName="obj_chain_link_fence_buruwasu" x="11328" y="5120" name="inst_F8211D74" locked="0" code="zDirection = 270;" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5440" name="inst_F4877903" locked="0" code="zDirection = 180;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5568" name="inst_86E06982" locked="0" code="zDirection = 180;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5696" name="inst_E1CEF95B" locked="0" code="zDirection = 180;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5824" name="inst_E806D698" locked="0" code="zDirection = 180;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5312" name="inst_E4BCF141" locked="0" code="zDirection = 180;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11392" y="5184" name="inst_C9BFECC2" locked="0" code="zDirection = 180;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="10944" y="5120" name="inst_7256AB53" locked="0" code="zDirection = 270;&#xA;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11072" y="5120" name="inst_813DC5B3" locked="0" code="zDirection = 270;&#xA;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11200" y="5120" name="inst_61774034" locked="0" code="zDirection = 270;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
+    <instance objName="obj_chain_link_fence_buruwasu" x="11328" y="5120" name="inst_F8211D74" locked="0" code="zDirection = 270;&#xA;scr_ApplyChainLinkFenceCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="90"/>
     <instance objName="obj_euro_pallet" x="10848" y="5440" name="inst_3834C7C5" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_euro_pallet" x="10528" y="5440" name="inst_B8191991" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_euro_pallet" x="10944" y="5184" name="inst_7EEC6C88" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
