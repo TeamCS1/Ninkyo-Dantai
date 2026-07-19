@@ -116,11 +116,12 @@ source before being recorded here.
   NPCs), which gate their `x = xprevious; y = yprevious;` revert behind
   `if global.enablePlayerCollisionsInWorldBuruwasu == true`, the taxi's
   collision event does the revert unconditionally.
-- **Collision reverts both axes at once.** All the gated collision handlers
-  do `x = xprevious; y = yprevious;` as a single block instead of resolving
-  X and Y independently, so diagonal contact with any prop cancels all
-  motion for the step rather than sliding along the surface — this is why
-  the player can feel "stuck" on corners/edges of static objects.
+- ~~**Collision reverts both axes at once.**~~ **Fixed.** All 11 gated
+  collision handlers used to do `x = xprevious; y = yprevious;` as a single
+  block, cancelling all motion on any diagonal contact instead of sliding
+  along the surface. They now call `scripts/scr_ResolvePlayerAxisCollision.gml`,
+  which reverts X and Y independently (falling back to reverting both only
+  for genuine corner-clip cases where neither axis alone is blocked).
 - **`global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
   Set in `obj_global_buruwasu`'s Create event but read from player collision
   events; GMS1.4 doesn't guarantee Create-event order across differently
