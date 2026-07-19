@@ -1874,7 +1874,7 @@ y = yprevious;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true
+            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true &amp;&amp; global.homeBuildingMode == false
 {
     scr_ResolvePlayerAxisCollision(other);
 }
@@ -1900,7 +1900,7 @@ y = yprevious;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true
+            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true &amp;&amp; global.homeBuildingMode == false
 {
     scr_ResolvePlayerAxisCollision(other);
 }
@@ -1926,7 +1926,7 @@ y = yprevious;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true
+            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true &amp;&amp; global.homeBuildingMode == false
 {
     scr_ResolvePlayerAxisCollision(other);
 }

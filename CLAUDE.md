@@ -191,12 +191,20 @@ source before being recorded here.
   trailing all-zero terminator row GameMaker writes per primitive block,
   and never touches the normal-vector fields since some are corrupted
   `-nan(ind)` values in the source assets that would otherwise crash
-  `real()`) and `scripts/scr_ApplyModelCollisionBounds.gml` (sizes the
+  `real()`) and `scripts/scr_ApplyModelCollisionBoundsScaled.gml` (sizes the
   calling instance's `image_xscale`/`image_yscale` from those real
-  dimensions, swapping width/depth when the instance's own `zDirection` is
-  rotated 90/270° so the mask matches what's actually drawn — `image_angle`
-  is never touched by these props' Draw code, so it can't be used to infer
-  orientation; `zDirection` is the only source of truth). Wired up via
+  dimensions — multiplied by the same scale factor the object's own Draw
+  event passes to `d3d_transform_set_scaling`/`d3d_transform_add_scaling`,
+  since models are authored in local space then scaled up for display —
+  and swapping width/depth when a caller-supplied rotation angle is
+  90/270° so the mask matches what's actually drawn. The rotation is
+  passed in explicitly by each per-object wrapper script rather than read
+  off a hardcoded variable name, because objects disagree on this:
+  `obj_chain_link_fence_buruwasu` uses `zDirection`, `obj_bed` uses
+  `zRotation`, and `obj_cabinet`/`obj_fridge` have no rotation variable at
+  all (their Draw code hardcodes `d3d_transform_add_rotation_z(0)`, i.e.
+  never rotates) — `image_angle` is never touched by any of these props'
+  Draw code either, so none of it can be inferred generically). Wired up via
   `scripts/scr_ApplyChainLinkFenceCollisionBounds.gml`, a thin no-argument
   wrapper so each fence instance's room creation code can call it the same
   way it already sets `zDirection` — added to all 16 placed fence instances
@@ -207,19 +215,45 @@ source before being recorded here.
   ~3.96×120.2 units (thin, long panel) vs. the old guessed 45×32px box —
   confirms the mismatch was real and in the direction of "far too small
   and the wrong aspect ratio," not just imprecise. This is a proof of
-  concept for one prop; every other 3D-model prop still uses a guessed
+  concept for one prop; several other 3D-model props still use a guessed
   `image_xscale`/`image_yscale` and would need the same
-  `scr_ApplyModelCollisionBounds` wiring to be verified rather than
-  assumed. **Important caveat found while swapping the fence's mask
-  sprite:** `scr_ApplyModelCollisionBounds` scales the mask sprite around
-  its own origin (`xorig`/`yorigin`), so it only produces a box centered
-  on the instance if that sprite's origin is centered too. `mask_32`
-  (0,0 origin — top-left corner) produces a box that drifts entirely
-  down-and-right of the instance instead of surrounding it; the fence was
-  switched to `mask_32_32_actual` (16,16 origin — centered, same 32×32
-  size, and already the convention 12 other props use) instead. Any
-  future prop wired up with this script needs a **centered-origin** mask
-  sprite, or the box will be positioned wrong regardless of size.
+  `scr_ApplyModelCollisionBoundsScaled` wiring to be verified rather than
+  assumed.
+- **Important caveat found while swapping the fence's mask sprite:**
+  `scr_ApplyModelCollisionBoundsScaled` scales the mask sprite around its
+  own origin (`xorig`/`yorigin`), so it only produces a box centered on
+  the instance if that sprite's origin is centered too. `mask_32` (0,0
+  origin — top-left corner) produces a box that drifts entirely
+  down-and-right of the instance instead of surrounding it, regardless of
+  rotation — it isn't a rotation-logic bug, it affects every instance
+  using that sprite equally. The fence was switched to `mask_32_32_actual`
+  (16,16 origin — centered, same 32×32 size, and already the convention
+  used by a dozen other props). Any future prop wired up with this script
+  needs a **centered-origin** mask sprite, or the box will be positioned
+  wrong regardless of size.
+- ~~**Home furniture (`obj_bed`/`obj_cabinet`/`obj_fridge`) had zero real
+  collision and no build-mode gating.**~~ **Fixed.** All three were also
+  using `mask_32` (the same off-center-origin sprite as the fence bug
+  above) — switched to `mask_32_32_actual`. Added
+  `scripts/scr_ApplyBedCollisionBounds.gml`,
+  `scr_ApplyCabinetCollisionBounds.gml`, and `scr_ApplyFridgeCollisionBounds.gml`
+  (thin wrappers around `scr_ApplyModelCollisionBoundsScaled`, mirroring
+  the fence's pattern) to replace their placeholder `image_xscale/yscale
+  = 1.0` — each had a `//setup collisions` comment sitting directly above
+  those placeholder lines, i.e. collision sizing was clearly intended but
+  never actually computed. Matters more here than for the fence: the bed
+  and fridge draw their model at 3× and 4.8× scale respectively
+  (`d3d_transform_add_scaling`), which `scr_ApplyModelCollisionBoundsScaled`
+  now correctly multiplies in — getting this wrong would have undersized
+  the box by roughly 3-5× linearly, not just ~10% like the fence's
+  previously-unaccounted-for `1.1` Y-stretch (also fixed now, in the same
+  pass). The 3 gated Collision events for these props (added earlier, see
+  Player & collision above) were also updated to additionally check
+  `global.homeBuildingMode == false`, matching the exact style
+  already used elsewhere in `obj_player_buruwasu` for build-mode gating
+  (e.g. its keyboard-movement events) — so the player can walk through
+  furniture while placing/rearranging it in build mode, but collides with
+  it normally otherwise.
 - **`obj_line_of_ladies` has no sprite.** Both `<spriteName>` and
   `<maskName>` are `<undefined>` in the object definition, yet it's placed
   live in `rm_city_buruwasu`. It currently renders nothing and has no valid

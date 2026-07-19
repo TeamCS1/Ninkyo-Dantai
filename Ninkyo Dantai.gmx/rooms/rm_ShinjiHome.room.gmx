@@ -172,7 +172,7 @@ global.drawOCRange = 2000;</code>
     <instance objName="obj_cabinet" x="896" y="640" name="inst_53C3784B" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_fridge" x="640" y="384" name="inst_6B9FB04C" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_placerParent" x="432" y="-48" name="inst_CCEBFE9E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_bed" x="1376" y="368" name="inst_D105C076" locked="0" code="zRotation = 180;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_bed" x="1376" y="368" name="inst_D105C076" locked="0" code="zRotation = 180;&#xA;scr_ApplyBedCollisionBounds();" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
