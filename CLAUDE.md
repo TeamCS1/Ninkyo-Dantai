@@ -126,6 +126,51 @@ source before being recorded here.
   sprite/mask at all — `<spriteName>` and `<maskName>` are both
   `<undefined>` — so it needs an actual sprite before collision would mean
   anything; flagged separately below).
+- ~~**Every building/shop exterior, the elevator, dining booths, and home
+  furniture also had zero collision.**~~ **Fixed.** A follow-up audit of
+  *every* object that does any 3D drawing (65 total, found via grepping for
+  `d3d_model_draw`/`d3d_model_create`/`scr_load_model` across all of
+  `objects/*.object.gmx` — not just the "Props" folder) turned up a second,
+  larger wave: `obj_7_24_shop_block`, `obj_block_shop_sushi_bar001`,
+  `obj_eatery_joes_pizza2`, `obj_garage001`, `obj_house_block002`,
+  `obj_house_blue_block001`, `obj_house_green_block001`,
+  `obj_house_high_rise`, `obj_house_highrise`, `obj_house_red_block001`,
+  `obj_house_violet_block001`, `obj_modern_mall_interior_block`,
+  `obj_residential_house`, `obj_shop_computer_shop`,
+  `obj_shop_shine_of_light`, `obj_shopping_mall_block_exterior`, and
+  `obj_warehouse001` — every building/shop exterior in the game — had no
+  collision at all, meaning the player could walk straight through every
+  building wall in every city. Also missing: `obj_elevator` (its Create
+  event builds two solid `d3d_model_block` shapes — a real structure, not a
+  trigger), the three `obj_chicken_lickin_booth_0{0,1,2}` dining booths, and
+  the home-customisation furniture `obj_bed`/`obj_cabinet`/`obj_fridge`
+  (each of which literally has a `//setup collisions` comment in Create
+  followed only by `image_xscale`/`image_yscale` — collision was clearly
+  planned and never wired up, same half-finished pattern as the fence).
+  Added 24 more gated Collision events for all of these.
+  `obj_house_block002`/`obj_house_blue_block001` aren't currently placed in
+  any room (only referenced by `scr_minimap.gml`) but were added anyway so
+  the bug doesn't resurface if they're ever used. Note
+  `obj_house_highrise` and `obj_house_high_rise` are two separate,
+  near-identically-named objects — possible accidental duplicate, not
+  investigated further.
+- **Deliberately left non-solid (confirmed by reading their Create code,
+  not guessed):** `obj_taxi_corona` and `obj_custom_waypoint_buruwasu`
+  (both just spawn a glowing corona-cylinder model as an interaction
+  marker — same pattern as `obj_gun_shop_corona_shine_of_light`, all three
+  are "walk up and interact" triggers, not obstacles); `obj_enter_mall_trigger`/
+  `obj_exit_mall_trigger` (room-transition triggers); `obj_drop_bag_of_money`
+  and `obj_ninkyo_baseball_bat` (pickups); `obj_floor3d` and
+  `obj_roof_modular_buruwasu` (ground/ceiling decoration, not obstacles).
+- **`obj_land_mask` and `object192` are suspicious but left untouched.**
+  Both are placed only in `rm_city_ichihara`, and both have **identical**
+  Create-event code loading the same `TERRAIN/hill.d3d` model.
+  `object192` is GameMaker's auto-generated default name for a
+  never-renamed object — strong evidence it's an accidental leftover
+  duplicate of `obj_land_mask` rather than a second intentional hill.
+  Whether either (or both) should be solid is a design call (is this a
+  background hill players never reach, or terrain they walk around?) —
+  flagging rather than guessing.
 - **Collision-mask/visual-size mismatch risk for 3D-model props.** Props
   like the chain-link fence draw a `.d3d` model with its own independent
   `d3d_transform_set_scaling`/rotation/translation, while the *collision*
