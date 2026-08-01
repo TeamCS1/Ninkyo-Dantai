@@ -446,15 +446,41 @@ consistently:
   fixed 3), so once placement/removal exists the save/load side needs no
   changes — only `obj_placerParent` and the dropdown
   (`obj_dropdown_home_customisation`/`obj_dropdown_slots`, see #38/#41)
-  need the actual create/destroy logic.
+  need the actual create/destroy logic. Related latent constraint:
+  `scr_ApplyHomeFurniturePositions` repositions via
+  `with (_objIndex) { x = ...; y = ...; }`, which applies to *every*
+  existing instance of that object type — fine while there's exactly one
+  of each, but if #45 is ever built and a second instance of the same
+  type is added, saved rows and live instances would need a stable
+  per-instance identity to stay correctly matched, not just an object
+  name.
 - **46. Minor: shipped default furniture layout is hardcoded in two
-  places.** The fridge/cabinet/bed default coordinates are duplicated
-  identically in `scr_SaveHomeFurniture.gml` and `scr_LoadHomeFurniture.gml`
-  with no shared constant — if the room's default layout is ever changed,
-  both need updating or they'll silently disagree.
+  places.** `scripts/scr_SaveHomeFurniture.gml` and
+  `scripts/scr_LoadHomeFurniture.gml` both independently hardcode the same
+  three `ini_write_string` lines —
+  `"defaults", "item0", "obj_fridge,640,384,0,0"`,
+  `"item1", "obj_cabinet,896,640,0,0"`, and
+  `"item2", "obj_bed,1376,368,0,180"` — with no shared constant/script
+  between them. If the room's default layout is ever changed (or a
+  fourth default piece added), both files need updating by hand or
+  they'll silently disagree about what "defaults" means.
 - **47. Not yet playtested.** The whole slot/home.ini system (moving
   furniture, saving, leaving and returning to `rm_ShinjiHome`, and
   reloading) hasn't been verified in the actual GameMaker editor/runtime.
+- **48. TO DO: no rotation support in the placement UI.**
+  `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
+  `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
+  for changing a selected piece's rotation. Even if there were,
+  `obj_cabinet` and `obj_fridge` have no `zRotation` variable to begin
+  with (their Draw events hardcode `d3d_transform_add_rotation_z(0)`) —
+  only `obj_bed` supports rotation today, and only via room creation code
+  set once at placement time, not interactively.
+- **49. TO DO: no controller/joypad support for furniture placement.**
+  Confirmed by project-wide grep — there is no `gamepad_button_check`/
+  `gamepad_axis_value` call anywhere in the codebase, not just in the
+  home customisation objects. Selecting, moving, and (per #48) any future
+  rotating of furniture is keyboard/mouse-only
+  (`keyboard_check_pressed`, `mouse_wheel_up`/`down`).
 
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
