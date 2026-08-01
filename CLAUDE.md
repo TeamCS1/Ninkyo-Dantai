@@ -161,49 +161,50 @@ before being recorded here.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
-- **Taxi icon collision is a no-op stub.** The `obj_taxi_icon` collision
+- **1. Taxi icon collision is a no-op stub.** The `obj_taxi_icon` collision
   event is just `x = x` / `y = y`, while every sibling vehicle icon (car,
   scooter, truck, ambulance, police car) spawns a rideable vehicle and sets
   `global.inVehicle = true`. Touching the taxi icon currently does nothing —
   looks like an unfinished feature.
-- **Parked taxi (`obj_taxi_static`) ignores the no-clip debug toggle.**
+- **2. Parked taxi (`obj_taxi_static`) ignores the no-clip debug toggle.**
   Unlike every other solid prop, which gates its collision revert behind
   `if global.enablePlayerCollisionsInWorldBuruwasu == true`, the taxi's
   collision event reverts unconditionally.
-- **`global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
+- **3. `global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
   Set in `obj_global_buruwasu`'s Create event but read from player collision
   events; GMS1.4 doesn't guarantee Create-event order across differently
   named objects, so this is a latent "read before set" risk if instance
   order ever changes.
-- **`obj_land_mask` and `object192` are suspicious but left untouched.**
+- **4. `obj_land_mask` and `object192` are suspicious but left untouched.**
   Both are placed only in `rm_city_ichihara`, and both have **identical**
   Create-event code loading the same `TERRAIN/hill.d3d` model. `object192`
   is GameMaker's auto-generated default name for a never-renamed object —
   strong evidence it's an accidental leftover duplicate of `obj_land_mask`
   rather than a second intentional hill. Whether either (or both) should be
   solid is a design call, not something to guess at.
+
 ### Save/load & global state
 
-- **~190 distinct `global.*` variables** are initialized ad-hoc across at
+- **5. ~190 distinct `global.*` variables** are initialized ad-hoc across at
   least three places (`scr_globals.gml`, `obj_splash_screen_buruwasu`'s
   Create event, and scattered per-object Create events) with no single
   authoritative init entry point. This is the standing risk factor for
   "variable not set before read" bugs whenever room/instance order changes.
-- **`global.daysOfWeekIndex` is initialized in two places with different
+- **6. `global.daysOfWeekIndex` is initialized in two places with different
   values**: `obj_splash_screen_buruwasu` sets it to `1`, while
   `scr_load.gml` later overwrites it with the saved value (default `0`) —
   the "true" default for a new game depends on room/instance order, not one
   central script.
-- **`scr_save.gml`/`scr_load.gml` only persist a subset of `global.*`
+- **7. `scr_save.gml`/`scr_load.gml` only persist a subset of `global.*`
   state.** Nothing structurally ties the save/load key list to
   `scr_globals.gml`, so a future global added there is easy to forget to
   add to save/load too.
-- **Shrine count `5` is hardcoded independently in four files**
+- **8. Shrine count `5` is hardcoded independently in four files**
   (`scr_save.gml`, `scr_load.gml`, `scr_check_nearby_shrines.gml`,
   `scr_globals.gml`) with no shared constant — adding a 6th shrine without
   updating all four silently drops its save/load/check logic (GML 2D arrays
   don't throw on out-of-range access, so this fails silently, not loudly).
-- **`global.previousLocation` is stored as a raw room index and passed
+- **9. `global.previousLocation` is stored as a raw room index and passed
   straight to `room_goto`** in `obj_optionsMenuLoadButton`, with no
   `room_exists()` guard. If rooms are ever reordered/added/removed (which
   changes GMS1.4 room indices), an old save file can silently teleport the
@@ -211,13 +212,13 @@ before being recorded here.
 
 ### NPC AI, spawning & battle
 
-- **`scripts/scr_UniversalNPCSpawner.gml` line 55 checks the wrong
+- **10. `scripts/scr_UniversalNPCSpawner.gml` line 55 checks the wrong
   position.** `if !place_meeting(x,y,obj_block_modern_mall_floor1)` tests
   the spawner's own fixed position, not the randomly rolled candidate point
   (`xx,yy`/`instVert`). This condition is invariant across the whole spawn
   loop, so a mall spawner either places *every* NPC or *none* of them,
   never actually gating per-candidate-point as intended.
-- **Same script, lines 57-66: `with createNPC` targets the wrong
+- **11. Same script, lines 57-66: `with createNPC` targets the wrong
   instances.** `instance_create(...)`'s return value is discarded, so
   `createNPC` still holds the *object type*, not the newly created
   instance. `with createNPC { ... instance_destroy(); npcCount++; }`
@@ -225,13 +226,13 @@ before being recorded here.
   standing near `obj_modern_mall_interior_block`, not just the one just
   spawned, silently depopulating unrelated NPCs. Fix: capture
   `var inst = instance_create(...)` and use `with (inst)`.
-- **`scripts/scr_alarmAI.gml`: `actiontelephonebox` state is dead and
+- **12. `scripts/scr_alarmAI.gml`: `actiontelephonebox` state is dead and
   doesn't re-arm the alarm.** No code path ever sets
   `characterstates.actiontelephonebox`, and unlike the other cases in the
   same switch, its `case` block doesn't reset `alarm[0]` before `break`. If
   this state is ever wired up in the future without also fixing that, the
   NPC's AI loop will freeze permanently once it enters this state.
-- **`objects/obj_battle_start_dialogue.object.gmx`: dialogue resolves the
+- **13. `objects/obj_battle_start_dialogue.object.gmx`: dialogue resolves the
   wrong encounter if two exist at once.** Its Step event finds the target
   via `instance_nearest(obj_player_buruwasu.x, obj_player_buruwasu.y,
   obj_battle_encounter)` instead of storing an owner reference at creation
@@ -239,42 +240,42 @@ before being recorded here.
   `encounter_id`). With a single on-screen encounter this is harmless; with
   two, the wrong encounter can get `battleStage = 2` while the real one
   stays stuck at `battleStage == 1` forever (softlock).
-- **Minor:** `scr_UniversalNPCSpawner.gml` line 7 declares its loop counter
+- **14. Minor:** `scr_UniversalNPCSpawner.gml` line 7 declares its loop counter
   `i` without `var`, leaking it as a persistent instance variable instead of
   a local. `obj_battleNPC_man_blue` has no health/death logic at all
   (reads as incomplete feature, not a bug).
 
 ### Battle system (deep dive)
 
-- **State transitions live in a Draw event instead of Step.**
+- **15. State transitions live in a Draw event instead of Step.**
   `obj_battle_encounter`'s Step event is an empty `battleStage` skeleton;
   the actual side effects — spawning `obj_battle_enemy_hud` and binding
   `hud.encounter_id = id` — happen in its **Draw GUI event** instead. Draw
   isn't guaranteed to run under all conditions, so gameplay state changes
   shouldn't live there.
-- **Combat input and death detection also live in a Draw event.**
+- **16. Combat input and death detection also live in a Draw event.**
   `obj_battle_enemy_hud`'s Draw GUI event applies damage on
   `mouse_check_button_released(mb_left)` and separately re-checks
   `enemyCurrentHealth <= 0` for death — duplicating the Step event's own
   check and coupling "attack" to rendering rather than Step/input handling.
-- **"Damage Dealt!" renders every frame, not just on hit.**
+- **17. "Damage Dealt!" renders every frame, not just on hit.**
   `obj_battle_enemy_hud`: `if enemyCurrentHealth < 90 { draw_text(150,150,
   "Damage Dealt!") }` is a fixed-threshold check, not an edge/hit-timer
   check — once HP first drops below 90 this renders continuously for the
   rest of the fight.
-- **`draw_set_colour(c_aqua)` is never reset** in the same event — confirmed
+- **18. `draw_set_colour(c_aqua)` is never reset** in the same event — confirmed
   no matching `draw_set_colour(c_white)` anywhere in that object. Any later
   `draw_text` call anywhere in the project that doesn't set its own color
   renders aqua from that point on (see Rendering below).
-- **`obj_battle_hud` is orphaned** — never `instance_create`'d and not
+- **19. `obj_battle_hud` is orphaned** — never `instance_create`'d and not
   placed in any room, so its Draw GUI event (meant to draw the HUD
   background frame) never runs.
-- **Per-encounter isolation is broken.** `obj_battle_encounter` guards HUD
+- **20. Per-encounter isolation is broken.** `obj_battle_encounter` guards HUD
   and dialogue spawning with `!instance_exists(obj_battle_enemy_hud)` /
   `!instance_exists(obj_battle_start_dialogue)` — these check for *any*
   instance of that object type, not one scoped to `id`. Only one global
   HUD/dialogue can ever exist, so two concurrent encounters will misbehave.
-- **No HP floor clamp** — `enemyCurrentHealth` can go negative before the
+- **21. No HP floor clamp** — `enemyCurrentHealth` can go negative before the
   death check tidies up; the healthbar can render a negative percentage for
   one frame. Minor.
 
@@ -287,20 +288,20 @@ else changes it. This project has many places that change it and never
 change it back, which makes bugs order-dependent and hard to reproduce
 consistently:
 
-- `obj_battle_enemy_hud` leaves color set to `c_aqua` (see Battle above).
-- `obj_waypoint_controller_buruwasu`'s Draw GUI event sets
+- (Same issue as #18) `obj_battle_enemy_hud` leaves color set to `c_aqua`.
+- **22.** `obj_waypoint_controller_buruwasu`'s Draw GUI event sets
   `draw_set_halign(fa_center)` and never restores `fa_left`.
-- `obj_car_icon` / `obj_taxi_icon` only call `draw_set_alpha_test(false)`
+- **23.** `obj_car_icon` / `obj_taxi_icon` only call `draw_set_alpha_test(false)`
   in the *out-of-range* branch, leaving alpha testing on indefinitely
   whenever the in-range branch draws instead.
-- `obj_bin_ashtray_buruwasu` and `obj_street_lamp_post` toggle
+- **24.** `obj_bin_ashtray_buruwasu` and `obj_street_lamp_post` toggle
   `d3d_set_lighting` off for their own draw and don't reliably restore it —
   the dev's own code comment on the ashtray ("make sure house lighting is
   false. Somehow lighting works when off lmao") shows this is already known
   to be fragile. Lighting is only re-enabled once per frame centrally by
   `obj_control`, so any lit object drawn after a lamp/ashtray at a lower
   depth in the same frame renders flat/unlit until the next frame's reset.
-- Several menu/HUD objects (`obj_main_menu_options`,
+- **25.** Several menu/HUD objects (`obj_main_menu_options`,
   `obj_notification_system_out`, `obj_dropdown_home_customisation`,
   `obj_dropdown_slots`, `obj_vending_machine_ui`,
   `obj_property_management_slots`) set font/color in their Draw GUI events
@@ -309,17 +310,17 @@ consistently:
   `scr_DrawCollisionBoxModel.gml` (resets alpha/color/transform at the end)
   and `obj_cursor_grab_64` (checks `instance_exists` before dereferencing
   its target).
-- `scripts/DrawArrowWaypoint.gml` line 16 reads `_maxDistance`, which is
+- **26.** `scripts/DrawArrowWaypoint.gml` line 16 reads `_maxDistance`, which is
   never declared — the actual variable is `_maxLength`. Dead code today,
   but will throw immediately if ever wired up.
-- `obj_gui_buruwasu`'s Draw GUI event computes health/stamina bar
+- **27.** `obj_gui_buruwasu`'s Draw GUI event computes health/stamina bar
   percentages with no guard against a zero max — a real divide-by-zero
   risk if either max stat is ever zeroed elsewhere.
-- `draw_text_shadow_tooltips.gml` hardcodes its draw position to
+- **28.** `draw_text_shadow_tooltips.gml` hardcodes its draw position to
   `(20, 1000)` regardless of caller-supplied coordinates, so if two
   interactables are ever in range at once, their prompts overwrite each
   other at the same spot.
-- **TO DO: `obj_elevator` (Shinji's Home) doesn't use the elevator texture
+- **29. TO DO: `obj_elevator` (Shinji's Home) doesn't use the elevator texture
   at most quality settings.** Its Draw GUI event switches on
   `global.buildingQuality`, but only `case 5` (the highest setting) draws
   with `spr_elevator_1024` — cases 1-4 all draw with `spr_block_house_*`,
@@ -332,14 +333,14 @@ consistently:
 
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
-- **Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
+- **30. Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
   Both this object and its near-clone `obj_battle_start_dialogue` define
   only `message[0]` with `message_end = 0`. The counts match today, but the
   code's own comment — *"if there are more messages left to show (0 -> 6,
   in our case)"* — is leftover from a 7-line template, i.e. this exact
   desync has already happened once before. Adding a new line without
   bumping `message_end` will make it silently unreachable.
-- **Forced intro dialogue replays every time on 10+ rooms.** The same
+- **31. Forced intro dialogue replays every time on 10+ rooms.** The same
   instance (identical hardcoded text) is placed non-persistently across
   most city/interior rooms. Its Draw GUI event shows the box unconditionally
   on room load with no "already seen" flag, so re-entering any of these
@@ -350,7 +351,7 @@ consistently:
 
 ### Map system
 
-- **`obj_buruwasu_map`'s Room Start event calls
+- **32. `obj_buruwasu_map`'s Room Start event calls
   `room_instance_add(global.newRoomCityBuruwasuMap, 0, 0,
   obj_draw_map_buruwasu)`** — `obj_draw_map_buruwasu` is not a defined
   object anywhere in the project. `scr_BuruwasuDrawMap.gml` (unreferenced
@@ -358,52 +359,52 @@ consistently:
   meant to run, and it also references an undeclared variable `gsc` (the
   rest of the project uses `gui_scale`) — this looks like an
   abandoned/broken refactor.
-- The `room_instance_add(...)` call above also runs **outside** the
+- **33.** The `room_instance_add(...)` call above also runs **outside** the
   `if global.newRoomCityBuruwasuisGenerated == false` guard that correctly
   wraps the preceding `room_duplicate` — so it re-runs (and re-appends) on
   every map visit even though the room duplication itself is correctly
   gated to happen once.
-- **Room-space/GUI-space mismatch for the debug map marker.** The middle
+- **34. Room-space/GUI-space mismatch for the debug map marker.** The middle
   mouse-press handler in `obj_buruwasu_map` stores room-space
   `mouse_x`/`mouse_y` into `global.targetedX/Y`, but the Draw GUI event then
   draws that value directly in GUI space — the marker lands in the wrong
   spot whenever the view scrolls/zooms.
-- **`obj_ichihara_temp_map` is invisible.** Its Create event sets
+- **35. `obj_ichihara_temp_map` is invisible.** Its Create event sets
   `image_alpha = 0` and nothing in the project ever restores it, yet it's
   placed as the background in `rm_city_ichihara` — that city's backdrop
   currently renders fully transparent.
-- No fast-travel/unlock validation exists to check — the only
+- **36.** No fast-travel/unlock validation exists to check — the only
   destination-selection mechanic found is an in-city waypoint marker, no
   cross-city travel code path was located.
 
 ### Home customisation system
 
-- **Placed furniture doesn't persist at all.** `obj_fridge`, `obj_cabinet`,
+- **37. Placed furniture doesn't persist at all.** `obj_fridge`, `obj_cabinet`,
   and `obj_bed` are all non-persistent, and `scr_save.gml`/`scr_load.gml`
   never reference furniture position/type — moved furniture resets the
   moment the room is left, not just on reload.
-- **Dropdown menu leaks 9 UI instances per click.**
+- **38. Dropdown menu leaks 9 UI instances per click.**
   `obj_dropdown_home_customisation`'s Pressed event calls
   `scr_CreateDropdownItems()` unconditionally on every click (both open and
   close), which always creates 9 `obj_dropdown_slots` rows with nothing
   anywhere destroying the previous batch first.
-- **No placement validation at all.** `obj_placerParent`'s Draw GUI event
+- **39. No placement validation at all.** `obj_placerParent`'s Draw GUI event
   moves `global.selectedTarget` by keyboard nudge with no `place_meeting`,
   no room-bounds clamp, and no check against other placed items — furniture
   can be pushed off-room or stacked infinitely in one spot.
-- **"Nearest object" selection doesn't actually sort by distance.**
+- **40. "Nearest object" selection doesn't actually sort by distance.**
   `ds_list_sort(tempList, true)` sorts the raw ds_list *handles* stored in
   `tempList`, not the `dist` field inside each entry — selection order is
   effectively creation order, not proximity order.
-- **Leftover copy-paste flavor text.** `obj_dropdown_slots`' furniture
+- **41. Leftover copy-paste flavor text.** `obj_dropdown_slots`' furniture
   category rows still carry verbatim vending-machine descriptions (e.g.
   *"A carbonated Cola derived from fruit ingredients"*) instead of
   furniture descriptions.
-- **Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
+- **42. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
   Create with no Destroy event to free it; `obj_wall_mounted_oil_lamp_custom`
   creates a child light instance and loads a model in Create with no
   Destroy event to clean either up.
-- The visible placement grid is purely cosmetic — there is no actual
+- **43.** The visible placement grid is purely cosmetic — there is no actual
   grid-snapping/world-to-cell math anywhere; movement is a raw per-keypress
   pixel nudge.
 
