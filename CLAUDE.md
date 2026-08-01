@@ -430,6 +430,31 @@ consistently:
 - **43.** The visible placement grid is purely cosmetic — there is no actual
   grid-snapping/world-to-cell math anywhere; movement is a raw per-keypress
   pixel nudge.
+- **44. TO DO: no slot-picker UI.** `global.currentSaveSlot` (1-5) exists
+  and `scr_SaveHomeFurniture`/`scr_ApplyHomeFurniturePositions` are fully
+  slot-aware, but nothing in the game lets the player choose or see which
+  slot is active — it always stays at its default of `1` until a picker
+  is built (e.g. in the options/save menu).
+- **45. TO DO: no way to add or remove furniture, only move the 3
+  defaults.** `obj_placerParent` can only select and reposition the
+  pre-existing `obj_fridge`/`obj_cabinet`/`obj_bed` instances (it
+  iterates `global.movableTypes` via `with`, which only matches
+  instances that already exist) — there's no `instance_create` path
+  anywhere for spawning a new piece from the dropdown, and no delete
+  action either. The `"customN"` save format already supports arbitrary
+  additional items (it writes a `count` plus indexed entries, not a
+  fixed 3), so once placement/removal exists the save/load side needs no
+  changes — only `obj_placerParent` and the dropdown
+  (`obj_dropdown_home_customisation`/`obj_dropdown_slots`, see #38/#41)
+  need the actual create/destroy logic.
+- **46. Minor: shipped default furniture layout is hardcoded in two
+  places.** The fridge/cabinet/bed default coordinates are duplicated
+  identically in `scr_SaveHomeFurniture.gml` and `scr_LoadHomeFurniture.gml`
+  with no shared constant — if the room's default layout is ever changed,
+  both need updating or they'll silently disagree.
+- **47. Not yet playtested.** The whole slot/home.ini system (moving
+  furniture, saving, leaving and returning to `rm_ShinjiHome`, and
+  reloading) hasn't been verified in the actual GameMaker editor/runtime.
 
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
