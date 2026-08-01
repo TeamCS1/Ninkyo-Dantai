@@ -1153,6 +1153,10 @@
       <script>scripts\scr_ApplyBedCollisionBounds.gml</script>
       <script>scripts\scr_ApplyCabinetCollisionBounds.gml</script>
       <script>scripts\scr_ApplyFridgeCollisionBounds.gml</script>
+      <script>scripts\scr_ParseHomeFurnitureItem.gml</script>
+      <script>scripts\scr_SaveHomeFurniture.gml</script>
+      <script>scripts\scr_LoadHomeFurniture.gml</script>
+      <script>scripts\scr_ApplyHomeFurniturePositions.gml</script>
     </scripts>
     <scripts name="Memory DLL">
       <script>scripts\cleanmem_init.gml</script>

@@ -25,3 +25,8 @@ for (var i = 0; i < 5; i++) {
 
 ini_close();
 
+//home customisation furniture (separate home.ini, see scr_LoadHomeFurniture) -
+//actual repositioning happens when rm_ShinjiHome starts, since the
+//furniture instances don't exist yet at this point
+scr_LoadHomeFurniture();
+

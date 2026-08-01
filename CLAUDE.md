@@ -152,12 +152,39 @@ Background on how core systems actually work, based on an in-depth review
   used to `with obj_dropdown_home_customisation` twice instead of also
   targeting `obj_grid_home_128`, leaking a new grid instance on every
   toggle.
+- **Home furniture now persists, per save slot, in a separate `home.ini`.**
+  `global.currentSaveSlot` (1-5, default 1) selects which `"customN"`
+  section is active; a shared `"defaults"` section holds the shipped
+  layout (fridge/cabinet/bed positions), written by both
+  `scr_SaveHomeFurniture` and `scr_LoadHomeFurniture` so it exists even on
+  a fresh install. Each furniture item is one comma-joined ini string
+  (`"objectName,x,y,z,zRotation"`), parsed by
+  `scripts/scr_ParseHomeFurnitureItem.gml`. `scr_save.gml`/`scr_load.gml`
+  call `scr_SaveHomeFurniture`/`scr_LoadHomeFurniture`, but the actual
+  per-instance repositioning happens in
+  `scripts/scr_ApplyHomeFurniturePositions.gml`, called from
+  `obj_home_customisation_controller`'s **Room Start** event — Load itself
+  can't reposition anything, since the furniture instances (placed
+  directly in `rm_ShinjiHome`, non-persistent) don't exist yet at the
+  moment `scr_load` runs from the options menu. Saving only writes the
+  `"customN"` section while the player is actually standing in
+  `rm_ShinjiHome` (`room == rm_ShinjiHome`), so saving from anywhere else
+  never overwrites a previously-saved layout with nothing.
+  `global.movableTypes` (already populated by `obj_placerParent`, also
+  placed in that room) is reused as the list of furniture types to
+  save/restore, so this scales automatically if more placeable furniture
+  is added later. **Not built**: an actual slot-picker UI — the
+  mechanism supports 5 slots, but nothing currently lets the player
+  choose one, so `global.currentSaveSlot` always stays at its default of
+  `1` in practice.
 
 ## Known issues
 
 Remaining open findings, ranked most severe first within each area. Every
 finding below was independently spot-checked against the actual source
-before being recorded here.
+before being recorded here. Numbers are stable references, not a count —
+a fixed item is removed and its number retired (moved to Architecture
+notes) rather than renumbering everything after it, so gaps are expected.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
@@ -379,10 +406,6 @@ consistently:
 
 ### Home customisation system
 
-- **37. Placed furniture doesn't persist at all.** `obj_fridge`, `obj_cabinet`,
-  and `obj_bed` are all non-persistent, and `scr_save.gml`/`scr_load.gml`
-  never reference furniture position/type — moved furniture resets the
-  moment the room is left, not just on reload.
 - **38. Dropdown menu leaks 9 UI instances per click.**
   `obj_dropdown_home_customisation`'s Pressed event calls
   `scr_CreateDropdownItems()` unconditionally on every click (both open and

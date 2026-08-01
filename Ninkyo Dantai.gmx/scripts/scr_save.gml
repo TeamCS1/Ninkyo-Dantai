@@ -22,6 +22,9 @@ for (var i = 0; i < 5; i++) {
     ini_write_real("save01", "shrineCollected" + string(i), global.prayerShrines[i, 2]);
 }
 
+//home customisation furniture (separate home.ini, see scr_SaveHomeFurniture)
+scr_SaveHomeFurniture();
+
 show_debug_message("Save Success!");
 
 ini_close();
