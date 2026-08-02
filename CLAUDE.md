@@ -499,3 +499,36 @@ from the code alone. Recorded so they don't get "fixed" again.
   sprite because it doesn't need one for collision: it's elevated
   (`z = 223` in Create) and out of the player's reach at ground level, the
   same reasoning that already applies to `obj_fire_escape_three_floors`.
+
+## Update notes
+
+One line per completed item, newest first. Added here going forward
+whenever a Known Issue is fixed or a piece of work lands.
+
+- 2026-08-02: Added slot-based furniture persistence (`home.ini`,
+  `scr_SaveHomeFurniture`/`scr_LoadHomeFurniture`/
+  `scr_ApplyHomeFurniturePositions`/`scr_ParseHomeFurnitureItem`) — was
+  "placed furniture doesn't persist at all."
+- 2026-08-02: Fixed the grid-instance leak on every home-customisation
+  build-mode toggle (copy-paste `with` targeting the wrong object).
+- 2026-08-02: Reclassified `obj_line_of_ladies` from Known Issues to As
+  Designed after confirming it renders its own model and is intentionally
+  elevated/non-solid.
+- 2026-08-02: Gated bed/cabinet/fridge collision behind
+  `global.homeBuildingMode == false` so the player can walk through
+  furniture while placing it, not just when standing near it normally.
+- 2026-08-02: Fixed the fence and furniture collision-box drift by
+  switching from `mask_32` (off-center origin) to `mask_32_32_actual`
+  (centered).
+- 2026-08-02: Added real 3D-model-bounds collision sizing
+  (`scr_GetModelBounds`/`scr_ApplyModelCollisionBoundsScaled`) as a proof
+  of concept on the chain-link fence and home furniture, replacing
+  guessed `image_xscale`/`image_yscale` values.
+- 2026-08-02: Removed incorrectly-added collision on
+  `obj_fire_escape_three_floors` (elevated, not reachable at ground
+  level).
+- 2026-08-02: Added missing collision for ~43 previously-uncollided world
+  props, buildings, the elevator, dining booths, and home furniture.
+- 2026-08-02: Fixed player collision reverting both axes at once on
+  diagonal contact — added `scr_ResolvePlayerAxisCollision` so the player
+  slides along surfaces instead of stopping dead.
