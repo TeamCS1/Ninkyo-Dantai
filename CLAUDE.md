@@ -502,33 +502,31 @@ from the code alone. Recorded so they don't get "fixed" again.
 
 ## Update notes
 
-One line per completed item, newest first. Added here going forward
-whenever a Known Issue is fixed or a piece of work lands.
+Player-facing patch notes, most recent first — written so they can be
+copy-pasted straight into an itch.io devlog/update post. Add a new dated
+entry here each time a Known Issue is fixed or a piece of work lands;
+keep the technical specifics (scripts, object names) out of this section
+and in Architecture notes / Known Issues instead.
 
-- 2026-08-02: Added slot-based furniture persistence (`home.ini`,
-  `scr_SaveHomeFurniture`/`scr_LoadHomeFurniture`/
-  `scr_ApplyHomeFurniturePositions`/`scr_ParseHomeFurnitureItem`) — was
-  "placed furniture doesn't persist at all."
-- 2026-08-02: Fixed the grid-instance leak on every home-customisation
-  build-mode toggle (copy-paste `with` targeting the wrong object).
-- 2026-08-02: Reclassified `obj_line_of_ladies` from Known Issues to As
-  Designed after confirming it renders its own model and is intentionally
-  elevated/non-solid.
-- 2026-08-02: Gated bed/cabinet/fridge collision behind
-  `global.homeBuildingMode == false` so the player can walk through
-  furniture while placing it, not just when standing near it normally.
-- 2026-08-02: Fixed the fence and furniture collision-box drift by
-  switching from `mask_32` (off-center origin) to `mask_32_32_actual`
-  (centered).
-- 2026-08-02: Added real 3D-model-bounds collision sizing
-  (`scr_GetModelBounds`/`scr_ApplyModelCollisionBoundsScaled`) as a proof
-  of concept on the chain-link fence and home furniture, replacing
-  guessed `image_xscale`/`image_yscale` values.
-- 2026-08-02: Removed incorrectly-added collision on
-  `obj_fire_escape_three_floors` (elevated, not reachable at ground
-  level).
-- 2026-08-02: Added missing collision for ~43 previously-uncollided world
-  props, buildings, the elevator, dining booths, and home furniture.
-- 2026-08-02: Fixed player collision reverting both axes at once on
-  diagonal contact — added `scr_ResolvePlayerAxisCollision` so the player
-  slides along surfaces instead of stopping dead.
+### August 2, 2026
+
+**New**
+- Furniture you move around in Shinji's Home now actually saves! Move
+  your bed, fridge, or cabinet and it'll still be there next time you
+  load up.
+
+**Fixes**
+- Fixed walking diagonally into a wall or object stopping you dead
+  instead of letting you slide along it.
+- Fixed a huge number of things around the city you could previously
+  walk straight through, including building exteriors, the elevator,
+  street lamps, wall lamps, benches, bins, fences, pillars, and the
+  dining booths at Chicken Licken.
+- Fixed the chain-link fence's collision not matching how it actually
+  looks, so it now blocks you where you'd expect instead of letting you
+  clip into or through it.
+- Fixed being able to get stuck on your own furniture while trying to
+  rearrange your room — it's walk-through only while you're actively
+  placing it, solid the rest of the time.
+- Fixed a small memory leak from repeatedly opening and closing the
+  furniture placement menu.
