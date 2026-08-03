@@ -489,6 +489,30 @@ consistently:
   slot-aware, but nothing in the game lets the player choose or see which
   slot is active — it always stays at its default of `1` until a picker
   is built (e.g. in the options/save menu).
+- **46. Minor: shipped default furniture layout is hardcoded in two
+  places.** `scripts/scr_SaveHomeFurniture.gml` and
+  `scripts/scr_LoadHomeFurniture.gml` both independently hardcode the same
+  three `ini_write_string` lines —
+  `"defaults", "item0", "obj_fridge,0,640,384,0,0"`,
+  `"item1", "obj_cabinet,1,896,640,0,0"`, and
+  `"item2", "obj_bed,2,1376,368,0,180"` — with no shared constant/script
+  between them. If the room's default layout is ever changed (or a
+  fourth default piece added), both files need updating by hand or
+  they'll silently disagree about what "defaults" means.
+- **48. TO DO: no rotation support in the placement UI.**
+  `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
+  `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
+  for changing a selected piece's rotation. Even if there were,
+  `obj_cabinet` and `obj_fridge` have no `zRotation` variable to begin
+  with (their Draw events hardcode `d3d_transform_add_rotation_z(0)`) —
+  only `obj_bed` supports rotation today, and only via room creation code
+  set once at placement time, not interactively.
+- **49. TO DO: no controller/joypad support for furniture placement.**
+  Confirmed by project-wide grep — there is no `gamepad_button_check`/
+  `gamepad_axis_value` call anywhere in the codebase, not just in the
+  home customisation objects. Selecting, moving, and (per #48) any future
+  rotating of furniture is keyboard/mouse-only
+  (`keyboard_check_pressed`, `mouse_wheel_up`/`down`).
 - **50. TO DO: still no way to remove furniture once placed.** Adding is
   now possible (see Architecture notes, Home customisation system), but
   `obj_placerParent` has no delete action at all — only select and
@@ -513,30 +537,6 @@ consistently:
   and is tracked/saved elsewhere, but nothing in the new add-furniture
   flow reads `price` or deducts it — every add is currently instant and
   free, with no funds check at all.
-- **46. Minor: shipped default furniture layout is hardcoded in two
-  places.** `scripts/scr_SaveHomeFurniture.gml` and
-  `scripts/scr_LoadHomeFurniture.gml` both independently hardcode the same
-  three `ini_write_string` lines —
-  `"defaults", "item0", "obj_fridge,640,384,0,0"`,
-  `"item1", "obj_cabinet,896,640,0,0"`, and
-  `"item2", "obj_bed,1376,368,0,180"` — with no shared constant/script
-  between them. If the room's default layout is ever changed (or a
-  fourth default piece added), both files need updating by hand or
-  they'll silently disagree about what "defaults" means.
-- **48. TO DO: no rotation support in the placement UI.**
-  `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
-  `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
-  for changing a selected piece's rotation. Even if there were,
-  `obj_cabinet` and `obj_fridge` have no `zRotation` variable to begin
-  with (their Draw events hardcode `d3d_transform_add_rotation_z(0)`) —
-  only `obj_bed` supports rotation today, and only via room creation code
-  set once at placement time, not interactively.
-- **49. TO DO: no controller/joypad support for furniture placement.**
-  Confirmed by project-wide grep — there is no `gamepad_button_check`/
-  `gamepad_axis_value` call anywhere in the codebase, not just in the
-  home customisation objects. Selecting, moving, and (per #48) any future
-  rotating of furniture is keyboard/mouse-only
-  (`keyboard_check_pressed`, `mouse_wheel_up`/`down`).
 
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
