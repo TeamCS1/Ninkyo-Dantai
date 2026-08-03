@@ -523,11 +523,6 @@ consistently:
   between them. If the room's default layout is ever changed (or a
   fourth default piece added), both files need updating by hand or
   they'll silently disagree about what "defaults" means.
-- ~~**47. Not yet playtested.**~~ **Playtested — found two real bugs, both
-  fixed** (see Architecture notes, Collision system and Home
-  customisation system): saving from the options menu never actually
-  wrote the custom furniture layout, and the bed's collision box let the
-  player walk through its south side by a real margin.
 - **48. TO DO: no rotation support in the placement UI.**
   `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
   `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
