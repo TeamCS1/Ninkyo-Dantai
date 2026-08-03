@@ -863,6 +863,10 @@
     <sprites name="Interiors">
       <sprites name="Shinji's Home">
         <sprite>sprites\spr_elevator_1024</sprite>
+        <sprite>sprites\spr_elevator_512</sprite>
+        <sprite>sprites\spr_elevator_256</sprite>
+        <sprite>sprites\spr_elevator_128</sprite>
+        <sprite>sprites\spr_elevator_64</sprite>
         <sprite>sprites\spr_black_carpet_1024</sprite>
         <sprite>sprites\spr_black_carpet_mask</sprite>
       </sprites>
