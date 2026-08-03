@@ -395,6 +395,27 @@ consistently:
   `(20, 1000)` regardless of caller-supplied coordinates, so if two
   interactables are ever in range at once, their prompts overwrite each
   other at the same spot.
+- **53. HUD "Default" fade-out never visibly re-triggers after a room
+  change (e.g. backing out of the options menu) once it's already faded
+  once.** The "HUD Elements" options-menu setting (`global.hudGameElements`,
+  cycled by `obj_optionsMenuHUDElementsLeft`/`Right`) has a "Default" mode
+  (`== 1`) meant to show the yen/compass/clock/health/stamina HUD block
+  briefly, then fade it out — `obj_gui_buruwasu`'s Create event (which
+  reruns every time its non-persistent instance is recreated, e.g. on
+  every `room_goto`) arms this by setting `doFade = true` and
+  `alarm[0] = room_speed * 5`. But Create never resets the *global*
+  `global.hudGameElementsAlphaControl` back to `1` — only
+  `obj_map_buruwasu_controller` does that (when opening the minimap).
+  Since that alpha variable persists across room changes, once it has
+  decayed to `0` (which happens automatically ~5 seconds into any
+  "Default"-mode room visit), leaving through the options menu and
+  pressing Back/Resume — or any other `room_goto` — recreates
+  `obj_gui_buruwasu` with the fade timer rearmed but the alpha already at
+  its floor: there's nothing left to fade *from*, so the HUD block simply
+  stays invisible with no visible transition, until the player happens to
+  open the map. Fix would be for Create to set
+  `global.hudGameElementsAlphaControl = 1` alongside arming `doFade`/
+  `alarm[0]`, mirroring what the map controller already does.
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
 - **30. Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
