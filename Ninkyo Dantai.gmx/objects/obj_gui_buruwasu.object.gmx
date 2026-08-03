@@ -37,6 +37,7 @@ if global.hudGameElements == 0
 if global.hudGameElements == 1
 {
     //if the setting is default
+    global.hudGameElementsAlphaControl = 1;
     doFade = true;
     alarmIsTrue = false;
     alarm[0] = room_speed * 5;

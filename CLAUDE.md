@@ -226,6 +226,23 @@ Background on how core systems actually work, based on an in-depth review
   out, copy-pasted from a vending-machine UI (see the old flavor-text
   bug this leftover code caused, now fixed for these 3 rows).
 
+### HUD (`obj_gui_buruwasu`)
+
+- **"Default" HUD Elements mode now correctly re-shows before fading
+  again on every room change.** The options-menu "HUD Elements" setting's
+  "Default" mode (`global.hudGameElements == 1`) is meant to show the
+  yen/compass/clock/health/stamina block briefly, then fade it out — armed
+  each time `obj_gui_buruwasu` is recreated (every `room_goto`, since it's
+  non-persistent) via `doFade = true; alarm[0] = room_speed * 5;` in
+  Create. That alone wasn't enough: the actual alpha it fades
+  (`global.hudGameElementsAlphaControl`) is global and survives room
+  changes, so once it had already decayed to `0` in one room, any later
+  `room_goto` — including backing out of the options menu — started the
+  new instance already invisible, with nothing left to fade *from*. Create
+  now also resets `global.hudGameElementsAlphaControl = 1` for the
+  `== 1` case, mirroring what `obj_map_buruwasu_controller` already does
+  when opening the minimap.
+
 ## Known issues
 
 Remaining open findings, ranked most severe first within each area. Every
@@ -395,27 +412,6 @@ consistently:
   `(20, 1000)` regardless of caller-supplied coordinates, so if two
   interactables are ever in range at once, their prompts overwrite each
   other at the same spot.
-- **53. HUD "Default" fade-out never visibly re-triggers after a room
-  change (e.g. backing out of the options menu) once it's already faded
-  once.** The "HUD Elements" options-menu setting (`global.hudGameElements`,
-  cycled by `obj_optionsMenuHUDElementsLeft`/`Right`) has a "Default" mode
-  (`== 1`) meant to show the yen/compass/clock/health/stamina HUD block
-  briefly, then fade it out — `obj_gui_buruwasu`'s Create event (which
-  reruns every time its non-persistent instance is recreated, e.g. on
-  every `room_goto`) arms this by setting `doFade = true` and
-  `alarm[0] = room_speed * 5`. But Create never resets the *global*
-  `global.hudGameElementsAlphaControl` back to `1` — only
-  `obj_map_buruwasu_controller` does that (when opening the minimap).
-  Since that alpha variable persists across room changes, once it has
-  decayed to `0` (which happens automatically ~5 seconds into any
-  "Default"-mode room visit), leaving through the options menu and
-  pressing Back/Resume — or any other `room_goto` — recreates
-  `obj_gui_buruwasu` with the fade timer rearmed but the alpha already at
-  its floor: there's nothing left to fade *from*, so the HUD block simply
-  stays invisible with no visible transition, until the player happens to
-  open the map. Fix would be for Create to set
-  `global.hudGameElementsAlphaControl = 1` alongside arming `doFade`/
-  `alarm[0]`, mirroring what the map controller already does.
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
 - **30. Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
@@ -577,6 +573,10 @@ and in Architecture notes / Known Issues instead.
 - Fixed the elevator in Shinji's Home looking like a plain house block at
   every graphics quality setting except the highest — it now shows the
   proper elevator texture at every setting.
+- Fixed the HUD (money, compass, clock, health/stamina bars) staying
+  invisible after backing out of the options menu when "HUD Elements" is
+  set to "Default" — it now reappears and fades out again as intended
+  instead of just staying hidden.
 
 **Behind the scenes**
 - Removed a large amount of unused leftover code that shipped in the
