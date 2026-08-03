@@ -183,16 +183,25 @@ Background on how core systems actually work, based on an in-depth review
   `obj_home_customisation_controller`'s **Room Start** event — Load itself
   can't reposition anything, since the furniture instances (placed
   directly in `rm_ShinjiHome`, non-persistent) don't exist yet at the
-  moment `scr_load` runs from the options menu. Saving only writes the
-  `"customN"` section while the player is actually standing in
-  `rm_ShinjiHome` (checked via `global.previousLocation == rm_ShinjiHome`,
-  not `room` — pressing Save always happens from inside
-  `rm_options_menu`, which is a real `room_goto`, so `room` itself is
-  never `rm_ShinjiHome` at the point `scr_save` runs even when that's
-  where the player actually was; this was a real bug found in
-  playtesting, where saving furniture silently did nothing), so saving
-  from anywhere else never overwrites a previously-saved layout with
-  nothing.
+  moment `scr_load` runs from the options menu. Saving is the mirror
+  problem: pressing Save always happens from inside `rm_options_menu` (a
+  real `room_goto`, triggered by `obj_options_menu_trigger`), so by the
+  time `scr_SaveHomeFurniture` runs, the furniture instances have already
+  been destroyed by leaving `rm_ShinjiHome` — there's nothing left to
+  scan directly. Two playtesting rounds found both halves of this: first
+  that the code was gating on `room == rm_ShinjiHome` (always false at
+  save time) instead of `global.previousLocation`, and after fixing
+  that, that even the *right* check couldn't work because the instances
+  themselves were already gone. The actual fix is
+  `scripts/scr_SnapshotHomeFurniture.gml`, called from
+  `obj_home_customisation_controller`'s **Room End** event (fires while
+  still in `rm_ShinjiHome`, right before its instances are torn down) —
+  it captures every movable instance's current state into
+  `global.homeFurnitureSnapshot`, and `scr_SaveHomeFurniture` writes
+  *that* to disk rather than trying to read live instances. It still
+  checks `global.previousLocation == rm_ShinjiHome` too, so saving from
+  somewhere the player never actually took the furniture through this
+  session doesn't touch the custom section at all.
   `global.movableTypes` (already populated by `obj_placerParent`, also
   placed in that room) is reused as the list of furniture types to
   save/restore, so this scales automatically if more placeable furniture
