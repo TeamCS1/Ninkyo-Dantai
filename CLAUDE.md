@@ -566,6 +566,99 @@ from the code alone. Recorded so they don't get "fixed" again.
   (`z = 223` in Create) and out of the player's reach at ground level, the
   same reasoning that already applies to `obj_fire_escape_three_floors`.
 
+## Reviewer's take
+
+A personal, subjective assessment from the AI assistant that did the
+in-depth review and fixes recorded above (2026-08-03) — not a design
+document, just an honest read of the codebase after spending real time
+in nearly every system.
+
+**Overall.** This is an ambitious project for the engine it's built in.
+GameMaker Studio 1.4 is not really meant for what's being asked of it
+here — a multi-city open-ish world, real-time 3D-model props rendered
+inside a 2D top-down game via `d3d_model_draw`, a full save/load system
+with per-slot home customisation, a battle system, a dialogue system,
+NPC spawning/AI, a day/night clock, taxi fast-travel, and six independent
+graphics-quality sliders — and it mostly holds together. That's a genuine
+achievement for a solo/small-team GMS1.4 project, and it's clear a lot of
+real design thought went into the scope even where the implementation
+hasn't caught up yet.
+
+**The good.**
+- The pseudo-3D prop rendering (real `.d3d` models drawn in a 2D engine)
+  is a clever, unusual technical choice, and the decision to measure
+  actual model bounding boxes from the model files instead of guessing
+  scale values (once that work started) is the kind of rigor that
+  separates "looks right" from "is right."
+- The home customisation system — per-save-slot persistence, stable
+  furniture identity across multiple instances of the same object,
+  build-mode collision gating — is more sophisticated than most small
+  GMS1.4 projects attempt, and it's now in a genuinely solid state.
+- Consistent naming conventions (`obj_`/`scr_`/camelCase scripts) across
+  ~250 objects and ~130 scripts suggests real discipline, not just size.
+- The built-in debug overlay (FPS, memory, camera/collision state) shows
+  a developer actively instrumenting their own work rather than debugging
+  blind — a good habit that made several fixes in this review much faster
+  to verify.
+- The project responds well to targeted fixes. Nothing found during this
+  review needed a rewrite — every issue, including the trickiest ones
+  (the bed's asymmetric collision box, the two-stage furniture-save
+  problem, the HUD fade's persistent-room blind spot), was fixable with a
+  small, scoped change once properly root-caused.
+
+**The bad.**
+- **Global state is the single biggest structural risk in the codebase.**
+  ~190 `global.*` variables initialized ad-hoc across at least three
+  different places with no central entry point. Nearly every subtle "why
+  doesn't this work" bug traced back to this during the review — a global
+  that's read before it's set, set in two places with different values,
+  or (the HUD fade bug) left stale across a room transition because
+  nothing owns resetting it. This will keep generating this exact class
+  of bug for every new feature until it's consolidated.
+- **State-changing logic living in Draw events instead of Step.** The
+  battle system's state transitions and combat input both happen in Draw
+  GUI events, not Step — Draw isn't guaranteed to run under every
+  condition, so gameplay logic shouldn't depend on it firing. This is a
+  correctness risk hiding as a rendering concern.
+- **Systems are built for the single/happy-path case, not the general
+  case.** The battle system only supports one on-screen encounter at a
+  time (HUD and dialogue lookups aren't scoped per-encounter); the HUD
+  fade only worked the very first time a room was entered until this
+  session; the dialogue controller's message-count arrays have already
+  desynced once. The pattern is consistent: things work great in the
+  scenario the developer was actually testing, and quietly break outside
+  it.
+- **Copy-paste reuse without follow-through cleanup.** The furniture
+  dropdown UI started as a copy-pasted vending-machine UI with its
+  Pressed event entirely commented out; six of nine dropdown categories
+  still carry vending-machine flavor text. This isn't unique to one
+  place — it's a repeated pattern of "copy something similar, get the
+  happy path working, move on" without going back to finish the edges.
+- **Real leftover/dead code shipped in the project for an extended
+  period** (an entire unused platformer collision engine, assets from an
+  unrelated earlier game). Harmless at runtime since none of it was
+  wired up, but it's a sign nothing was auditing the project tree for
+  drift — which is exactly the kind of thing that erodes confidence when
+  a new contributor tries to understand what's actually load-bearing.
+
+**What would make the biggest difference from here.** Not more features —
+the two structural debts above (global-state sprawl and
+logic-in-Draw-events) are the ones that keep resurfacing as "works for
+the simple case, breaks for the general case" bugs, and they'll only get
+more expensive to unwind the more gets built on top. A single
+`scr_globals.gml`-owned initialization pass, and moving battle-system
+state changes into Step, would probably prevent more future bugs than
+any individual feature fix in this file. Everything else — the TO DO
+list, the remaining known issues — is normal, healthy backlog for a game
+this size; the systemic stuff is the part worth prioritizing before it
+compounds.
+
+One honest limitation of this take: everything above comes from reading
+code, not playing the game. I have no read on whether the murder-mystery
+narrative, the pacing, or the actual moment-to-moment feel of exploring
+the cities is any good — that's the part that ultimately decides whether
+this is a good game, and it's outside what a code review can tell you.
+
 ## Update notes
 
 Player-facing patch notes, most recent first — written so they can be
