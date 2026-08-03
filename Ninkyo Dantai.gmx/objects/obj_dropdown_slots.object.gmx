@@ -38,6 +38,7 @@ scrollCutOff = 180;
 itemSerialised = -1;
 price = 0;
 upkeep = 0;
+targetObject = noone; //furniture object this row spawns when clicked, if any
 
 image_index = 0;
 image_speed = 0.00;
@@ -96,28 +97,31 @@ printOut = true;
         with(instance_find(obj_dropdown_slots, 3)) //ID 3
         {
             name = "Living";
-            desc = "A sparkling lemon and lime drink.";
+            desc = "A wooden cabinet for storing your belongings.";
             price = 660;
             quantity = 0;
             upkeep = 660;
+            targetObject = obj_cabinet;
         }
-    
+
         with(instance_find(obj_dropdown_slots, 4))
         {
             name = "Bedroom";
-            desc = "500ml. Nature's refreshment, pure and clear, providing essential hydration with 100% natural spring goodness.";
+            desc = "A comfortable bed to rest and recover in.";
             price = 660;
             quantity = 0;
             upkeep = 660;
+            targetObject = obj_bed;
         }
-    
+
         with(instance_find(obj_dropdown_slots, 5))
         {
             name = "Kitchen";
-            desc = "500ml. Pure hydration in every sip, ensuring clarity and refreshment with 100% natural purity.";
+            desc = "A fridge to keep your food and drinks cold.";
             price = 660;
             quantity = 0;
             upkeep = 660;
+            targetObject = obj_fridge;
         }
     
         with(instance_find(obj_dropdown_slots, 6))
@@ -176,51 +180,31 @@ printOut = true;
           <argument>
             <kind>1</kind>
             <string>/// PRESSED EVENT LISTENER
-/*
-// Get the mouse coordinates relative to the window
 var mouseX = window_mouse_get_x();
 var mouseY = window_mouse_get_y();
 
-// Check if the mouse coordinates meet the position of the button
-if (position_meeting(mouseX, mouseY, id)) 
+if (position_meeting(mouseX, mouseY, id))
 {
-    // Mouse is inside the button
-    // Add your code for mouse hover behavior here
     image_index = 1;
-    show_debug_message("Yes")
-   
-    //Code for clicking - 
-    itemEntered = id; 
 
-with itemEntered
+    if (mouse_check_button_released(mb_left) &amp;&amp; targetObject != noone)
+    {
+        //spawn a new piece of furniture next to the player, tagged with
+        //its own stable id so save/load can tell it apart from any other
+        //instance of the same type
+        var _newInst = instance_create(obj_player_buruwasu.x, obj_player_buruwasu.y, targetObject);
+        _newInst.furnitureId = global.nextFurnitureId;
+        global.nextFurnitureId += 1;
+
+        //close the dropdown after adding
+        obj_dropdown_slots.x = -5000;
+        obj_dropdown_home_customisation.dropdown_visible = false;
+    }
+}
+else
 {
-
-    obj_vending_machine_ui.name = itemEntered.name;
-    obj_vending_machine_ui.desc = itemEntered.desc;
-    obj_vending_machine_ui.price = itemEntered.price;
-
-     //obj_properties_new_york_menu_pointer.newYorkPropertySelection = itemEntered.name;
-     //global.newYorkPropertySelection = itemEntered.name; 
-     //obj_properties_new_york_menu_pointer.propertyDescription = itemEntered.desc;
-     //obj_properties_new_york_menu_pointer.propertyCost = itemEntered.price;
-     //obj_properties_new_york_menu_pointer.propertyUpkeepType = itemEntered.upkeep;
-     //obj_properties_new_york_menu_pointer.propertyQuantity = itemEntered.quantity;
-}    
-    
-    
-} 
-else 
-{
-    // Mouse is outside the button
-    // Add your code for when the mouse is not hovering over the button
     image_index = 0;
 }
-
-/*TODO:  FOR NOT ENOUGH FUNDS
-if !instance_exists(obj_notification_system_out)
-    {
-        scr_CreateNotifications("You have int with Vending",300);
-    } 
 </string>
           </argument>
         </arguments>

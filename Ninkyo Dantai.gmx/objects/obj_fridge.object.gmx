@@ -27,6 +27,7 @@
             <kind>1</kind>
             <string>zIsTwoPoints = false; //used for map editor
 z = 0;
+furnitureId = 0; //stable save/load identity - overridden when a new piece is added or restored
 pObject = scr_load_model(working_directory + "Assets\Buruwasu\HOME_CELL\fridge.d3d");
 //setup collisions
 scr_ApplyFridgeCollisionBounds();

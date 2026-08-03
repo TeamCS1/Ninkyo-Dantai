@@ -177,6 +177,25 @@ Background on how core systems actually work, based on an in-depth review
   mechanism supports 5 slots, but nothing currently lets the player
   choose one, so `global.currentSaveSlot` always stays at its default of
   `1` in practice.
+- **Furniture can now actually be added, not just moved.** Every
+  placeable furniture instance (the 3 shipped defaults and any added
+  later) carries a `furnitureId` — 0/1/2 for the shipped
+  fridge/cabinet/bed, assigned in each object's own Create event, and a
+  fresh incrementing value from `global.nextFurnitureId` for anything
+  added afterward. This is what lets `scr_SaveHomeFurniture`/
+  `scr_ApplyHomeFurniturePositions` tell two instances of the same
+  object type apart — the save format is now
+  `"objectName,furnitureId,x,y,z,zRotation"`, and applying a save either
+  repositions an existing instance with matching `furnitureId` or
+  `instance_create`s a new one if none exists yet.
+  `scr_ApplyHomeFurniturePositions` also advances `global.nextFurnitureId`
+  past every id it sees on load, so newly added pieces never collide
+  with restored ones. Three of `obj_dropdown_slots`' nine category rows
+  (Bedroom/Kitchen/Living) now have a real `targetObject`
+  (`obj_bed`/`obj_fridge`/`obj_cabinet`) and spawn that piece next to the
+  player on click — its Pressed event was previously entirely commented
+  out, copy-pasted from a vending-machine UI (see the old flavor-text
+  bug this leftover code caused, now fixed for these 3 rows).
 
 ## Known issues
 
@@ -419,10 +438,13 @@ consistently:
   `ds_list_sort(tempList, true)` sorts the raw ds_list *handles* stored in
   `tempList`, not the `dist` field inside each entry — selection order is
   effectively creation order, not proximity order.
-- **41. Leftover copy-paste flavor text.** `obj_dropdown_slots`' furniture
-  category rows still carry verbatim vending-machine descriptions (e.g.
-  *"A carbonated Cola derived from fruit ingredients"*) instead of
-  furniture descriptions.
+- **41. Leftover copy-paste flavor text (partially fixed).** The
+  Bedroom/Kitchen/Living rows now have real furniture descriptions (see
+  Architecture notes, Home customisation system), but the other 6
+  category rows in `obj_dropdown_slots` still carry verbatim
+  vending-machine descriptions (e.g. *"A carbonated Cola derived from
+  fruit ingredients"*) — moot until those categories have a matching
+  furniture type to describe (see #51).
 - **42. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
   Create with no Destroy event to free it; `obj_wall_mounted_oil_lamp_custom`
   creates a child light instance and loads a model in Create with no
@@ -435,25 +457,30 @@ consistently:
   slot-aware, but nothing in the game lets the player choose or see which
   slot is active — it always stays at its default of `1` until a picker
   is built (e.g. in the options/save menu).
-- **45. TO DO: no way to add or remove furniture, only move the 3
-  defaults.** `obj_placerParent` can only select and reposition the
-  pre-existing `obj_fridge`/`obj_cabinet`/`obj_bed` instances (it
-  iterates `global.movableTypes` via `with`, which only matches
-  instances that already exist) — there's no `instance_create` path
-  anywhere for spawning a new piece from the dropdown, and no delete
-  action either. The `"customN"` save format already supports arbitrary
-  additional items (it writes a `count` plus indexed entries, not a
-  fixed 3), so once placement/removal exists the save/load side needs no
-  changes — only `obj_placerParent` and the dropdown
-  (`obj_dropdown_home_customisation`/`obj_dropdown_slots`, see #38/#41)
-  need the actual create/destroy logic. Related latent constraint:
-  `scr_ApplyHomeFurniturePositions` repositions via
-  `with (_objIndex) { x = ...; y = ...; }`, which applies to *every*
-  existing instance of that object type — fine while there's exactly one
-  of each, but if #45 is ever built and a second instance of the same
-  type is added, saved rows and live instances would need a stable
-  per-instance identity to stay correctly matched, not just an object
-  name.
+- **50. TO DO: still no way to remove furniture once placed.** Adding is
+  now possible (see Architecture notes, Home customisation system), but
+  `obj_placerParent` has no delete action at all — only select and
+  reposition. A misclicked or unwanted piece can only be nudged
+  off-screen, not actually removed.
+- **51. Only 3 of the 9 dropdown categories have a matching furniture
+  type.** `obj_dropdown_slots` still lists "Structure & Painting",
+  "Doors & Windows", "General", "Bathroom", "Office", "Outdoor &
+  Farming", and "Decorations" as categories, but no placeable object
+  exists for any of them yet — clicking those rows does nothing
+  (`targetObject` stays `noone`). Separately, the same object's Step
+  event sets names/descriptions via
+  `instance_find(obj_dropdown_slots, 0)` through `..., 9)` — but
+  `scr_CreateDropdownItems.gml` only ever creates 9 rows (indices 0-8),
+  so `instance_find(obj_dropdown_slots, 9)` ("Decorations") always
+  resolves to `noone` and that `with` block silently does nothing. Not
+  currently harmful (`with (noone)` is a no-op), but worth knowing before
+  adding a 10th row expecting it to work.
+- **52. TO DO: adding furniture is free.** Each dropdown row already
+  carries `price`/`upkeep` fields (left over from the vending-machine
+  code this UI was copied from), and `global.yenAmount` already exists
+  and is tracked/saved elsewhere, but nothing in the new add-furniture
+  flow reads `price` or deducts it — every add is currently instant and
+  free, with no funds check at all.
 - **46. Minor: shipped default furniture layout is hardcoded in two
   places.** `scripts/scr_SaveHomeFurniture.gml` and
   `scripts/scr_LoadHomeFurniture.gml` both independently hardcode the same
@@ -514,6 +541,8 @@ and in Architecture notes / Known Issues instead.
 - Furniture you move around in Shinji's Home now actually saves! Move
   your bed, fridge, or cabinet and it'll still be there next time you
   load up.
+- You can now add an extra bed, fridge, or cabinet from the furniture
+  menu instead of only rearranging the ones you start with.
 
 **Fixes**
 - Fixed walking diagonally into a wall or object stopping you dead
