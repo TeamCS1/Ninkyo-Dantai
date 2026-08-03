@@ -653,11 +653,56 @@ list, the remaining known issues — is normal, healthy backlog for a game
 this size; the systemic stuff is the part worth prioritizing before it
 compounds.
 
-One honest limitation of this take: everything above comes from reading
+**On game design** (inferred from what the systems imply, not from
+playing — a real limitation, see below). The premise — a murder-mystery
+narrative JRPG with open-ish city exploration — is bolted onto a genuinely
+wide spread of other genre elements: a full home-decorating/life-sim
+layer (per-slot furniture persistence, a build mode, a furniture shop
+UI), real-time single-target combat, taxi fast-travel between five
+cities, a day/night/weekday clock, a fog/weather system, and a shrine
+collectible layer. That's a lot of different games' worth of systems for
+one project to carry at once, and from what I've read, most of them are
+currently shallow rather than deep — combat is a single mouse-click
+dealing damage to one on-screen enemy with a health bar, no visible
+abilities/inventory/combo depth; NPC "AI" is a small handful of states;
+dialogue is fixed, non-branching message sequences. Wide-but-shallow
+scope is a common trap for ambitious solo/small-team projects — every
+system present is a real feature, but none of them (from what's in the
+code) is pushed past a first pass, which tends to read to players as "a
+lot to do, not much depth to any of it."
+
+The bigger question mark, specifically because the premise is a *murder
+mystery*: I did not find anything in the dialogue, battle, or any other
+system I reviewed that reads as an investigation/deduction mechanic —
+no clue collection, evidence log, suspect tracking, or dialogue choices
+that branch based on what the player has learned. The dialogue
+controller is sequential fixed text with no player input beyond
+advancing lines. If investigation gameplay exists, it's in a system I
+didn't touch during this review; but if it doesn't exist yet, that's the
+single piece I'd consider most important to a game whose whole framing
+is "murder mystery" — right now the narrative delivery mechanism and the
+actual "solve the mystery" gameplay loop don't appear to be the same
+system, which is usually a bigger design risk than any individual bug.
+Two smaller, concrete design smells worth calling out on their own: the
+forced intro dialogue currently replaying verbatim on every single visit
+to 10+ rooms (Known Issues #31) is exactly the kind of repetition that
+playtesting normally catches fast, since it actively undercuts the
+narrative focus the genre choice implies; and the amount of engineering
+investment visible in rendering/performance tuning (six independent
+graphics-quality sliders, a memory/RAM debug overlay) looks
+disproportionate next to how shallow the combat and investigation loops
+currently are — reasonable if the plan is "get the tech pipeline solid
+first, deepen mechanics later," but worth being a deliberate choice
+rather than a byproduct of where effort happened to go.
+
+One honest limitation of both takes above: everything comes from reading
 code, not playing the game. I have no read on whether the murder-mystery
 narrative, the pacing, or the actual moment-to-moment feel of exploring
 the cities is any good — that's the part that ultimately decides whether
 this is a good game, and it's outside what a code review can tell you.
+If there's an investigation mechanic I missed, or the shallow systems
+above are early-access placeholders with a deeper pass already planned,
+that changes this assessment a fair amount.
 
 ## Update notes
 
