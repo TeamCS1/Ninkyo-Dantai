@@ -327,8 +327,39 @@ if global.hideAllDebugText == false
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//shortcut to get to home remove after
-//room_goto(rm_ShinjiHome);
+            <string>//re-arm the HUD Elements fade every time this room is (re-)entered.
+//needed in addition to Create: this object's rooms (rm_city_buruwasu,
+//rm_city_ichihara, rm_ShinjiHome) are persistent rooms, so returning to
+//them (e.g. backing out of the options menu) does not re-run Create for
+//surviving instances -- only Room Start fires on every re-entry.
+alarmIsTrue = false;
+
+if global.hudGameElements == 0
+{
+    doFade = false;
+    alarmIsTrue = false;
+}
+
+if global.hudGameElements == 1
+{
+    global.hudGameElementsAlphaControl = 1;
+    doFade = true;
+    alarmIsTrue = false;
+    alarm[0] = room_speed * 5;
+}
+
+if global.hudGameElements == 2 //pinned
+{
+    doFade = false;
+    alarmIsTrue = false;
+}
+
+if global.hudGameElements == 3 //hide
+{
+    doFade = false;
+    alarmIsTrue = false;
+    global.hideAllGameElements = 1;
+}
 </string>
           </argument>
         </arguments>

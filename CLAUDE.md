@@ -229,19 +229,26 @@ Background on how core systems actually work, based on an in-depth review
 ### HUD (`obj_gui_buruwasu`)
 
 - **"Default" HUD Elements mode now correctly re-shows before fading
-  again on every room change.** The options-menu "HUD Elements" setting's
-  "Default" mode (`global.hudGameElements == 1`) is meant to show the
-  yen/compass/clock/health/stamina block briefly, then fade it out — armed
-  each time `obj_gui_buruwasu` is recreated (every `room_goto`, since it's
-  non-persistent) via `doFade = true; alarm[0] = room_speed * 5;` in
-  Create. That alone wasn't enough: the actual alpha it fades
-  (`global.hudGameElementsAlphaControl`) is global and survives room
-  changes, so once it had already decayed to `0` in one room, any later
-  `room_goto` — including backing out of the options menu — started the
-  new instance already invisible, with nothing left to fade *from*. Create
-  now also resets `global.hudGameElementsAlphaControl = 1` for the
-  `== 1` case, mirroring what `obj_map_buruwasu_controller` already does
-  when opening the minimap.
+  again every time its room is (re-)entered, including backing out of the
+  options menu.** The options-menu "HUD Elements" setting's "Default" mode
+  (`global.hudGameElements == 1`) is meant to show the
+  yen/compass/clock/health/stamina block briefly, then fade it out, armed
+  via `doFade = true; alarm[0] = room_speed * 5;` plus resetting the alpha
+  it fades (`global.hudGameElementsAlphaControl`, global and normally left
+  at `0` once fully faded) back to `1`. Two playtesting rounds found this
+  needed fixing twice: first, Create alone wasn't enough to reset the
+  alpha (it only armed the timer, so a room revisited with the alpha
+  already faded stayed invisible with nothing to fade from) — but even
+  after adding the alpha reset to Create, backing out of the options menu
+  still didn't show the HUD, because `rm_city_buruwasu`, `rm_city_ichihara`
+  and `rm_ShinjiHome` are all **persistent rooms**
+  (`obj_gui_buruwasu`'s own rooms) — GameMaker does not re-run Create for
+  a persistent room's surviving instances when you return to it, only
+  Room Start fires on every re-entry. The same reset logic now also runs
+  in `obj_gui_buruwasu`'s Room Start event (previously unused, dead
+  commented-out code), which is what actually re-arms the fade after the
+  options menu — Create alone only ever mattered for the very first time
+  a room is entered.
 
 ## Known issues
 
