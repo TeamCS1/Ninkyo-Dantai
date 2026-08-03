@@ -70,24 +70,21 @@ Background on how core systems actually work, based on an in-depth review
 
 ### Dead/orphaned code (do not extend, safe to ignore or remove)
 
-- **A whole Mario-style platformer collision engine is unused.**
-  `scripts/characterCreateEvent.gml`, `characterStepEvent.gml`,
+- **The unused Mario-style platformer collision engine has been deleted**
+  (`characterCreateEvent.gml`, `characterStepEvent.gml`,
   `characterDrawEvent.gml`, `calculateCollisionBounds.gml`,
   `canLandOnPlatforms.gml`, `canPushMoveableSolids.gml`, every
-  `getIdCollision*`/`isCollision*` script, and the objects they reference
-  (`oCharacter`, `oSolid`, `oMoveableSolid`, `oPlatform`, `oLadder`, `oWater`,
-  `oGame`) do not exist anywhere in `Ninkyo Dantai.project.gmx` or the
-  `objects/` folder — verified by grep. This is a leftover template, unrelated
-  to the actual player object (`objects/obj_player_buruwasu.object.gmx`),
-  which uses GameMaker's built-in `speed`/`direction`/`friction` plus
-  per-collision-object events instead.
-- **`scripts/scr_load_script_SBB.gml`** is leftover from a different game
-  (references "Super Bandonio Bros" level names) and is never called
-  anywhere.
-- **`scripts/scr_save_configs.gml` / `scripts/scr_load_configs.gml`** (display
-  settings persistence) are internally consistent with each other but never
-  called from the actual options menu — display settings likely don't
-  persist across sessions as a result.
+  `getIdCollision*`/`isCollision*` script, `gameCreateEvent.gml`,
+  `gameStepEvent.gml`, `makeActive.gml`, `platformCharacterIs.gml`,
+  `setCollisionBounds.gml`), along with a batch of unrelated leftover
+  scripts from a different game (`scr_LightingSystemBandonio*.gml`,
+  `scr_WaterSystemBandonio.gml`, `scr_worldCharacterSpawnerBandonio.gml`,
+  `scr_load_script_SBB.gml`, `script112.gml`) and the never-called display
+  settings persistence pair `scr_save_configs.gml`/`scr_load_configs.gml`.
+  None of it was referenced anywhere in `Ninkyo Dantai.project.gmx` or
+  called from any object — the actual player object
+  (`objects/obj_player_buruwasu.object.gmx`) uses GameMaker's built-in
+  `speed`/`direction`/`friction` plus per-collision-object events instead.
 - **`scripts/scr_BuruwasuDrawMap.gml` and `scripts/DrawArrowWaypoint.gml`**
   are also unreferenced anywhere in the project, same as
   `characterDrawEvent.gml` above. Both also contain real bugs that would
@@ -398,17 +395,6 @@ consistently:
   `(20, 1000)` regardless of caller-supplied coordinates, so if two
   interactables are ever in range at once, their prompts overwrite each
   other at the same spot.
-- **29. TO DO: `obj_elevator` (Shinji's Home) doesn't use the elevator texture
-  at most quality settings.** Its Draw GUI event switches on
-  `global.buildingQuality`, but only `case 5` (the highest setting) draws
-  with `spr_elevator_1024` — cases 1-4 all draw with `spr_block_house_*`,
-  the same generic texture `obj_house_block001` uses for a plain house
-  exterior. At every quality setting except the max, the elevator in the
-  home room visually looks like a house block instead of an elevator.
-  (Minor, adjacent: the `else` cleanup branch flushes
-  `spr_block_house_1024_1024`, a sprite this object never actually draws,
-  instead of `spr_elevator_1024`, the one `case 5` does use.)
-
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
 - **30. Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
@@ -563,6 +549,19 @@ copy-pasted straight into an itch.io devlog/update post. Add a new dated
 entry here each time a Known Issue is fixed or a piece of work lands;
 keep the technical specifics (scripts, object names) out of this section
 and in Architecture notes / Known Issues instead.
+
+### August 3, 2026
+
+**Fixes**
+- Fixed the elevator in Shinji's Home looking like a plain house block at
+  every graphics quality setting except the highest — it now shows the
+  proper elevator texture at every setting.
+
+**Behind the scenes**
+- Removed a large amount of unused leftover code that shipped in the
+  project but was never actually part of the game (an old platformer
+  collision system and some assets from an unrelated earlier project).
+  No gameplay impact, just a cleaner codebase.
 
 ### August 2, 2026
 
