@@ -1,5 +1,6 @@
 ///--- Globals Persists
 global.modelBoundsCache = -1; //ds_map, lazily created by scr_GetModelBounds
+global.bedCollisionBoundsCache = -1; //ds_list, lazily created by scr_GetBedCollisionBounds
 global.currentSaveSlot = 1; //1-5, selects which home.ini "customN" section is active
 global.nextFurnitureId = 3; //0-2 are the shipped defaults (fridge/cabinet/bed); next added piece gets this
 global.mallCount = 100;

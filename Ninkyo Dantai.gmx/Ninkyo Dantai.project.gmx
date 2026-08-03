@@ -1150,6 +1150,7 @@
       <script>scripts\scr_GetModelBounds.gml</script>
       <script>scripts\scr_ApplyModelCollisionBoundsScaled.gml</script>
       <script>scripts\scr_ApplyChainLinkFenceCollisionBounds.gml</script>
+      <script>scripts\scr_GetBedCollisionBounds.gml</script>
       <script>scripts\scr_ApplyBedCollisionBounds.gml</script>
       <script>scripts\scr_ApplyCabinetCollisionBounds.gml</script>
       <script>scripts\scr_ApplyFridgeCollisionBounds.gml</script>

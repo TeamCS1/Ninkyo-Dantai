@@ -141,6 +141,23 @@ Background on how core systems actually work, based on an in-depth review
   as a proof of concept for the chain-link fence and the home furniture;
   most other 3D-model props still use a guessed `image_xscale`/`image_yscale`
   and would need the same treatment to be verified rather than assumed.
+- **The bed needed its own dedicated bounds script, not the shared one.**
+  Playtesting found the player could walk through the south side of the
+  bed. Measuring the bed's `.d3d` model directly showed why: its real Y
+  extent is `-53.7` to `+26.3` — offset about `-13.7` from center, unlike
+  the fence's near-negligible offset. A tight-fit symmetric box is wrong
+  for an off-center model once rotated (GameMaker's simple bounding-box
+  collision doesn't rotate with `image_angle`, and the required
+  compensation flips direction depending on rotation — a real problem
+  now that "add furniture" can spawn a second bed at a different
+  rotation than the shipped default). `scripts/scr_GetBedCollisionBounds.gml`
+  computes a symmetric-safe size instead — `2 * max(|min|, |max|)` per
+  axis — guaranteeing full coverage on both sides after any 90° rotation,
+  at the cost of some harmless over-blocking on the side that didn't
+  need it. `scripts/scr_ApplyBedCollisionBounds.gml` uses this instead of
+  the shared `scr_GetModelBounds`/`scr_ApplyModelCollisionBoundsScaled`
+  pipeline, which is unchanged and still correct for the fence/cabinet/
+  fridge.
 - **Build-mode gating.** While `global.homeBuildingMode` is true (toggled by
   `obj_home_customisation_controller`), the player's furniture Collision
   events (bed/cabinet/fridge) are skipped, matching the same
@@ -158,7 +175,7 @@ Background on how core systems actually work, based on an in-depth review
   layout (fridge/cabinet/bed positions), written by both
   `scr_SaveHomeFurniture` and `scr_LoadHomeFurniture` so it exists even on
   a fresh install. Each furniture item is one comma-joined ini string
-  (`"objectName,x,y,z,zRotation"`), parsed by
+  (`"objectName,furnitureId,x,y,z,zRotation"`), parsed by
   `scripts/scr_ParseHomeFurnitureItem.gml`. `scr_save.gml`/`scr_load.gml`
   call `scr_SaveHomeFurniture`/`scr_LoadHomeFurniture`, but the actual
   per-instance repositioning happens in
@@ -168,8 +185,14 @@ Background on how core systems actually work, based on an in-depth review
   directly in `rm_ShinjiHome`, non-persistent) don't exist yet at the
   moment `scr_load` runs from the options menu. Saving only writes the
   `"customN"` section while the player is actually standing in
-  `rm_ShinjiHome` (`room == rm_ShinjiHome`), so saving from anywhere else
-  never overwrites a previously-saved layout with nothing.
+  `rm_ShinjiHome` (checked via `global.previousLocation == rm_ShinjiHome`,
+  not `room` — pressing Save always happens from inside
+  `rm_options_menu`, which is a real `room_goto`, so `room` itself is
+  never `rm_ShinjiHome` at the point `scr_save` runs even when that's
+  where the player actually was; this was a real bug found in
+  playtesting, where saving furniture silently did nothing), so saving
+  from anywhere else never overwrites a previously-saved layout with
+  nothing.
   `global.movableTypes` (already populated by `obj_placerParent`, also
   placed in that room) is reused as the list of furniture types to
   save/restore, so this scales automatically if more placeable furniture
@@ -491,9 +514,11 @@ consistently:
   between them. If the room's default layout is ever changed (or a
   fourth default piece added), both files need updating by hand or
   they'll silently disagree about what "defaults" means.
-- **47. Not yet playtested.** The whole slot/home.ini system (moving
-  furniture, saving, leaving and returning to `rm_ShinjiHome`, and
-  reloading) hasn't been verified in the actual GameMaker editor/runtime.
+- ~~**47. Not yet playtested.**~~ **Playtested — found two real bugs, both
+  fixed** (see Architecture notes, Collision system and Home
+  customisation system): saving from the options menu never actually
+  wrote the custom furniture layout, and the bed's collision box let the
+  player walk through its south side by a real margin.
 - **48. TO DO: no rotation support in the placement UI.**
   `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
   `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
@@ -554,6 +579,7 @@ and in Architecture notes / Known Issues instead.
 - Fixed the chain-link fence's collision not matching how it actually
   looks, so it now blocks you where you'd expect instead of letting you
   clip into or through it.
+- Fixed being able to walk through part of the bed's south side.
 - Fixed being able to get stuck on your own furniture while trying to
   rearrange your room — it's walk-through only while you're actively
   placing it, solid the rest of the time.
