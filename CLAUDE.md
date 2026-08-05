@@ -70,21 +70,11 @@ Background on how core systems actually work, based on an in-depth review
 
 ### Dead/orphaned code (do not extend, safe to ignore or remove)
 
-- **The unused Mario-style platformer collision engine has been deleted**
-  (`characterCreateEvent.gml`, `characterStepEvent.gml`,
-  `characterDrawEvent.gml`, `calculateCollisionBounds.gml`,
-  `canLandOnPlatforms.gml`, `canPushMoveableSolids.gml`, every
-  `getIdCollision*`/`isCollision*` script, `gameCreateEvent.gml`,
-  `gameStepEvent.gml`, `makeActive.gml`, `platformCharacterIs.gml`,
-  `setCollisionBounds.gml`), along with a batch of unrelated leftover
-  scripts from a different game (`scr_LightingSystemBandonio*.gml`,
-  `scr_WaterSystemBandonio.gml`, `scr_worldCharacterSpawnerBandonio.gml`,
-  `scr_load_script_SBB.gml`, `script112.gml`) and the never-called display
-  settings persistence pair `scr_save_configs.gml`/`scr_load_configs.gml`.
-  None of it was referenced anywhere in `Ninkyo Dantai.project.gmx` or
-  called from any object — the actual player object
-  (`objects/obj_player_buruwasu.object.gmx`) uses GameMaker's built-in
-  `speed`/`direction`/`friction` plus per-collision-object events instead.
+- **The unused Mario-style platformer collision engine, a batch of
+  leftover scripts from a different game, and an unused display-settings
+  persistence pair have all been deleted** — none of it was referenced by
+  the project or any object; the real player object uses GameMaker's
+  built-in `speed`/`direction`/`friction` instead.
 - **`scripts/scr_BuruwasuDrawMap.gml` and `scripts/DrawArrowWaypoint.gml`**
   are also unreferenced anywhere in the project, same as
   `characterDrawEvent.gml` above. Both also contain real bugs that would
