@@ -34,6 +34,7 @@ progress = -1;
 loadingString = "";
 hasStartedLoading = false;
 gamepadStickDir = 0;
+gamepadDevice = -1;
 glow = draw_set_color(make_colour_rgb(107,200,218))
 grey = draw_set_color(make_colour_rgb(125,134,133))
 
@@ -428,19 +429,32 @@ alarm[1] = room_speed * 1.2;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//Gamepad navigation (DualSense/DualShock etc, device 0) - D-pad or left stick up/down
-if gamepad_is_connected(0)
+            <string>//Gamepad navigation (DualSense/DualShock etc) - D-pad or left stick up/down
+//Scan every slot rather than assuming device 0, in case the pad isn't first
+gamepadDevice = -1;
+var _deviceCount = gamepad_get_device_count();
+
+for (var _i = 0; _i &lt; _deviceCount; _i++)
 {
-    if gamepad_button_check_pressed(0, gp_padu)
+    if gamepad_is_connected(_i)
+    {
+        gamepadDevice = _i;
+        break;
+    }
+}
+
+if gamepadDevice != -1
+{
+    if gamepad_button_check_pressed(gamepadDevice, gp_padu)
     {
         menuChoice--;
     }
-    if gamepad_button_check_pressed(0, gp_padd)
+    if gamepad_button_check_pressed(gamepadDevice, gp_padd)
     {
         menuChoice++;
     }
 
-    var _stickY = gamepad_axis_value(0, gp_axislv);
+    var _stickY = gamepad_axis_value(gamepadDevice, gp_axislv);
 
     if _stickY &lt; -0.5
     {
@@ -626,6 +640,46 @@ if progress &gt;= 0
     scr_glow_text(1600,1000,string(loadingString + " &gt; " + string(progress) + "%"),ft_buruwasu_gui,c_white,c_white,fa_top, fa_left,2,c_teal,1);
 }
 
+//DEBUG: gamepad diagnostics for controller testing - remove once DualSense nav is confirmed working
+draw_set_font(ft_buruwasu_gui);
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_color(c_yellow);
+
+var _deviceCount = gamepad_get_device_count();
+draw_text(20,20,"Gamepad slots: " + string(_deviceCount));
+
+var _debugY = 44;
+var _di = 0;
+
+while _di &lt; _deviceCount
+{
+    var _line = "Slot " + string(_di) + ": ";
+
+    if gamepad_is_connected(_di)
+    {
+        _line += "CONNECTED - " + gamepad_get_description(_di);
+    }
+    else
+    {
+        _line += "not connected";
+    }
+
+    draw_text(20,_debugY,_line);
+    _debugY += 24;
+    _di++;
+}
+
+if gamepadDevice != -1
+{
+    draw_text(20,_debugY,"Active device " + string(gamepadDevice) + " | left stick Y axis: " + string(gamepad_axis_value(gamepadDevice, gp_axislv)));
+}
+else
+{
+    draw_text(20,_debugY,"No gamepad recognised by GameMaker.");
+}
+
+draw_set_color(c_white);
 
 </string>
           </argument>
