@@ -251,6 +251,127 @@ Background on how core systems actually work, based on an in-depth review
   out, copy-pasted from a vending-machine UI (see the old flavor-text
   bug this leftover code caused, now fixed for these 3 rows).
 
+### Vehicle system
+
+- **All 10 drivable vehicles run identical code.** `obj_car`,
+  `obj_truck`, `obj_ambulance`, `obj_police_car`, `obj_taxi`,
+  `obj_scooter_vehicle` and the four civilian sedans
+  (`obj_block_stingray`, `obj_olympics_lemane`, `obj_opera_windsor`,
+  `obj_titan_gresely`) each hold nothing but a Create event and one-line
+  calls to the shared scripts. Their non-Create event bodies are
+  byte-identical — verified by hash — with only the exit icon differing.
+  Previously only `obj_car` had the newer physics and the other nine each
+  carried their own copy-pasted variant of the old built-in
+  `speed`/`friction` model.
+  - `scr_VehicleCreateEventBuruwasu(topSpeed, reverse, acc, brake, name)`
+    — shared setup plus every handling default.
+  - `scr_VehicleStep` — the driving physics.
+  - `scr_VehicleDraw` — distance-culled sprite draw.
+  - `scr_VehicleDrawGUI` — speedometer, gear, needle, name plate.
+  - `scr_VehicleExit(iconObject)` — hands control back and destroys the
+    vehicle. Also restores `global.drawOCRange`, which has to happen
+    *here*: by the time the player is out, the vehicle instance is gone
+    and its own Draw GUI never runs again.
+- **Per-vehicle character comes from overriding the defaults after the
+  create call**, not from separate code. A truck sets `yawInertia = 260`
+  and `steerLockTop = 5`; a police car sets `frontGrip = 0.17` and
+  `handbrakeGrip = 0.18`. Anything not overridden stays on the sedan
+  defaults.
+- **The physics is a slip-angle bicycle model**, not the older "rotate
+  the heading, then bleed off sideways velocity" approach. Front and rear
+  axles each generate lateral grip from their slip angle up to a traction
+  limit, so drift, countersteer recovery and weight transfer all fall out
+  of the model rather than being special-cased. Rotation is a real yaw
+  rate with inertia, and the steering wheel moves at a limited rate —
+  those two are what stop it feeling like a turret on ice.
+- **Wheelbase has to be large relative to per-step travel.** The original
+  numbers had `axleFront`/`axleRear` at 1.1 against a top speed of 6px a
+  step, so the car covered 2.7 wheelbases per frame where a real one
+  covers about a fifth of one. That made cornering grip-limited rather
+  than steering-limited and gave a 67px turn radius at top speed — the
+  car could pivot on the spot. It's now a 40px wheelbase with
+  `steerLockTop` at 7°, giving ~417px at top speed and forcing you to
+  slow for corners. If these are ever retuned, measure rather than guess:
+  steady-state radius is `speed / yawRate`, and `yawDamp` is coupled to
+  it (lowering it widens *every* corner, because sustained rotation then
+  needs more torque).
+- `scripts/scr_DrawVehicleDebugOverlay.gml` shows live slip angles, grip
+  used per axle as a percentage, lateral velocity and a drifting
+  indicator, toggled in game with the `/physics` console command. Its
+  header maps symptoms to dials — reach for it before changing numbers.
+
+### Performance: scenery culling
+
+- **`rm_city_buruwasu` holds ~6,800 instances, ~93% of them static
+  scenery**, and the per-instance `point_distance` check every object's
+  Draw event runs only skips the *drawing* — not the event dispatch,
+  which at that count is most of the cost.
+  `scripts/scr_CullDistantScenery.gml` deactivates distant scenery
+  outright so it runs nothing at all, re-culling only once the player has
+  moved `global.cullStep` pixels. Called from `obj_control`'s Begin Step.
+- **It only ever touches a fixed allowlist of static geometry** — floors,
+  walls, roads, pavements, grass, water. NPCs are deliberately excluded:
+  deactivating one freezes it mid-walk and stops its AI alarms, so the
+  city beyond the draw distance would quietly stand still and anything
+  walking somewhere would never arrive. The player, `obj_control`, the
+  GUI, spawners, triggers and pickups are out for the same reason. Check
+  a candidate for Step/Alarm events before adding it to that list.
+- **`global.cullRange` must stay above the widest `global.drawOCRange`
+  ever gets**, because a deactivated instance doesn't draw either — cull
+  closer than you draw and the world has visible holes in it.
+- **`global.drawOCRange` used to compound.** With camera zoom on,
+  entering a vehicle did `drawOCRange = drawOCRange * 2` and nothing put
+  it back, because the only reset lived in the vehicle's own Draw GUI,
+  which stops running the moment the instance is destroyed. Across a
+  session it went 750 → 1500 → 3000 → 6000, and since it's a radius each
+  doubling quadruples how much of the world is drawn. There is now a
+  `global.drawOCRangeBase` that the current range is always set *from*,
+  never multiplied into.
+- Toggle culling in game with `/cull` to A/B it.
+
+### Minimap
+
+- **An always-on panel, separate from the Tab map.** `scr_DrawMinimap`
+  draws a bordered box centred on the player;
+  `scr_minimap` (Tab, unchanged) still lays the whole 25000×25000 room
+  out at once. They share a colour scheme deliberately, so the two read
+  as the same map at different zooms: pale blocks are buildings,
+  mid-grey is pavement, and roads are simply the dark gaps left between
+  them rather than anything drawn.
+  - `scr_MinimapMark` — converts one world position to the panel and
+    clips it by clamping to the panel bounds (no surface, so no surface
+    lifetime handling, and a blip straddling the edge still shows its
+    visible half).
+  - `scr_DrawMinimapBackdrop` / `scr_DrawMinimapFrame` — these bracket
+    the contents. Fill underneath, frame on top; drawing the whole border
+    up front let the clipped blips chew its inside edge.
+  - `scr_DrawMinimapArrow` — the player marker.
+- **It is only affordable because of the scenery culling**: `with()`
+  skips deactivated instances, so its ~25 loops touch what's nearby
+  rather than all ~6,800 instances. Turning culling off with `/cull`
+  makes the panel walk everything every frame.
+- Consequently **`global.minimapRange` must stay inside
+  `global.cullRange` — its *diagonal***, or the panel's corners show
+  empty ground that has merely been deactivated. 1400 against a 2200 cull
+  radius leaves room.
+- **The player arrow must not use `obj_control.bearing`.** That is set to
+  90 in `obj_control`'s Create and afterwards written *only* by
+  `scr_VehicleStep`, so on foot it never leaves north and the arrow sits
+  frozen. `obj_player_buruwasu.direction` is what tracks facing on foot;
+  `bearing` is right *in* a vehicle, because that's what the vehicle just
+  wrote to it.
+- **`draw_triangle` needs culling turned off.** This project's standing
+  state is `d3d_set_culling(1)` (which is why `obj_bed` and `obj_cabinet`
+  turn it off and set it back to 1), and culling silently discards any
+  triangle whose vertices are wound the wrong way. GameMaker generates
+  `draw_circle`/`draw_rectangle` geometry itself with a winding that
+  survives; a hand-specified triangle does not get that courtesy. The
+  arrow was being discarded entirely — the circle marker beside it drew
+  fine and changing the size changed nothing, which is the signature of
+  this rather than of a geometry bug. `scr_DrawMinimapArrow` disables
+  culling for the duration, restores it to 1, and draws both windings.
+- Toggle with `/minimap`.
+
 ### Gamepad input
 
 - **GMS1.4's mapped gamepad API does not recognise the DualSense's
@@ -368,6 +489,45 @@ notes) rather than renumbering everything after it, so gaps are expected.
   strong evidence it's an accidental leftover duplicate of `obj_land_mask`
   rather than a second intentional hill. Whether either (or both) should be
   solid is a design call, not something to guess at.
+
+### Vehicles & world performance
+
+Found while unifying the vehicles and chasing the spawn-area framerate;
+none of these were fixed.
+
+- **53. The water animation is broken, not just idle.**
+  `obj_water_anim_buruwasu`'s alarm increments `image_index_animation`,
+  and then its Step event immediately does
+  `image_index_animation = image_index`, overwriting what the alarm just
+  set. 615 instances in the spawn room each run that every frame to
+  achieve nothing. (It is in the culling allowlist, which is safe — the
+  worst case is off-screen water holding a frame — but the animation
+  wouldn't play even if it weren't.)
+- **54. `obj_side_walk_buruwasu` calls `randomize()` in its Create
+  event** — 2,029 instances in `rm_city_buruwasu`, so 2,029 reseeds of
+  the RNG at room load. `randomize()` is meant to be called once at
+  startup; doing it per instance is both a load-time cost and a way to
+  defeat any deterministic seeding.
+- **55. `obj_house_block001` caches a texture it then doesn't use.** Its
+  Create stores `TEX1 = sprite_get_texture(spr_block_house_64_64, 0)`,
+  but some quality branches of its Draw call `sprite_get_texture(...)`
+  inline again rather than using `TEX1` — a per-frame lookup across
+  1,294 instances for a value already sitting in a variable.
+- **56. The Tab map only shows two of the ten vehicles.**
+  `scr_minimap.gml` draws a green blip for `obj_car` and
+  `obj_police_car`; the truck, ambulance, taxi, scooter and four
+  civilian sedans have no branch, so driving any of them leaves the map
+  with no player marker at all (the on-foot marker is skipped while
+  `global.inVehicle` is true). The new always-on minimap doesn't share
+  this problem — it marks the player centrally regardless of vehicle.
+- **57. The four civilian sedans drop the wrong pickup icon.**
+  `obj_block_stingray`, `obj_olympics_lemane`, `obj_opera_windsor` and
+  `obj_titan_gresely` all pass `obj_car_icon` to `scr_VehicleExit`, so
+  getting out of a Titan Gresley leaves a Block,Charger behind. Each has
+  its own icon object already (`obj_block_stingray_icon` and so on).
+  This is pre-existing behaviour that was preserved deliberately during
+  the vehicle unification rather than silently changed — it is a
+  one-word fix per object once someone confirms that's the intent.
 
 ### Save/load & global state
 
@@ -799,6 +959,38 @@ copy-pasted straight into an itch.io devlog/update post. Add a new dated
 entry here each time a Known Issue is fixed or a piece of work lands;
 keep the technical specifics (scripts, object names) out of this section
 and in Architecture notes / Known Issues instead.
+
+### August 7, 2026
+
+**New**
+- There's now a minimap on screen at all times, showing the streets
+  around you with an arrow for where you're facing. The full map is
+  still on Tab.
+- Every vehicle now drives on the same, much more convincing physics.
+  Cars lean on their tyres instead of sliding around: brake into a
+  corner and the back steps out, get on the power too early and you run
+  wide, and a handbrake turn now actually rotates the car and can be
+  caught with opposite lock.
+- Each vehicle type feels genuinely different rather than just faster or
+  slower. The truck is heavy and stubborn and has to slow right down for
+  a corner, the police car is the sharpest thing on the road, the
+  ambulance leans, and the scooter is light and flickable.
+
+**Fixes**
+- Big framerate improvement in the city, especially after driving. Two
+  causes: the game was drawing far more of the world than it needed to
+  after you'd been in a vehicle — and getting worse every time you got
+  into another one — and it was also keeping thousands of distant
+  scenery objects fully active when they were nowhere near you.
+- Corners can no longer be taken flat out. Vehicles now have a realistic
+  turning circle at speed, so you have to actually slow down.
+- Fixed a handful of vehicles you could get into that behaved
+  differently from the rest, including the scooter, which used different
+  controls to everything else. All vehicles now use the arrow keys and I
+  to get out.
+- Fixed the truck's gear display skipping numbers at certain speeds.
+- Fixed the wrong vehicle name showing on the speedometer when driving
+  anything other than the car.
 
 ### August 6, 2026
 
