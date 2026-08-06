@@ -48,6 +48,15 @@ global.cullStep = 256;          //how far the player moves before re-culling
 global.cullLastX = -100000;
 global.cullLastY = -100000;
 global.cullLastRoom = -1;
+
+//Always-on minimap (scr_DrawMinimap). minimapRange is how far from the
+//player the panel shows, in world units. Its DIAGONAL has to stay inside
+//cullRange (range * 1.42 &lt;= cullRange) or the corners of the panel show
+//empty ground that has only been deactivated, not actually cleared.
+global.minimapEnabled = true;
+global.minimapSize = 300;       //panel size in GUI pixels
+global.minimapPad = 20;         //distance from the top-left corner
+global.minimapRange = 1400;     //world units shown from centre to edge
 global.primaryObjective = "NONE"; 
 global.secondaryObjective = 0;
 global.targetedX = -1;

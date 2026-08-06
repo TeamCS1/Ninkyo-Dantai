@@ -1117,6 +1117,8 @@
       <script>scripts\scr_BuruwasuEndGame.gml</script>
       <script>scripts\scr_BuruwasuDrawMap.gml</script>
       <script>scripts\scr_minimap.gml</script>
+      <script>scripts\scr_DrawMinimap.gml</script>
+      <script>scripts\scr_MinimapMark.gml</script>
       <script>scripts\DrawArrowWaypoint.gml</script>
       <scripts name="NPC AI">
         <script>scripts\scr_creationAI.gml</script>

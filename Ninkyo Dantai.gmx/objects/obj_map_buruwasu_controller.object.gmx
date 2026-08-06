@@ -112,7 +112,11 @@ else
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if global.openMiniMap == true
+            <string>//Always-on local minimap panel
+scr_DrawMinimap();
+
+//Full-room map while Tab is held
+if global.openMiniMap == true
 {
     scr_minimap(10,10,gui_scale);    
 }
