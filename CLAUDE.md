@@ -45,6 +45,41 @@ The development manual is on the repo's Wiki.
   with and without extra parameters, write two separate scripts (e.g.
   `scr_FindSupportHeight()` / `scr_FindSupportHeightAt(x, y)`) rather than
   branching on `argument_count` inside one.
+- **Short-circuiting is ON in this project — order conditionals to exploit
+  it.** GML stops evaluating a `&&` chain as soon as something is false
+  (and a `||` chain as soon as something is true), so the rest is never
+  read:
+
+  ```gml
+  if (1 + 1 == 3) && (instance_place(x, y, obj_enemy))
+  {
+      // instance_place never runs - 1 + 1 isn't 3, so the result
+      // can't be true no matter what the second half says
+  }
+  ```
+
+  Two things follow, and both are worth doing deliberately:
+  - **Put the cheap checks first.** A variable comparison costs nothing;
+    `instance_place`, `collision_*`, `distance_to_object` and anything
+    looping over instances cost real time. Guard the expensive call
+    behind the cheap one.
+  - **Put the most-likely-false check first.** Five conditions that are
+    nearly always true followed by one that's nearly always false means
+    doing all the work before reaching the one that decides it.
+
+  It also makes a guard and the thing it guards a single expression,
+  rather than nested `if`s:
+
+  ```gml
+  if (instance_exists(target)) && (target.hp > 0)
+  ```
+
+  **The caveat:** this is a per-project setting
+  (`<option_shortcircuit>` in `Configs/Default.config.gmx`), not a
+  language guarantee. It's currently `True`. If it were ever switched
+  off, both halves would evaluate and the guard pattern above would
+  crash on a destroyed instance — so if that setting changes, every
+  `&&` that guards a dereference has to become a nested `if` again.
 
 ## Project changes
 
