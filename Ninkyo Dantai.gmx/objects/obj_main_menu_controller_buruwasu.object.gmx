@@ -718,7 +718,9 @@ if progress &gt;= 0
     scr_glow_text(1600,1000,string(loadingString + " &gt; " + string(progress) + "%"),ft_buruwasu_gui,c_white,c_white,fa_top, fa_left,2,c_teal,1);
 }
 
-//DEBUG: gamepad diagnostics for controller testing - remove once DualSense nav is confirmed working
+//Gamepad diagnostics overlay - toggled by "Debug Gamepad" in the options menu
+if global.debugGamepadOverlay
+{
 draw_set_font(ft_buruwasu_gui);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
@@ -813,6 +815,7 @@ else
 }
 
 draw_set_color(c_white);
+}
 
 </string>
           </argument>

@@ -31,6 +31,7 @@ y = 250;
 instance_create(x,y,obj_city_population_input);
 instance_create(x,y,obj_close_main_menu_configs_menu);
 instance_create(x,y,obj_toggle_fullscreen_main_menu);
+instance_create(x,y,obj_toggle_debug_gamepad_main_menu);
 </string>
           </argument>
         </arguments>
@@ -61,6 +62,11 @@ draw_set_font(ft_map_editor_buruwasu);
 
 //encounters toggle
 draw_text(1303,675,string("On"));
+
+//gamepad settings - label for the debug overlay toggle, sits under "No settings found"
+draw_set_font(ft_options);
+draw_text(592,717,string("Debug Gamepad:"));
+draw_set_font(ft_map_editor_buruwasu);
 
 if obj_city_population_input.openPopup == false
 {

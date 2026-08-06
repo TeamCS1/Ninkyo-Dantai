@@ -35,6 +35,14 @@ if instance_exists(obj_toggle_fullscreen_main_menu)
     with obj_toggle_fullscreen_main_menu
     {
         instance_destroy();
-    } 
+    }
+}
+
+if instance_exists(obj_toggle_debug_gamepad_main_menu)
+{
+    with obj_toggle_debug_gamepad_main_menu
+    {
+        instance_destroy();
+    }
 }
 

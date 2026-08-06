@@ -1519,6 +1519,7 @@
           <object>objects\obj_city_population_input</object>
           <object>objects\obj_close_main_menu_configs_menu</object>
           <object>objects\obj_toggle_fullscreen_main_menu</object>
+          <object>objects\obj_toggle_debug_gamepad_main_menu</object>
         </objects>
       </objects>
       <objects name="Map Editor">
