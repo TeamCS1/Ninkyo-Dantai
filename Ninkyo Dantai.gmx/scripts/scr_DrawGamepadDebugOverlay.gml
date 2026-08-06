@@ -89,48 +89,74 @@ else
     draw_text(20, _drawY, "Raw axes: " + _axes);
     _drawY += 24;
 
-    //Which MAPPED constants the runtime reports - this is the line that
-    //tells you whether gp_* works for this pad, rather than only the raw
-    //indices above. A DualSense's D-pad shows nothing here even while
-    //held; see scr_GetGamepadDpadY.
-    var _mapped = "";
+    //Face buttons, named for the layout actually detected. gp_faceN is
+    //just raw index N-1 passed through - the runtime does NOT translate
+    //per layout - so the gp_ name is shown alongside as a reminder that
+    //it describes a position, not a physical button.
+    var _face0 = "A";
+    var _face1 = "B";
+    var _face2 = "X";
+    var _face3 = "Y";
 
-    if gamepad_button_check(_device, gp_face1)
+    if scr_GamepadUsesPlaystationLayout()
     {
-        _mapped += "face1(A/Cross) ";
+        _face0 = "Square";
+        _face1 = "Cross";
+        _face2 = "Circle";
+        _face3 = "Triangle";
     }
 
-    if gamepad_button_check(_device, gp_face2)
+    var _held = "";
+
+    if gamepad_button_check(_device, 0)
     {
-        _mapped += "face2(B/Circle) ";
+        _held += _face0 + " (raw 0 = gp_face1) ";
     }
 
-    if gamepad_button_check(_device, gp_face3)
+    if gamepad_button_check(_device, 1)
     {
-        _mapped += "face3(X/Square) ";
+        _held += _face1 + " (raw 1 = gp_face2) ";
     }
 
-    if gamepad_button_check(_device, gp_face4)
+    if gamepad_button_check(_device, 2)
     {
-        _mapped += "face4(Y/Triangle) ";
+        _held += _face2 + " (raw 2 = gp_face3) ";
     }
+
+    if gamepad_button_check(_device, 3)
+    {
+        _held += _face3 + " (raw 3 = gp_face4) ";
+    }
+
+    if _held == ""
+    {
+        _held = "(none held)";
+    }
+
+    draw_text(20, _drawY, "Face buttons held: " + _held);
+    _drawY += 24;
+
+    //Shown separately because this is the mapping that's actually broken
+    //for a DualSense - it stays empty even while the D-pad is held, which
+    //is the whole reason scr_GetGamepadDpadY falls back to the POV hat.
+    var _mappedDpad = "";
 
     if gamepad_button_check(_device, gp_padu)
     {
-        _mapped += "padu ";
+        _mappedDpad += "padu ";
     }
 
     if gamepad_button_check(_device, gp_padd)
     {
-        _mapped += "padd ";
+        _mappedDpad += "padd ";
     }
 
-    if _mapped == ""
+    if _mappedDpad == ""
     {
-        _mapped = "(none held)";
+        _mappedDpad = "(none held)";
     }
 
-    draw_text(20, _drawY, "Mapped buttons held: " + _mapped);
+    draw_text(20, _drawY, "Mapped D-pad held: " + _mappedDpad);
     _drawY += 24;
 
     //Which face-button layout the confirm button is being read for. If
