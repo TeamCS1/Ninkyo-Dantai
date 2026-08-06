@@ -192,18 +192,43 @@ with (obj_taxi_corona)
     scr_MinimapMark(x, y, 40, c_orange, false);
 }
 
-// ---- The player sits at the centre by definition, with a stub showing
-// which way the camera is facing
+// ---- The player sits at the centre by definition. Drawn as an arrowhead
+// rather than a dot so the marker carries the facing as well as the
+// position - which is why there's no separate heading line any more.
+//
+// Built from three points around the centre: a tip along the heading, and
+// two back corners swept 140 degrees either side of it. Widening that
+// angle gives a squatter arrow, narrowing it a longer dart.
 var _heading = obj_control.bearing;
-var _len = 14;
+var _mmCX = global.mmCentreGuiX;
+var _mmCY = global.mmCentreGuiY;
 
-draw_set_color(c_red);
-draw_line_width(global.mmCentreGuiX, global.mmCentreGuiY,
-                global.mmCentreGuiX + lengthdir_x(_len, _heading),
-                global.mmCentreGuiY + lengthdir_y(_len, _heading), 2);
+var _tipLen = 9;        // centre to the point
+var _backLen = 7;       // centre to each back corner
+var _backAngle = 140;   // sweep of the back corners either side of the tip
+
+// A dark copy a little larger first, so the marker stays legible whether
+// it's sitting on a black road or a white building
+var _outline = 2;
+
+draw_set_alpha(1);
+draw_set_color(c_black);
+draw_triangle(_mmCX + lengthdir_x(_tipLen + _outline, _heading),
+              _mmCY + lengthdir_y(_tipLen + _outline, _heading),
+              _mmCX + lengthdir_x(_backLen + _outline, _heading + _backAngle),
+              _mmCY + lengthdir_y(_backLen + _outline, _heading + _backAngle),
+              _mmCX + lengthdir_x(_backLen + _outline, _heading - _backAngle),
+              _mmCY + lengthdir_y(_backLen + _outline, _heading - _backAngle),
+              false);
 
 draw_set_color(make_colour_rgb(0, 255, 255));
-draw_circle(global.mmCentreGuiX, global.mmCentreGuiY, 4, false);
+draw_triangle(_mmCX + lengthdir_x(_tipLen, _heading),
+              _mmCY + lengthdir_y(_tipLen, _heading),
+              _mmCX + lengthdir_x(_backLen, _heading + _backAngle),
+              _mmCY + lengthdir_y(_backLen, _heading + _backAngle),
+              _mmCX + lengthdir_x(_backLen, _heading - _backAngle),
+              _mmCY + lengthdir_y(_backLen, _heading - _backAngle),
+              false);
 
 // Frame last, so nothing above has drawn over its inside edge
 scr_DrawMinimapFrame();
