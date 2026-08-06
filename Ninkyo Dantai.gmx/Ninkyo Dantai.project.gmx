@@ -1121,6 +1121,7 @@
       <script>scripts\scr_MinimapMark.gml</script>
       <script>scripts\scr_DrawMinimapBackdrop.gml</script>
       <script>scripts\scr_DrawMinimapFrame.gml</script>
+      <script>scripts\scr_DrawMinimapArrow.gml</script>
       <script>scripts\DrawArrowWaypoint.gml</script>
       <scripts name="NPC AI">
         <script>scripts\scr_creationAI.gml</script>

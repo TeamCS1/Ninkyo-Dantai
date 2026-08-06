@@ -242,24 +242,15 @@ var _outline = max(2, global.minimapArrowSize * 0.1); // dark copy's overhang
 draw_set_alpha(1);
 
 // A dark copy a little larger first, so the marker stays legible whether
-// it's sitting on a black road or a white building
-draw_set_color(c_black);
-draw_triangle(_mmCX + lengthdir_x(_tipLen + _outline, _heading),
-              _mmCY + lengthdir_y(_tipLen + _outline, _heading),
-              _mmCX + lengthdir_x(_backLen + _outline, _heading + _backAngle),
-              _mmCY + lengthdir_y(_backLen + _outline, _heading + _backAngle),
-              _mmCX + lengthdir_x(_backLen + _outline, _heading - _backAngle),
-              _mmCY + lengthdir_y(_backLen + _outline, _heading - _backAngle),
-              false);
+// it's sitting on a black road or a white building. See the script for
+// why these don't just call draw_triangle directly.
+scr_DrawMinimapArrow(_mmCX, _mmCY, _heading,
+                     _tipLen + _outline, _backLen + _outline, _backAngle,
+                     c_black);
 
-draw_set_color(make_colour_rgb(0, 255, 255));
-draw_triangle(_mmCX + lengthdir_x(_tipLen, _heading),
-              _mmCY + lengthdir_y(_tipLen, _heading),
-              _mmCX + lengthdir_x(_backLen, _heading + _backAngle),
-              _mmCY + lengthdir_y(_backLen, _heading + _backAngle),
-              _mmCX + lengthdir_x(_backLen, _heading - _backAngle),
-              _mmCY + lengthdir_y(_backLen, _heading - _backAngle),
-              false);
+scr_DrawMinimapArrow(_mmCX, _mmCY, _heading,
+                     _tipLen, _backLen, _backAngle,
+                     make_colour_rgb(0, 255, 255));
 
 // Frame last, so nothing above has drawn over its inside edge
 scr_DrawMinimapFrame();
