@@ -287,10 +287,13 @@ if keyboard_check_pressed(vk_enter) //When enter is pressed, the string is copie
 
     else
     {
+        //Say so on screen. Silently reopening the console is
+        //indistinguishable from a command that ran but did nothing.
+        scr_CreateNotifications("Command not found: " + cmd + " - type /list for the full command list", 400);
+
         keyboard_string = "/";
         global.freezePlayer = true;
         obj_buruwasu_debug_console.openPopup = true;
-        //show_message("Command not found. For a full command list, type /list");
     }
 }
 
