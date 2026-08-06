@@ -202,31 +202,42 @@ with (obj_taxi_corona)
 var _mmCX = global.mmCentreGuiX;
 var _mmCY = global.mmCentreGuiY;
 
-var _heading = obj_control.bearing;
+// Which way to point the arrow.
+//
+// NOT obj_control.bearing, which is the obvious choice and the wrong one:
+// it's set to 90 in obj_control's Create and then only ever written by
+// scr_VehicleStep, so on foot it never moves off north and the arrow sits
+// frozen. The player's own direction is what actually tracks where you're
+// facing. In a vehicle the player instance is dragged along without its
+// direction being updated, so there we do want bearing - because that's
+// exactly what the vehicle has just written to it.
+var _heading = 90;
 
-// NaN never equals itself. obj_control derives bearing from mouse-look
-// maths that divides by a value it only partly guards, and lengthdir of a
-// NaN angle yields NaN coordinates, which draw as nothing at all - so fall
-// back to facing north rather than silently losing the marker.
+if global.inVehicle == true
+{
+    _heading = obj_control.bearing;
+}
+else
+{
+    if instance_exists(obj_player_buruwasu)
+    {
+        _heading = obj_player_buruwasu.direction;
+    }
+}
+
+// NaN never equals itself. lengthdir of a NaN angle yields NaN
+// coordinates, which draw as nothing at all rather than failing loudly.
 if _heading != _heading
 {
     _heading = 90;
 }
 
-var _tipLen = 11;       // centre to the point
-var _backLen = 8;       // centre to each back corner
-var _backAngle = 140;   // sweep of the back corners either side of the tip
+var _tipLen = 16;       // centre to the point
+var _backLen = 11;      // centre to each back corner
+var _backAngle = 145;   // sweep of the back corners either side of the tip
 var _outline = 2;       // how far the dark copy underneath sticks out
 
 draw_set_alpha(1);
-
-// Dot base. Drawn from the same values as the arrow, so if this shows up
-// on its own then the marker block IS running and reaching the centre,
-// and it's draw_triangle specifically that isn't rendering.
-draw_set_color(c_black);
-draw_circle(_mmCX, _mmCY, 6, false);
-draw_set_color(make_colour_rgb(0, 255, 255));
-draw_circle(_mmCX, _mmCY, 4, false);
 
 // A dark copy a little larger first, so the marker stays legible whether
 // it's sitting on a black road or a white building
