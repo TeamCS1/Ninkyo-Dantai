@@ -199,19 +199,37 @@ with (obj_taxi_corona)
 // Built from three points around the centre: a tip along the heading, and
 // two back corners swept 140 degrees either side of it. Widening that
 // angle gives a squatter arrow, narrowing it a longer dart.
-var _heading = obj_control.bearing;
 var _mmCX = global.mmCentreGuiX;
 var _mmCY = global.mmCentreGuiY;
 
-var _tipLen = 9;        // centre to the point
-var _backLen = 7;       // centre to each back corner
+var _heading = obj_control.bearing;
+
+// NaN never equals itself. obj_control derives bearing from mouse-look
+// maths that divides by a value it only partly guards, and lengthdir of a
+// NaN angle yields NaN coordinates, which draw as nothing at all - so fall
+// back to facing north rather than silently losing the marker.
+if _heading != _heading
+{
+    _heading = 90;
+}
+
+var _tipLen = 11;       // centre to the point
+var _backLen = 8;       // centre to each back corner
 var _backAngle = 140;   // sweep of the back corners either side of the tip
+var _outline = 2;       // how far the dark copy underneath sticks out
+
+draw_set_alpha(1);
+
+// Dot base. Drawn from the same values as the arrow, so if this shows up
+// on its own then the marker block IS running and reaching the centre,
+// and it's draw_triangle specifically that isn't rendering.
+draw_set_color(c_black);
+draw_circle(_mmCX, _mmCY, 6, false);
+draw_set_color(make_colour_rgb(0, 255, 255));
+draw_circle(_mmCX, _mmCY, 4, false);
 
 // A dark copy a little larger first, so the marker stays legible whether
 // it's sitting on a black road or a white building
-var _outline = 2;
-
-draw_set_alpha(1);
 draw_set_color(c_black);
 draw_triangle(_mmCX + lengthdir_x(_tipLen + _outline, _heading),
               _mmCY + lengthdir_y(_tipLen + _outline, _heading),
