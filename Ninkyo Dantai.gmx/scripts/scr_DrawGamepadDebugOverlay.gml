@@ -88,6 +88,50 @@ else
 
     draw_text(20, _drawY, "Raw axes: " + _axes);
     _drawY += 24;
+
+    //Which MAPPED constants the runtime reports - this is the line that
+    //tells you whether gp_* works for this pad, rather than only the raw
+    //indices above. A DualSense's D-pad shows nothing here even while
+    //held; see scr_GetGamepadDpadY.
+    var _mapped = "";
+
+    if gamepad_button_check(_device, gp_face1)
+    {
+        _mapped += "face1(A/Cross) ";
+    }
+
+    if gamepad_button_check(_device, gp_face2)
+    {
+        _mapped += "face2(B/Circle) ";
+    }
+
+    if gamepad_button_check(_device, gp_face3)
+    {
+        _mapped += "face3(X/Square) ";
+    }
+
+    if gamepad_button_check(_device, gp_face4)
+    {
+        _mapped += "face4(Y/Triangle) ";
+    }
+
+    if gamepad_button_check(_device, gp_padu)
+    {
+        _mapped += "padu ";
+    }
+
+    if gamepad_button_check(_device, gp_padd)
+    {
+        _mapped += "padd ";
+    }
+
+    if _mapped == ""
+    {
+        _mapped = "(none held)";
+    }
+
+    draw_text(20, _drawY, "Mapped buttons held: " + _mapped);
+    _drawY += 24;
 }
 
 if _joystick == -1

@@ -1152,6 +1152,7 @@
         <script>scripts\scr_GetLegacyJoystick.gml</script>
         <script>scripts\scr_GetGamepadDpadY.gml</script>
         <script>scripts\scr_GetGamepadStickY.gml</script>
+        <script>scripts\scr_GetGamepadConfirm.gml</script>
         <script>scripts\scr_GamepadNavPoll.gml</script>
         <script>scripts\scr_DrawGamepadDebugOverlay.gml</script>
       </scripts>
@@ -1171,6 +1172,7 @@
       <script>scripts\scr_LoadHomeFurniture.gml</script>
       <script>scripts\scr_ApplyHomeFurniturePositions.gml</script>
       <script>scripts\scr_SnapshotHomeFurniture.gml</script>
+      <script>scripts\scr_MainMenuSelect.gml</script>
     </scripts>
     <scripts name="Memory DLL">
       <script>scripts\cleanmem_init.gml</script>

@@ -488,6 +488,13 @@ else if menuChoice &gt; 6
 {
     menuChoice = 0;
 }
+
+//Gamepad confirm is the same action as pressing Enter. Runs after the
+//clamp above so menuChoice is always a valid entry when it selects.
+if global.gamepadNavConfirm
+{
+    scr_MainMenuSelect();
+}
 </string>
           </argument>
         </arguments>
@@ -697,59 +704,7 @@ scr_DrawGamepadDebugOverlay();
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if menuChoice == 0 &amp;&amp; hasStartedLoading == false
-{       
-    hasStartedLoading = true;
-    window_set_cursor(cr_hourglass);
-    loadingString = "Creating Game Data..."
-    progress = 0;
-    alarm[0] = room_speed * 0.5;
-}
-
-//load game
-else if menuChoice == 1 &amp;&amp; hasStartedLoading == false
-{   
-    //load function
-    if file_exists("savedata.ini")
-    {
-        scr_load();
-        
-        hasStartedLoading = true;
-        window_set_cursor(cr_hourglass);
-        loadingString = "Loading Game Data..."
-        progress = 0;
-        alarm[0] = room_speed * 0.5;
-    }
-
-}
-
-else if menuChoice == 2
-{
-    if !instance_exists(obj_main_menu_options)
-    {
-        instance_create(x,y,obj_main_menu_options);
-    }
-}
-
-else if menuChoice == 3 // character profiles
-{
-    game_end();
-}
-
-else if menuChoice == 4 // dlc
-{
-    game_end();
-}
-
-else if menuChoice == 5 // credits
-{
-    room_goto(rm_buruwasu_credits);
-}
-
-else if menuChoice == 6 // quit
-{
-    game_end();
-}
+            <string>scr_MainMenuSelect();
 </string>
           </argument>
         </arguments>
