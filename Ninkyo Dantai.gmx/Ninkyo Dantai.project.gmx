@@ -1147,6 +1147,14 @@
         <script>scripts\scr_OptionsMenuGraphicsCreate.gml</script>
         <script>scripts\scr_OptionsMenuGraphicsDestroy.gml</script>
       </scripts>
+      <scripts name="Gamepad">
+        <script>scripts\scr_GetGamepadDevice.gml</script>
+        <script>scripts\scr_GetLegacyJoystick.gml</script>
+        <script>scripts\scr_GetGamepadDpadY.gml</script>
+        <script>scripts\scr_GetGamepadStickY.gml</script>
+        <script>scripts\scr_GamepadNavPoll.gml</script>
+        <script>scripts\scr_DrawGamepadDebugOverlay.gml</script>
+      </scripts>
       <script>scripts\scr_MoveLightDebug.gml</script>
       <script>scripts\scr_globals.gml</script>
       <script>scripts\scr_check_nearby_shrines.gml</script>

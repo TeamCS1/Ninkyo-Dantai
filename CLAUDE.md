@@ -216,6 +216,50 @@ Background on how core systems actually work, based on an in-depth review
   out, copy-pasted from a vending-machine UI (see the old flavor-text
   bug this leftover code caused, now fixed for these 3 rows).
 
+### Gamepad input
+
+- **GMS1.4's mapped gamepad API does not recognise the DualSense's
+  D-pad.** The runtime's bundled controller-mapping database predates the
+  DualSense, so on a pad paired over Bluetooth the analog sticks map
+  correctly but `gp_padu`/`gp_padd` never fire — the D-pad arrives as a
+  DirectInput **POV hat** instead. `scripts/scr_GetGamepadDpadY.gml`
+  therefore reads *both* sources (mapped buttons, then `joystick_pov` via
+  the legacy API) and returns whichever reports a direction. Verified
+  against a real DualSense: GameMaker reported it in **slot 4**, not slot
+  0, which is why `scr_GetGamepadDevice.gml` scans every slot instead of
+  assuming device 0.
+- **Read direction through the `scr_Get*` scripts, never
+  `gp_padu`/`gp_padd` directly** — a direct read silently works on an
+  Xbox pad and silently fails on a DualSense, which is exactly how this
+  bug was introduced the first time.
+- The `scr_Get*` scripts return a **level** (`-1`/`0`/`1`, true every
+  frame the direction is held). `scripts/scr_GamepadNavPoll.gml` wraps
+  them with edge detection for menus — one step per press rather than
+  continuous scrolling — publishing `global.gamepadNavUp` /
+  `global.gamepadNavDown`. It **must be called once per frame from a
+  Begin Step event**: every instance's Begin Step runs before any
+  instance's Step, so any number of objects can then read those globals
+  in Step without depending on instance order. Calling it twice in one
+  frame swallows the press, since the second call sees the direction as
+  already engaged. Currently called from
+  `obj_main_menu_controller_buruwasu`'s Begin Step; a second menu in the
+  same room should *read the globals*, not call the poll again.
+- D-pad and stick are deliberately folded into one direction *before*
+  the edge check. Keeping them separate meant a pad whose D-pad is seen
+  by both detection paths moved the selection two items per press.
+- `scripts/scr_DrawGamepadDebugOverlay.gml` draws a diagnostic readout
+  (slot count, per-slot connected state and reported name, raw button
+  bits, raw axis values, POV angle), gated on `global.debugGamepadOverlay`
+  — toggled by "Debug Gamepad" on the main menu options screen
+  (`obj_toggle_debug_gamepad_main_menu`, modelled on
+  `obj_toggle_fullscreen_main_menu`). It shows what GameMaker *actually*
+  detects rather than what it should, which is what identified both the
+  slot-4 and POV-hat findings above; reach for it first when a controller
+  misbehaves.
+- **Not built yet:** any gamepad input outside the main menu — no confirm/
+  cancel button (menu selection is still `vk_enter`), no horizontal
+  navigation, no in-game or furniture-placement support (see #49).
+
 ### HUD (`obj_gui_buruwasu`)
 
 - **"Default" HUD Elements mode now correctly re-shows before fading
@@ -508,11 +552,12 @@ consistently:
   only `obj_bed` supports rotation today, and only via room creation code
   set once at placement time, not interactively.
 - **49. TO DO: no controller/joypad support for furniture placement.**
-  Confirmed by project-wide grep — there is no `gamepad_button_check`/
-  `gamepad_axis_value` call anywhere in the codebase, not just in the
-  home customisation objects. Selecting, moving, and (per #48) any future
-  rotating of furniture is keyboard/mouse-only
-  (`keyboard_check_pressed`, `mouse_wheel_up`/`down`).
+  Gamepad support now exists, but only in the main menu — see Architecture
+  notes, Gamepad input. Selecting, moving, and (per #48) any future
+  rotating of furniture is still keyboard/mouse-only
+  (`keyboard_check_pressed`, `mouse_wheel_up`/`down`). The reusable
+  scripts to wire this up are already there; `obj_placerParent` just
+  doesn't call them yet.
 - **50. TO DO: still no way to remove furniture once placed.** Adding is
   now possible (see Architecture notes, Home customisation system), but
   `obj_placerParent` has no delete action at all — only select and
@@ -701,6 +746,20 @@ copy-pasted straight into an itch.io devlog/update post. Add a new dated
 entry here each time a Known Issue is fixed or a piece of work lands;
 keep the technical specifics (scripts, object names) out of this section
 and in Architecture notes / Known Issues instead.
+
+### August 6, 2026
+
+**New**
+- Controller support has started landing! You can now scroll the main
+  menu with a controller — either the D-pad or the left stick. Tested
+  with a DualSense connected over Bluetooth, with no extra software
+  needed.
+- Added a "Debug Gamepad" option under Gamepad Settings in the options
+  menu. Turn it on to see exactly what the game detects about your
+  controller — handy if yours isn't working and you're reporting it.
+
+Note that selecting a menu item still needs Enter for now, and the
+controller doesn't do anything outside the main menu yet.
 
 ### August 3, 2026
 
