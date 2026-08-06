@@ -232,10 +232,12 @@ if _heading != _heading
     _heading = 90;
 }
 
-var _tipLen = 16;       // centre to the point
-var _backLen = 11;      // centre to each back corner
+// Size comes from global.minimapArrowSize so it can be tuned without
+// touching this script; the rest of the shape scales off it.
+var _tipLen = global.minimapArrowSize;      // centre to the point
+var _backLen = global.minimapArrowSize * 0.7; // centre to each back corner
 var _backAngle = 145;   // sweep of the back corners either side of the tip
-var _outline = 2;       // how far the dark copy underneath sticks out
+var _outline = max(2, global.minimapArrowSize * 0.1); // dark copy's overhang
 
 draw_set_alpha(1);
 

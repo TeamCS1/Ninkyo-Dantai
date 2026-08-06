@@ -57,6 +57,10 @@ global.minimapEnabled = true;
 global.minimapSize = 220;       //panel size in GUI pixels (square)
 global.minimapPad = 20;         //distance from the top-left corner
 global.minimapRange = 1400;     //world units shown from centre to edge
+global.minimapArrowSize = 40;   //player arrow, centre to tip, in GUI pixels.
+                                //It spans about 1.7x this tall in total, so
+                                //much past 55 and it starts swallowing a
+                                //220px panel rather than pointing at things.
 global.primaryObjective = "NONE"; 
 global.secondaryObjective = 0;
 global.targetedX = -1;
