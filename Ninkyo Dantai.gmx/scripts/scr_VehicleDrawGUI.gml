@@ -30,6 +30,8 @@ if (global.inVehicle == true)
     }
 
     draw_set_color(c_white);
+
+    scr_DrawVehicleDebugOverlay();
 }
 else
 {

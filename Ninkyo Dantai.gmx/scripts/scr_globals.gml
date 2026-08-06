@@ -5,6 +5,7 @@ global.currentSaveSlot = 1; //1-5, selects which home.ini "customN" section is a
 global.nextFurnitureId = 3; //0-2 are the shipped defaults (fridge/cabinet/bed); next added piece gets this
 global.homeFurnitureSnapshot = -1; //ds_list, captured by scr_SnapshotHomeFurniture on leaving rm_ShinjiHome
 global.debugGamepadOverlay = false; //toggled from the main menu options screen, drives the gamepad debug readout
+global.debugVehiclePhysics = false; //toggled in game with the "/physics" console command, drives the driving readout
 global.gamepadNavUp = false; //set by scr_GamepadNavPoll, true only on the frame "up" is engaged
 global.gamepadNavDown = false; //set by scr_GamepadNavPoll, true only on the frame "down" is engaged
 global.gamepadNavConfirm = false; //set by scr_GamepadNavPoll, true only on the frame confirm (Cross/A) is pressed

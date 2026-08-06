@@ -30,13 +30,18 @@
 scr_VehicleCreateEventBuruwasu(7, -2, 0.07, 0.01, "Police Car");
 
 // Handling for this vehicle type - everything else is the shared default
-maxTurn = 1.55;              // pursuit tuned - sharpest steering
-minTurn = 0.28;
-grip = 0.14;                 // best traction
-driftGrip = 0.030;
-drag = 0.984;
-brakePower = 0.14;           // strongest brakes
-handbrakePower = 0.960;
+frontGrip = 0.36;              // pursuit rubber - best grip of the fleet
+rearGrip = 0.34;               // still slightly loose at the back, so it rotates on command
+corneringStiffness = 0.042;    // sharp turn-in
+steerLock = 35;
+steerLockTop = 14;
+steerSpeed = 4.2;              // quick rack
+steerReturn = 6;
+yawInertia = 0.85;             // eager to rotate
+yawDamp = 0.92;
+lateralDamp = 0.89;            // plants hard
+handbrakeGrip = 0.18;          // breaks away readily for a handbrake turn
+brakePower = 0.15;             // strongest brakes
 </string>
           </argument>
         </arguments>

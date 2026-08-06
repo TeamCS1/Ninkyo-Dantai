@@ -27,25 +27,79 @@ acc = argument2;
 brake = argument3;
 carName = argument4;
 
-// Custom physics velocity - the vehicle moves by adding these to x/y
-// itself rather than using GameMaker's built-in speed/direction
+// Custom physics state - the vehicle moves by adding these to x/y itself
+// rather than using GameMaker's built-in speed/direction
 vx = 0;
 vy = 0;
+yawRate = 0;            // how fast the body is rotating, degrees per step
+steerAngle = 0;         // where the front wheels are actually pointed
 
-// Handling values - override these per vehicle after calling this
-grip = 0.12;            // how quickly it regains traction and stops sliding sideways
-driftGrip = 0.035;      // reduced traction while handbraking, for controlled drifting
-drag = 0.985;           // rolling resistance that slowly bleeds off momentum
+// ---- Handling values. Override these per vehicle after calling this.
+// See scr_VehicleStep for how they combine; the notes below are what each
+// one does to the FEEL, which is what you actually want when tuning.
+
+// Grip. The maximum sideways force each axle can make before the tyres
+// let go. Front lower than rear = understeer (pushes wide, safe). Rear
+// lower than front = oversteer (rotates, wants to drift).
+frontGrip = 0.30;
+rearGrip = 0.29;
+
+// How hard the tyres bite per degree of slip. Higher = sharper, more
+// darty response and grip reached sooner; lower = softer and lazier.
+corneringStiffness = 0.035;
+
+// Steering wheel. steerLock is the lock available when crawling,
+// steerLockTop the (smaller) lock at full speed. steerSpeed is how fast
+// the wheel moves toward the input, steerReturn how fast it recentres
+// when you let go. Low steerSpeed is a big part of feeling like a car
+// rather than a cursor.
+steerLock = 32;
+steerLockTop = 12;
+steerSpeed = 3.5;
+steerReturn = 5;
+
+// Rotation. yawInertia is how reluctant the body is to start or stop
+// rotating - raise it for something heavy. yawDamp bleeds off spin;
+// lower values settle a slide faster but feel less lively.
+yawInertia = 1.0;
+yawDamp = 0.93;
+maxYawRate = 8;         // safety clamp, degrees per step
+
+// How quickly sideways motion scrubs off on its own. THIS IS THE FLOATY
+// DIAL: lower values plant the car, higher values let it skate.
+lateralDamp = 0.90;
+
+// How much throttle/braking shifts grip between the axles. Raise it for
+// more dramatic lift-off rotation and power understeer.
+weightTransfer = 0.25;
+
+// Handbrake. handbrakeGrip is the fraction of rear grip left while it's
+// held (low = breaks away easily), handbrakeBrake how much it slows you.
+handbrakeGrip = 0.22;
+handbrakeBrake = 0.06;
+
+// Distance from the centre of mass to each axle. Raising axleRear makes
+// the rear more stable; a short wheelbase overall rotates faster.
+axleFront = 1.1;
+axleRear = 1.1;
+
+drag = 0.995;           // rolling/air resistance along the direction of travel
 brakePower = 0.12;      // braking force when slowing from forward movement
-handbrakePower = 0.965; // fraction of momentum kept each frame while handbraking
-
-// Steering - turn rate falls off as speed rises, between these two
-maxTurn = 1.45;         // turn rate when barely moving
-minTurn = 0.25;         // turn rate at top speed
 
 // How the vehicle sprite is drawn (see scr_VehicleDraw)
 drawXScale = 0.6;
 drawYScale = 0.7;
+
+// Readouts for the physics debug overlay, filled in by scr_VehicleStep
+dbgLongVel = 0;
+dbgLatVel = 0;
+dbgFrontSlip = 0;
+dbgRearSlip = 0;
+dbgFrontForce = 0;
+dbgRearForce = 0;
+dbgFrontMax = 0;
+dbgRearMax = 0;
+dbgRearSliding = false;
 
 // Speedometer / name plate state
 fakeSpeed = 0;

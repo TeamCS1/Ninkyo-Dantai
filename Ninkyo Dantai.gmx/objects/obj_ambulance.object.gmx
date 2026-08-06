@@ -30,13 +30,18 @@
 scr_VehicleCreateEventBuruwasu(6, -1, 0.05, 0.01, "Ambulance");
 
 // Handling for this vehicle type - everything else is the shared default
-maxTurn = 1.15;              // tall and top-heavy
-minTurn = 0.20;
-grip = 0.11;
-driftGrip = 0.045;
-drag = 0.986;
-brakePower = 0.10;
-handbrakePower = 0.970;
+frontGrip = 0.26;              // tall and top-heavy, leans onto its outside tyres
+rearGrip = 0.28;
+corneringStiffness = 0.030;
+steerLock = 29;
+steerLockTop = 10;
+steerSpeed = 2.8;
+yawInertia = 1.5;
+yawDamp = 0.94;
+lateralDamp = 0.91;
+weightTransfer = 0.30;
+axleFront = 1.3;
+axleRear = 1.3;
 </string>
           </argument>
         </arguments>

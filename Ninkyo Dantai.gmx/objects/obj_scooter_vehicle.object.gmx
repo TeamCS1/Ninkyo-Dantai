@@ -30,14 +30,21 @@
 scr_VehicleCreateEventBuruwasu(4.65, -1, 0.05 / 9, 0.01, "Scooter");
 
 // Handling for this vehicle type - everything else is the shared default
-maxTurn = 1.90;              // light and flickable
-minTurn = 0.45;
-grip = 0.20;                 // two wheels - barely slides at all
-driftGrip = 0.12;
-drag = 0.980;
-brakePower = 0.10;
-handbrakePower = 0.970;
-drawXScale = 1;              // sprite is authored at full size
+frontGrip = 0.42;              // two wheels and almost no mass - it just grips
+rearGrip = 0.42;               // matched, so it has no interest in oversteering
+corneringStiffness = 0.055;    // darts
+steerLock = 40;
+steerLockTop = 20;
+steerSpeed = 5;                // flickable
+steerReturn = 7;
+yawInertia = 0.40;             // spins up instantly
+yawDamp = 0.90;
+lateralDamp = 0.85;            // barely slides at all
+weightTransfer = 0.18;
+handbrakeGrip = 0.50;
+axleFront = 0.7;               // short wheelbase
+axleRear = 0.7;
+drawXScale = 1;                // sprite is authored at full size
 drawYScale = 1;
 </string>
           </argument>

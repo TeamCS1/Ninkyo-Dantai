@@ -30,12 +30,12 @@
 scr_VehicleCreateEventBuruwasu(6, -2, 0.05 / 3, 0.01, "Taxi");
 
 // Handling for this vehicle type - everything else is the shared default
-maxTurn = 1.35;              // soft, comfort-biased sedan
-minTurn = 0.24;
-grip = 0.115;
-driftGrip = 0.040;
-brakePower = 0.11;
-handbrakePower = 0.968;
+frontGrip = 0.28;              // soft, comfort-biased sedan
+rearGrip = 0.27;
+corneringStiffness = 0.032;
+steerSpeed = 3.0;
+lateralDamp = 0.91;
+yawInertia = 1.15;
 </string>
           </argument>
         </arguments>
