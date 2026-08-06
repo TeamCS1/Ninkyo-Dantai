@@ -33,7 +33,6 @@ if global.hideAllGameElements == true
 
 var _size = global.minimapSize;
 var _pad = global.minimapPad;
-var _border = 3;
 
 global.mmBoxX1 = _pad;
 global.mmBoxY1 = _pad;
@@ -52,16 +51,9 @@ global.mmScale = (global.minimapRange * 2) / _size;
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 
-// Border first, as a solid black frame just outside the fill
-draw_set_alpha(1);
-draw_set_color(c_black);
-draw_rectangle(global.mmBoxX1 - _border, global.mmBoxY1 - _border,
-               global.mmBoxX2 + _border, global.mmBoxY2 + _border, false);
-
-// Panel fill
-draw_set_alpha(0.9);
-draw_rectangle(global.mmBoxX1, global.mmBoxY1, global.mmBoxX2, global.mmBoxY2, false);
-draw_set_alpha(1);
+// Shadow and fill go under the contents; the frame goes over them at the
+// end of this script, so the border edge stays clean
+scr_DrawMinimapBackdrop();
 
 // ---- Ground
 with (obj_water_anim_buruwasu)
@@ -212,6 +204,9 @@ draw_line_width(global.mmCentreGuiX, global.mmCentreGuiY,
 
 draw_set_color(make_colour_rgb(0, 255, 255));
 draw_circle(global.mmCentreGuiX, global.mmCentreGuiY, 4, false);
+
+// Frame last, so nothing above has drawn over its inside edge
+scr_DrawMinimapFrame();
 
 draw_set_color(c_white);
 draw_set_alpha(1);
