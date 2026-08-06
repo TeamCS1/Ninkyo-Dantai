@@ -1108,6 +1108,10 @@
     <scripts name="Ninkyo Dantai">
       <scripts name="Vehicles">
         <script>scripts\scr_VehicleCreateEventBuruwasu.gml</script>
+        <script>scripts\scr_VehicleStep.gml</script>
+        <script>scripts\scr_VehicleDraw.gml</script>
+        <script>scripts\scr_VehicleDrawGUI.gml</script>
+        <script>scripts\scr_VehicleExit.gml</script>
       </scripts>
       <script>scripts\scr_BuruwasuEndGame.gml</script>
       <script>scripts\scr_BuruwasuDrawMap.gml</script>
