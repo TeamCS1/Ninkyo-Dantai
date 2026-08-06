@@ -132,6 +132,28 @@ else
 
     draw_text(20, _drawY, "Mapped buttons held: " + _mapped);
     _drawY += 24;
+
+    //Which face-button layout the confirm button is being read for. If
+    //this is wrong for your pad, see scr_GamepadUsesPlaystationLayout.
+    var _layout = "Xbox/XInput (confirm = gp_face1)";
+
+    if scr_GamepadUsesPlaystationLayout()
+    {
+        _layout = "PlayStation (confirm = raw index 1 / Cross)";
+    }
+
+    draw_text(20, _drawY, "Detected layout: " + _layout);
+    _drawY += 24;
+
+    var _confirmState = "up";
+
+    if scr_GetGamepadConfirm()
+    {
+        _confirmState = "HELD";
+    }
+
+    draw_text(20, _drawY, "Confirm button: " + _confirmState);
+    _drawY += 24;
 }
 
 if _joystick == -1

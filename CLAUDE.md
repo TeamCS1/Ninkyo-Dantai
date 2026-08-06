@@ -232,6 +232,18 @@ Background on how core systems actually work, based on an in-depth review
   `gp_padu`/`gp_padd` directly** — a direct read silently works on an
   Xbox pad and silently fails on a DualSense, which is exactly how this
   bug was introduced the first time.
+- **`gp_face1` is not "the bottom face button" — it's just raw index 0
+  passed straight through.** The runtime does no per-layout translation
+  at all. Proven with the debug overlay: holding Cross on a DualSense
+  lights raw index **1** and reports **`gp_face2`**. So `gp_face1` is A
+  on an Xbox pad but **Square** on a DualSense, and there is no API that
+  reports which layout you have. `scripts/scr_GamepadUsesPlaystationLayout.gml`
+  matches on the device name to decide, and
+  `scripts/scr_GetGamepadConfirm.gml` picks *either* raw index 1 *or*
+  `gp_face1` on that basis — deliberately not OR-ing them, since OR-ing
+  makes two different buttons both confirm (on a DualSense, Cross *and*
+  Square). Name matching is a guess; a rebindable confirm button in the
+  options menu is the real fix, and would delete this whole problem.
 - The `scr_Get*` scripts return a **level** (`-1`/`0`/`1`, true every
   frame the direction is held). `scripts/scr_GamepadNavPoll.gml` wraps
   them with edge detection for menus — one step per press rather than
@@ -256,9 +268,15 @@ Background on how core systems actually work, based on an in-depth review
   detects rather than what it should, which is what identified both the
   slot-4 and POV-hat findings above; reach for it first when a controller
   misbehaves.
-- **Not built yet:** any gamepad input outside the main menu — no confirm/
-  cancel button (menu selection is still `vk_enter`), no horizontal
-  navigation, no in-game or furniture-placement support (see #49).
+- The main menu's Enter action lives in `scripts/scr_MainMenuSelect.gml`
+  so the keyboard event and the gamepad path run the same code rather
+  than two copies. It must be called from
+  `obj_main_menu_controller_buruwasu` — it resolves that object's
+  `menuChoice`/`hasStartedLoading`/`progress` and sets its `alarm[0]`
+  against the calling instance.
+- **Not built yet:** any gamepad input outside the main menu — no cancel/
+  back button, no horizontal navigation, no in-game or
+  furniture-placement support (see #49), and no rebinding.
 
 ### HUD (`obj_gui_buruwasu`)
 
@@ -754,12 +772,14 @@ and in Architecture notes / Known Issues instead.
   menu with a controller — either the D-pad or the left stick. Tested
   with a DualSense connected over Bluetooth, with no extra software
   needed.
+- You can now select a main menu item with the Cross button, instead of
+  having to reach for Enter.
 - Added a "Debug Gamepad" option under Gamepad Settings in the options
   menu. Turn it on to see exactly what the game detects about your
   controller — handy if yours isn't working and you're reporting it.
 
-Note that selecting a menu item still needs Enter for now, and the
-controller doesn't do anything outside the main menu yet.
+Note the controller doesn't do anything outside the main menu yet, and
+there's no way to rebind the buttons.
 
 ### August 3, 2026
 

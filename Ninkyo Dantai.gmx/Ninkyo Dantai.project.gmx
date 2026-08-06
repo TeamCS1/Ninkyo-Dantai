@@ -1152,6 +1152,7 @@
         <script>scripts\scr_GetLegacyJoystick.gml</script>
         <script>scripts\scr_GetGamepadDpadY.gml</script>
         <script>scripts\scr_GetGamepadStickY.gml</script>
+        <script>scripts\scr_GamepadUsesPlaystationLayout.gml</script>
         <script>scripts\scr_GetGamepadConfirm.gml</script>
         <script>scripts\scr_GamepadNavPoll.gml</script>
         <script>scripts\scr_DrawGamepadDebugOverlay.gml</script>
