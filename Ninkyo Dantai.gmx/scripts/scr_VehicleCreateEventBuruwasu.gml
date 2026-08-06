@@ -118,13 +118,18 @@ needleRot = 25;
 // Show the vehicle name shortly after getting in
 alarm[0] = room_speed * 0.1;
 
-// Car zoom effect
+// Car zoom effect - you see further from a moving vehicle.
+// Set from the resting base rather than doubling the CURRENT range: this
+// used to be "drawOCRange = drawOCRange * 2", which compounded every time
+// you got into a vehicle (750 -> 1500 -> 3000 -> ...) because nothing put
+// it back on the way out. Each doubling quadruples how much of the world
+// is drawn, so it ate the framerate a little more with every car.
 if global.carZooming == true
 {
-    global.drawOCRange = (global.drawOCRange * 2);
+    global.drawOCRange = global.drawOCRangeBase * 2;
 }
 
 else
 {
-    global.drawOCRange = 576;
+    global.drawOCRange = global.drawOCRangeBase;
 }

@@ -14,6 +14,12 @@ var _iconObject = argument0;
 
 global.inVehicle = false;
 
+// Put the draw distance back to its resting value. Doing it here rather
+// than relying on the vehicle's own Draw GUI is what actually makes it
+// happen - by the time the player is out, the vehicle instance is gone
+// and its events never run again.
+global.drawOCRange = global.drawOCRangeBase;
+
 // Camera defaults
 obj_control.ztobe = 500;
 obj_control.z = 700;

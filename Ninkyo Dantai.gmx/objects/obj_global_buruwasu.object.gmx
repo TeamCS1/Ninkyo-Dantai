@@ -36,7 +36,18 @@ global.previousLocation = rm_city_buruwasu;
 global.storyObjectivesController = 0;
 global.weapon = 0;
 global.currentRoom = room;
-global.drawOCRange = 750;       //600occlusion range, don't touch
+global.drawOCRangeBase = 750;   //the resting occlusion range
+global.drawOCRange = global.drawOCRangeBase; //current range; vehicles widen it, then restore it from the base
+
+//Scenery culling (scr_CullDistantScenery). cullRange MUST stay comfortably
+//above the widest drawOCRange ever gets, because a deactivated instance
+//doesn't draw either - cull closer than you draw and the world has holes in it.
+global.cullSceneryEnabled = true;
+global.cullRange = 2200;
+global.cullStep = 256;          //how far the player moves before re-culling
+global.cullLastX = -100000;
+global.cullLastY = -100000;
+global.cullLastRoom = -1;
 global.primaryObjective = "NONE"; 
 global.secondaryObjective = 0;
 global.targetedX = -1;

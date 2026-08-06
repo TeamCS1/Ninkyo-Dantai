@@ -105,7 +105,11 @@ sprite_prefetch(uv_drop_bag_of_money_512);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>///Mouse Look
+            <string>///Scenery culling - deactivates distant static geometry so its events
+//stop running. Deliberately never touches NPCs; see the script header.
+scr_CullDistantScenery();
+
+///Mouse Look
 
 //Yourself has provided the base code for Total Anarchy's camera and mouse aiming. Many thanks :)
 prepare_look(x,y,z,x+vector_x,y+vector_y,z+vector_z,0,0,1,45,1.3333)

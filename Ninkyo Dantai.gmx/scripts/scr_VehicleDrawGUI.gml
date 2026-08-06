@@ -35,5 +35,5 @@ if (global.inVehicle == true)
 }
 else
 {
-    global.drawOCRange = 576;
+    global.drawOCRange = global.drawOCRangeBase;
 }

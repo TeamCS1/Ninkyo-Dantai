@@ -201,6 +201,21 @@ if keyboard_check_pressed(vk_enter) //When enter is pressed, the string is copie
         instance_create(0,0,obj_debug_map_mode);
     }
 
+    else if cmd == "/cull"
+    {
+        if global.cullSceneryEnabled == true
+        {
+            global.cullSceneryEnabled = false;
+            instance_activate_all();
+            scr_CreateNotifications("Scenery culling OFF - all instances active, expect lower FPS", 400);
+        }
+        else
+        {
+            global.cullSceneryEnabled = true;
+            scr_CreateNotifications("Scenery culling ON", 400);
+        }
+    }
+
     else if cmd == "/physics"
     {
         if global.debugVehiclePhysics == true
@@ -331,7 +346,7 @@ draw_text(x,y + 100,string(c_input) + c_cursor); //This is what is typed.
 
 if showHelp == true
 {
-    scr_glow_text(x + 100,y+140,"Found 10 commands",ft_map_editor_buruwasu,c_white,c_white,fa_top, fa_left,2,c_teal,1);
+    scr_glow_text(x + 100,y+140,"Found 11 commands",ft_map_editor_buruwasu,c_white,c_white,fa_top, fa_left,2,c_teal,1);
     draw_text(x,y + 160,string("/time set day"));
     draw_text(x,y + 190,string("/time set night"));
     draw_text(x,y + 220,string("/mute &lt;bool&gt;"));
@@ -342,6 +357,7 @@ if showHelp == true
     draw_text(x,y + 370,string("/mall"));
     draw_text(x,y + 400,string("/template"));
     draw_text(x,y + 430,string("/physics"));
+    draw_text(x,y + 460,string("/cull"));
 }
 
 
