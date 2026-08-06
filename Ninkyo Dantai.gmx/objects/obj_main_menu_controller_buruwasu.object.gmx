@@ -35,6 +35,8 @@ loadingString = "";
 hasStartedLoading = false;
 gamepadStickDir = 0;
 gamepadDevice = -1;
+gamepadPovDir = 0;
+legacyJoystickId = -1;
 glow = draw_set_color(make_colour_rgb(107,200,218))
 grey = draw_set_color(make_colour_rgb(125,134,133))
 
@@ -478,6 +480,64 @@ if gamepadDevice != -1
     }
 }
 
+//DualSense D-pad over Bluetooth reports as a POV hat, not SDL dpad buttons on this
+//runtime (stick works via gp_axislv, but gp_padu/gp_padd never fire) - fall back to
+//the legacy DirectInput joystick API, which exposes the hat directly.
+legacyJoystickId = -1;
+var _lj = 1;
+
+while _lj &lt;= 4
+{
+    if joystick_exists(_lj)
+    {
+        legacyJoystickId = _lj;
+        _lj = 5;
+    }
+    else
+    {
+        _lj++;
+    }
+}
+
+if legacyJoystickId != -1
+{
+    if joystick_has_pov(legacyJoystickId)
+    {
+        var _pov = joystick_pov(legacyJoystickId);
+
+        if _pov == -1
+        {
+            gamepadPovDir = 0;
+        }
+        else
+        {
+            var _povUp = (_pov &gt;= 315) or (_pov &lt;= 45);
+            var _povDown = (_pov &gt;= 135) and (_pov &lt;= 225);
+
+            if _povUp
+            {
+                if gamepadPovDir != -1
+                {
+                    menuChoice--;
+                    gamepadPovDir = -1;
+                }
+            }
+            else if _povDown
+            {
+                if gamepadPovDir != 1
+                {
+                    menuChoice++;
+                    gamepadPovDir = 1;
+                }
+            }
+            else
+            {
+                gamepadPovDir = 0;
+            }
+        }
+    }
+}
+
 if subtitleChoice == 0
 {
     subtitle = "I,Md";
@@ -677,6 +737,61 @@ if gamepadDevice != -1
 else
 {
     draw_text(20,_debugY,"No gamepad recognised by GameMaker.");
+}
+
+_debugY += 24;
+
+if gamepadDevice != -1
+{
+    var _rawButtonCount = gamepad_button_count(gamepadDevice);
+    var _rawAxisCount = gamepad_axis_count(gamepadDevice);
+    var _bits = "";
+    var _bi = 0;
+
+    while _bi &lt; _rawButtonCount
+    {
+        if gamepad_button_check(gamepadDevice, _bi)
+        {
+            _bits += "1";
+        }
+        else
+        {
+            _bits += "0";
+        }
+
+        _bi++;
+    }
+
+    draw_text(20,_debugY,"Raw buttons (" + string(_rawButtonCount) + "): " + _bits);
+    _debugY += 24;
+
+    var _axisStr = "";
+    var _ai = 0;
+
+    while _ai &lt; _rawAxisCount
+    {
+        _axisStr += string(_ai) + "=" + string(gamepad_axis_value(gamepadDevice, _ai)) + " ";
+        _ai++;
+    }
+
+    draw_text(20,_debugY,"Raw axes: " + _axisStr);
+    _debugY += 24;
+}
+
+if legacyJoystickId != -1
+{
+    var _povText = "no POV";
+
+    if joystick_has_pov(legacyJoystickId)
+    {
+        _povText = string(joystick_pov(legacyJoystickId));
+    }
+
+    draw_text(20,_debugY,"Legacy joystick " + string(legacyJoystickId) + " | POV: " + _povText);
+}
+else
+{
+    draw_text(20,_debugY,"Legacy joystick API: none found");
 }
 
 draw_set_color(c_white);
