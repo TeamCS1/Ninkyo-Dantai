@@ -30,22 +30,22 @@
 scr_VehicleCreateEventBuruwasu(7, -1.5, 0.05, 0.01, "Truck Rig");
 
 // Handling for this vehicle type - everything else is the shared default
-frontGrip = 0.24;              // front lets go first - understeers, pushes wide
-rearGrip = 0.31;               // rear stays planted, so it resists rotating
-corneringStiffness = 0.028;    // lazy, soft response
-steerLock = 26;
-steerLockTop = 9;
-steerSpeed = 2.2;              // slow, heavy wheel
-steerReturn = 3.5;
-yawInertia = 2.2;              // a rig does not change direction in a hurry
-yawDamp = 0.95;
-lateralDamp = 0.93;
+frontGrip = 0.11;              // front lets go first - understeers, pushes wide
+rearGrip = 0.15;               // rear stays planted, so it resists rotating
+corneringStiffness = 0.04;     // lazy, soft response
+steerLock = 32;
+steerLockTop = 5;              // barely any lock at speed - must slow right down
+steerSpeed = 0.8;              // slow, heavy wheel
+steerReturn = 1.4;
+yawInertia = 260;              // a rig does not change direction in a hurry
+yawDamp = 0.985;
+lateralDamp = 0.975;
 weightTransfer = 0.32;         // lots of mass moving around
 handbrakeGrip = 0.35;          // hard to break loose deliberately
 drag = 0.997;                  // carries momentum
 brakePower = 0.09;             // worst brakes of the fleet
-axleFront = 1.5;               // long wheelbase
-axleRear = 1.5;
+axleFront = 30;                // long wheelbase
+axleRear = 30;
 </string>
           </argument>
         </arguments>

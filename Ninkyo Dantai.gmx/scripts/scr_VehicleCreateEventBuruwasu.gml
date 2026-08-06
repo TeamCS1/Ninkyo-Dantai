@@ -41,33 +41,37 @@ steerAngle = 0;         // where the front wheels are actually pointed
 // Grip. The maximum sideways force each axle can make before the tyres
 // let go. Front lower than rear = understeer (pushes wide, safe). Rear
 // lower than front = oversteer (rotates, wants to drift).
-frontGrip = 0.30;
-rearGrip = 0.29;
+frontGrip = 0.14;
+rearGrip = 0.13;
 
 // How hard the tyres bite per degree of slip. Higher = sharper, more
 // darty response and grip reached sooner; lower = softer and lazier.
-corneringStiffness = 0.035;
+corneringStiffness = 0.05;
 
 // Steering wheel. steerLock is the lock available when crawling,
-// steerLockTop the (smaller) lock at full speed. steerSpeed is how fast
-// the wheel moves toward the input, steerReturn how fast it recentres
-// when you let go. Low steerSpeed is a big part of feeling like a car
-// rather than a cursor.
-steerLock = 32;
-steerLockTop = 12;
-steerSpeed = 3.5;
-steerReturn = 5;
+// steerLockTop the (much smaller) lock at full speed. That drop is what
+// stops you taking any corner flat out - at speed the car is limited by
+// steering geometry, not grip, exactly like a real one. steerSpeed is
+// how fast the wheel moves toward the input, steerReturn how fast it
+// recentres. Low steerSpeed is a big part of feeling like a car rather
+// than a cursor.
+steerLock = 40;
+steerLockTop = 7;
+steerSpeed = 1.2;
+steerReturn = 2.0;
 
 // Rotation. yawInertia is how reluctant the body is to start or stop
-// rotating - raise it for something heavy. yawDamp bleeds off spin;
-// lower values settle a slide faster but feel less lively.
-yawInertia = 1.0;
-yawDamp = 0.93;
+// rotating - raise it for something heavy, and it sets how long turn-in
+// takes. yawDamp bleeds off spin; note that lowering it also widens
+// every corner, because sustained rotation then needs more torque.
+yawInertia = 90;
+yawDamp = 0.98;
 maxYawRate = 8;         // safety clamp, degrees per step
 
 // How quickly sideways motion scrubs off on its own. THIS IS THE FLOATY
-// DIAL: lower values plant the car, higher values let it skate.
-lateralDamp = 0.90;
+// DIAL: lower values plant the car, higher values let it skate. Kept
+// high so the tyre model does the work rather than this hiding it.
+lateralDamp = 0.97;
 
 // How much throttle/braking shifts grip between the axles. Raise it for
 // more dramatic lift-off rotation and power understeer.
@@ -78,10 +82,14 @@ weightTransfer = 0.25;
 handbrakeGrip = 0.22;
 handbrakeBrake = 0.06;
 
-// Distance from the centre of mass to each axle. Raising axleRear makes
-// the rear more stable; a short wheelbase overall rotates faster.
-axleFront = 1.1;
-axleRear = 1.1;
+// Distance from the centre of mass to each axle, in the same pixels the
+// vehicle moves in. These have to be big relative to how far the car
+// travels per step or the geometry stops making sense - at 6px a step
+// with a 40px wheelbase the car covers about a sixth of its own length
+// per frame, which is roughly right. Raising axleRear makes the rear
+// more stable; a shorter wheelbase overall rotates faster.
+axleFront = 20;
+axleRear = 20;
 
 drag = 0.995;           // rolling/air resistance along the direction of travel
 brakePower = 0.12;      // braking force when slowing from forward movement
