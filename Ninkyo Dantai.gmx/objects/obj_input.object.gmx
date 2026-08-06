@@ -206,11 +206,13 @@ if keyboard_check_pressed(vk_enter) //When enter is pressed, the string is copie
         if global.debugVehiclePhysics == true
         {
             global.debugVehiclePhysics = false;
+            scr_CreateNotifications("Vehicle physics overlay OFF", 400);
             show_debug_message("LOG: " + "Vehicle physics overlay OFF");
         }
         else
         {
             global.debugVehiclePhysics = true;
+            scr_CreateNotifications("Vehicle physics overlay ON - get in a vehicle to see it", 400);
             show_debug_message("LOG: " + "Vehicle physics overlay ON - get in a vehicle to see it");
         }
     }

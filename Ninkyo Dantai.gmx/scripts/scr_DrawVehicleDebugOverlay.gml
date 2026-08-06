@@ -32,7 +32,10 @@ draw_set_valign(fa_top);
 draw_set_color(c_yellow);
 
 var _drawX = 20;
-var _drawY = 20;
+
+// Starts below the notification box (which occupies y 20-100), so the
+// "/physics" confirmation doesn't sit on top of the readout
+var _drawY = 120;
 
 draw_text(_drawX, _drawY, carName + "   speed " + string(round(abs(fakeSpeed))));
 _drawY += 24;
