@@ -272,6 +272,21 @@ Background on how core systems actually work, based on an in-depth review
     vehicle. Also restores `global.drawOCRange`, which has to happen
     *here*: by the time the player is out, the vehicle instance is gone
     and its own Draw GUI never runs again.
+  - `scr_VehicleCollide` — collision response, called from each
+    vehicle's Collision events.
+- **Vehicle-vs-world collision is per-object Collision events on the
+  vehicle**, the same arrangement the player uses, and it is currently a
+  very short list: `obj_house_block001`, `obj_vending_machine` and
+  `obj_cone_buruwasu`. Everything else in the city — every other building
+  type, every prop, the street furniture the player *does* collide with —
+  is driven straight through. Before the unification only the car and
+  police car had all three and the scooter had none; all ten now share
+  the same set. Extending it means adding an event per object type to all
+  ten, so it is worth doing in one pass rather than one vehicle at a time.
+- `scr_VehicleCollide` damps `yawRate` as well as reverting the position,
+  which the old per-object version didn't: under the bicycle model the
+  body carries rotation independently of its velocity, so reverting
+  position alone left a vehicle spinning on the spot against a wall.
 - **A vehicle is only reachable if `obj_player_buruwasu` has a Collision
   event for its icon.** That is the entry point for all of them —
   `instance_create` the vehicle, set `global.inVehicle`, then
