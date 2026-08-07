@@ -27,9 +27,28 @@
             <kind>1</kind>
             <string>image_speed = 0;
 
-scr_VehicleCreateEventBuruwasu(6, -2, 0.05 / 3, 0.01, "Block Stingray");
+scr_VehicleCreateEventBuruwasu(8, -2, 0.09, 0.01, "Block Stingray");
 
-// Civilian sedan - uses the shared default handling as-is
+// Sports car - the quickest and fastest thing in the fleet. 0-top in
+// about 1.9s against the sedan's 3.0s, and a top speed of 8 where the
+// police car manages 7.
+//
+// The grip values are raised to match. On the shared sedan handling it
+// cornered at 448px at top speed, WIDER than the ordinary sedan's 417px
+// simply because it carries more speed into the corner - a sports car
+// that handles worse than the family car. These bring it to 369px,
+// between the sedan and the police car's 346px.
+frontGrip = 0.175;             // more rubber than a sedan
+rearGrip = 0.16;               // still looser at the back, so it rotates
+corneringStiffness = 0.058;    // sharp turn-in
+steerLock = 41;
+steerLockTop = 8;
+steerSpeed = 1.4;              // quick rack
+steerReturn = 2.3;
+yawInertia = 78;               // light and eager to change direction
+yawDamp = 0.979;
+lateralDamp = 0.966;           // plants hard
+brakePower = 0.15;             // brakes to match the speed
 
 scr_VehicleApplyCollisionSize();
 </string>

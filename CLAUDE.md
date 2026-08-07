@@ -568,6 +568,21 @@ none of these were fixed.
   but some quality branches of its Draw call `sprite_get_texture(...)`
   inline again rather than using `TEX1` — a per-frame lookup across
   1,294 instances for a value already sitting in a variable.
+- **59. Six vehicles can never reach their own stated top speed.** Under
+  the current model, drag alone caps speed at `acc * drag / (1 - drag)`,
+  which with `drag = 0.995` is `acc * 199`. Reaching a top speed of V
+  therefore needs `acc >= V / 199`. The taxi and the three remaining
+  civilian sedans pass `acc = 0.05 / 3`, capping them at **3.3** against
+  a `forwardspd` of 6; `obj_scooter_vehicle` passes `0.05 / 9`, capping
+  it at **1.1** against a stated 4.65. So they run at roughly half and a
+  quarter of their intended speeds respectively, and `forwardspd` is
+  doing nothing for them. Those `acc` values were tuned for the old
+  built-in-speed model, where drag worked differently; they were carried
+  over unchanged during the physics rewrite. `obj_car` (0.05), the police
+  car (0.07) and `obj_block_stingray` (0.09) all clear the threshold and
+  do reach their stated speeds. Fixing it means raising `acc` per
+  vehicle, which changes how they feel, so it is worth doing deliberately
+  rather than as a sweep.
 - **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
   setup — create call, physics, draw, exit — and is byte-identical to
   the other nine, but nothing ever `instance_create`s it and it is
