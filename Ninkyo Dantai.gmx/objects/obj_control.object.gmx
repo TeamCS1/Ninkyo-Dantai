@@ -30,11 +30,48 @@
 sprite_flush(spr_main_menus);
 
 //3D Global vars (These control the brighness of the scene)
-global.startFog = 300;
-global.endFog = 800;
-global.fogR = 0;
-global.fogG = 0;
-global.fogB = 0;
+//Current fog state. These are outputs now - scr_FogWeatherUpdate writes
+//them every step from global.fogIntensity, so setting them by hand
+//anywhere else will just be overwritten on the next frame.
+global.startFog = 3000;
+global.endFog = 6000;
+global.fogR = 66;
+global.fogG = 70;
+global.fogB = 80;
+
+//---- Fog weather system (scr_FogWeatherUpdate) ----
+global.fogIntensity = 0;    //0 clear, 1 full thickness. Everything else derives from this.
+global.fogActive = false;   //is a bank currently rolling in / holding?
+global.fogClearHour = -1;   //hour it will start lifting, picked when it starts
+global.fogLastHour = -1;    //so the once-per-hour dice are rolled once, not every step
+
+//Chance of a bank starting, in percent, checked on the hour
+global.fogChanceMidnight = 10;  //00:00
+global.fogChanceLate = 5;       //02:00
+
+//How fast it arrives and leaves, per step. The clock advances 1.5 game
+//seconds a step at the default timescale, so a game hour is about 2400
+//steps - 0.0008 rolls in over roughly half a game hour, 0.0005 lifts over
+//about three quarters of one. Fog lifts more slowly than it arrives.
+global.fogRampSpeed = 0.0008;
+global.fogClearSpeed = 0.0005;
+
+//Distance the fog occupies. Clear values sit beyond the draw distance so
+//nothing is tinted at all; thick values close inside it so the street
+//genuinely disappears.
+global.fogClearStart = 3000;
+global.fogClearEnd = 6000;
+global.fogThickStart = 150;
+global.fogThickEnd = 1000;
+
+//Colour at each end. Thin fog reads as a cool grey rather than white,
+//which is what makes it look like weather instead of the screen fading.
+global.fogThinR = 66;
+global.fogThinG = 70;
+global.fogThinB = 80;
+global.fogThickR = 255;
+global.fogThickG = 255;
+global.fogThickB = 255;
 
 //3D lighting variables
 global.lightingAmbienceR = 0;

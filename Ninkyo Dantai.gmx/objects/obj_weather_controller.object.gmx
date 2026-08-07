@@ -341,7 +341,9 @@ if global.timeHour == 21
     global.startFog = -1800
     global.endFog = 1200
     
-    scr_FogSystemBuruwasu(0.20,1,global.fogR,global.fogG,global.fogB,255,255,255)
+    //Removed: this ramped fog colour toward white and never back,
+    //so once past 21:00 it stayed white for the rest of the
+    //session. scr_FogWeatherUpdate drives colour from intensity.
 }
 
 if global.timeHour == 22
@@ -354,7 +356,9 @@ if global.timeHour == 22
     //global.startFog = -2000
     //global.endFog = 1200
     
-    scr_FogSystemBuruwasu(0.20,1,global.fogR,global.fogG,global.fogB,255,255,255)
+    //Removed: this ramped fog colour toward white and never back,
+    //so once past 21:00 it stayed white for the rest of the
+    //session. scr_FogWeatherUpdate drives colour from intensity.
 }
 
 if global.timeHour == 23
@@ -371,8 +375,23 @@ if global.timeHour == 23
 }
 
 //Weather system
-//apply fog every 60 times a step
-d3d_set_fog(true, make_colour_rgb(global.fogR,global.fogG,global.fogB), global.startFog, global.endFog);
+//
+//FOG. scr_FogWeatherUpdate owns it entirely - when a bank rolls in, how
+//thick it gets, what colour it is and when it lifts. It writes
+//global.startFog / endFog / fogR / fogG / fogB itself, which is why the
+//startFog and endFog lines in the hour blocks above no longer do anything:
+//they are overwritten here on the same step. They are left in place only
+//because the commented-out values beside them are the record of the
+//original hand-tuned day/night ramp.
+//
+//NOTE ON 10:00 - 15:00: there is deliberately no fog across those hours.
+//Partly the schedule (fog is a 00:00 - 09:00 event), and partly that it
+//would not read if there were - global.lightingAmbience is at its brightest
+//over exactly that window, 205 at 10:00 through 255 at noon and still 190
+//at 15:00, so pale fog against a fully lit scene is invisible.
+//scr_FogWeatherUpdate has a hard guard that clears any bank still running
+//by 10:00.
+scr_FogWeatherUpdate();
 </string>
           </argument>
         </arguments>
