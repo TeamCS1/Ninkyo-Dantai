@@ -170,7 +170,7 @@ alarm[1] = room_speed * 5;
           <argument>
             <kind>1</kind>
             <string>///Exit vehicle
-scr_VehicleExit(obj_car_icon);
+scr_VehicleExit(obj_block_stingray_icon);
 </string>
           </argument>
         </arguments>

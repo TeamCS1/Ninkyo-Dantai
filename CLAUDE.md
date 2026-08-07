@@ -272,6 +272,14 @@ Background on how core systems actually work, based on an in-depth review
     vehicle. Also restores `global.drawOCRange`, which has to happen
     *here*: by the time the player is out, the vehicle instance is gone
     and its own Draw GUI never runs again.
+- **A vehicle is only reachable if `obj_player_buruwasu` has a Collision
+  event for its icon.** That is the entry point for all of them —
+  `instance_create` the vehicle, set `global.inVehicle`, destroy the
+  icon — and the icon objects existing and being placed in a room is not
+  enough on its own. The four civilian sedans shipped for a long time
+  with icons placed in `rm_city_buruwasu` but no matching event, so they
+  were completely undrivable; that is now wired up. `obj_taxi_icon` is
+  the deliberate exception (see Known Issues #1).
 - **Per-vehicle character comes from overriding the defaults after the
   create call**, not from separate code. A truck sets `yawInertia = 260`
   and `steerLockTop = 5`; a police car sets `frontGrip = 0.17` and
@@ -468,11 +476,12 @@ notes) rather than renumbering everything after it, so gaps are expected.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
-- **1. Taxi icon collision is a no-op stub.** The `obj_taxi_icon` collision
-  event is just `x = x` / `y = y`, while every sibling vehicle icon (car,
-  scooter, truck, ambulance, police car) spawns a rideable vehicle and sets
-  `global.inVehicle = true`. Touching the taxi icon currently does nothing —
-  looks like an unfinished feature.
+- **1. Taxi icon collision is a no-op stub — but deliberately so.** The
+  `obj_taxi_icon` collision event is just `x = x` / `y = y`, unlike every
+  other vehicle icon, which spawns a rideable vehicle. That is intended:
+  the taxi is fast travel, not a car you drive, and the actual fast-travel
+  interaction lives on `obj_taxi_corona`. Do not "fix" this by making it
+  spawn `obj_taxi`. The stub body itself is still dead code that could go.
 - **2. Parked taxi (`obj_taxi_static`) ignores the no-clip debug toggle.**
   Unlike every other solid prop, which gates its collision revert behind
   `if global.enablePlayerCollisionsInWorldBuruwasu == true`, the taxi's
@@ -520,14 +529,13 @@ none of these were fixed.
   with no player marker at all (the on-foot marker is skipped while
   `global.inVehicle` is true). The new always-on minimap doesn't share
   this problem — it marks the player centrally regardless of vehicle.
-- **57. The four civilian sedans drop the wrong pickup icon.**
-  `obj_block_stingray`, `obj_olympics_lemane`, `obj_opera_windsor` and
-  `obj_titan_gresely` all pass `obj_car_icon` to `scr_VehicleExit`, so
-  getting out of a Titan Gresley leaves a Block,Charger behind. Each has
-  its own icon object already (`obj_block_stingray_icon` and so on).
-  This is pre-existing behaviour that was preserved deliberately during
-  the vehicle unification rather than silently changed — it is a
-  one-word fix per object once someone confirms that's the intent.
+- **58. `with <object>` in the vehicle-entry collision events destroys
+  every instance of that icon, not the one touched.** All ten events use
+  `with obj_x_icon { instance_destroy() }` rather than `with (other)`.
+  Harmless today because only one of each icon is ever in a room at a
+  time, but a second parked car of the same model would vanish when you
+  got into the first. Worth fixing across all ten at once rather than
+  piecemeal, so they stay identical.
 
 ### Save/load & global state
 
@@ -963,6 +971,9 @@ and in Architecture notes / Known Issues instead.
 ### August 7, 2026
 
 **New**
+- Four more cars are now drivable — the Block Stingray, Olympics Lemane,
+  Opera Windsor and Titan Gresley. They were parked around the city
+  already but you couldn't get into any of them.
 - There's now a minimap on screen at all times, showing the streets
   around you with an arrow for where you're facing. The full map is
   still on Tab.
