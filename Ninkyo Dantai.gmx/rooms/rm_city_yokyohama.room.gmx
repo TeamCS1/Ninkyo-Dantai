@@ -369,6 +369,7 @@
     <instance objName="obj_road_vertical_yokyohama" x="16512" y="8704" name="inst_E793F99D" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_road_vertical_yokyohama" x="16512" y="8960" name="inst_70EC09F7" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_taxi_corona" x="18176" y="6784" name="inst_BCC96F0D" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+        <instance objName="obj_options_menu_trigger" x="352" y="-288" name="inst_0PT00000" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

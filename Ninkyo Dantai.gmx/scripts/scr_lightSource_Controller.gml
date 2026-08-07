@@ -37,10 +37,19 @@ for (var i = 0; i < n-1; i++)
     }
 }
 
-// Enable lighting
-d3d_set_lighting(true);
-//LIGHTING
-//removed it on this line
+// NOTE: this script defines and enables the point lights, but deliberately
+// does NOT switch lighting on. It used to (d3d_set_lighting(true), right
+// here) and never switched it back, which was a real bug: this runs from
+// obj_control's DRAW event, and every Draw GUI event in the game happens
+// after all Draw events - so the whole GUI, minimap and objective text
+// included, was rendered with lighting enabled. At midday the ambient is
+// pure white, so they washed out. It looked positional only because any
+// object drawing at a lower depth afterwards would turn lighting off again
+// as part of its own draw.
+//
+// Light definitions persist regardless of the on/off toggle, so the
+// objects that want lighting still get these lights when they enable it
+// for their own draw.
 
 // Disable all lights first
 for (var i = 0; i < 8; i++)
@@ -71,3 +80,8 @@ for (var i = 0; i < count; i++)
 // Cleanup
 ds_list_destroy(lamps_id);
 ds_list_destroy(lamps_dist);
+
+// Leave lighting off, the resting state the rest of the project assumes.
+// obj_control's Draw is a useful place to guarantee it, since it runs
+// before the lower-depth objects and before every Draw GUI event.
+d3d_set_lighting(false);
