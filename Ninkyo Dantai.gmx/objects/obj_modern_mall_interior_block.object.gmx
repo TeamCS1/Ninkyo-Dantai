@@ -58,8 +58,10 @@ TEX1 = sprite_get_texture(spr_block_modern_mall_wallpaper,0)
 {
     draw_set_color(c_white)
     draw_set_alpha(1)
+    d3d_set_lighting(1); //enable lighting for this model
     d3d_model_draw(BLOCKMOD,x,y,z,TEX1)
     d3d_model_draw(BLOCKMOD2,x,y,z,TEX1)
+    d3d_set_lighting(0); //back off - every object leaves it off
 }
 
 

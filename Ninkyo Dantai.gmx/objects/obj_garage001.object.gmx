@@ -59,8 +59,10 @@ TEX2 = background_get_texture(tex_roof)
 {
     draw_set_color(c_white)
     draw_set_alpha(1)
+    d3d_set_lighting(1); //enable lighting for this model
     d3d_model_draw(BLOCKMOD,x,y,z,TEX1)
     d3d_model_draw(BLOCKMOD2,x,y,z,TEX2)
+    d3d_set_lighting(0); //back off - every object leaves it off
 }
 
 

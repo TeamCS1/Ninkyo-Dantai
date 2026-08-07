@@ -83,7 +83,9 @@ TEX1 = sprite_get_texture(spr_coronas,5);
     draw_set_color(c_white);
     draw_set_alpha(1);
     draw_set_alpha_test(false);
+    d3d_set_lighting(1); //enable lighting for this model
     d3d_model_draw(BLOCKMOD,x,y,0,TEX1);
+    d3d_set_lighting(0); //back off - every object leaves it off
 }
 </string>
           </argument>
