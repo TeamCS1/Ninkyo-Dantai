@@ -99,9 +99,20 @@ with (obj_side_walk_buruwasu)
     scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(150, 150, 150), false);
 }
 
+// Mall floor is checkered black and white, which separates it from the
+// ordinary pavement it used to share a grey with.
+//
+// The dark squares are a lifted black rather than pure: the panel fill
+// behind them is already rgb(8,12,16), so true black would vanish into it
+// and the pattern would read as scattered white squares rather than a
+// checkerboard. Drop it to c_black if you want that instead.
+var _mallWhite = c_white;
+var _mallBlack = make_colour_rgb(28, 28, 32);
+var _mallCell = 128;    // world pixels; tiles are 256, same 2x2 as the alleyways
+
 with (obj_sidewalk_mall_buruwasu)
 {
-    scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(150, 150, 150), false);
+    scr_MinimapMarkChecker(x, y, sprite_width / 2, _mallCell, _mallWhite, _mallBlack);
 }
 
 // ---- Parking
