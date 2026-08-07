@@ -386,6 +386,13 @@ Background on how core systems actually work, based on an in-depth review
     the contents. Fill underneath, frame on top; drawing the whole border
     up front let the clipped blips chew its inside edge.
   - `scr_DrawMinimapArrow` — the player marker.
+- **Both maps mark the player from `obj_player_buruwasu`, never from the
+  vehicle.** `scr_VehicleStep` parks the player instance on top of
+  whatever you're driving every step, so its position is already the
+  vehicle's — one marker covers all ten vehicles and anything added
+  later. The Tab map used to branch per vehicle type and only listed
+  `obj_car` and `obj_police_car`, so the other eight left it with no
+  marker at all while you drove them.
 - **It is only affordable because of the scenery culling**: `with()`
   skips deactivated instances, so its ~25 loops touch what's nearby
   rather than all ~6,800 instances. Turning culling off with `/cull`
@@ -544,13 +551,6 @@ none of these were fixed.
   but some quality branches of its Draw call `sprite_get_texture(...)`
   inline again rather than using `TEX1` — a per-frame lookup across
   1,294 instances for a value already sitting in a variable.
-- **56. The Tab map only shows two of the ten vehicles.**
-  `scr_minimap.gml` draws a green blip for `obj_car` and
-  `obj_police_car`; the truck, ambulance, taxi, scooter and four
-  civilian sedans have no branch, so driving any of them leaves the map
-  with no player marker at all (the on-foot marker is skipped while
-  `global.inVehicle` is true). The new always-on minimap doesn't share
-  this problem — it marks the player centrally regardless of vehicle.
 - **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
   setup — create call, physics, draw, exit — and is byte-identical to
   the other nine, but nothing ever `instance_create`s it and it is

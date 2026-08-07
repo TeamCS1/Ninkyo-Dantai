@@ -232,34 +232,25 @@ with(obj_taxi_corona)
 
 }
 
+//Player marker. Always drawn from the player instance, never from the
+//vehicle: scr_VehicleStep parks obj_player_buruwasu on top of whatever
+//you're driving every step, so its position is already the vehicle's.
+//That covers all ten vehicles, and any added later, without a branch per
+//type - which is what this used to have, and it only ever listed obj_car
+//and obj_police_car, so the other eight left the map with no marker at
+//all while you drove them.
 with(obj_player_buruwasu)
 {
-    if global.inVehicle == false
+    if global.inVehicle == true
+    {
+        draw_set_color(c_green)
+    }
+    else
     {
         draw_set_color(make_colour_rgb(0,255,255))  //cyan
-        draw_circle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s),3,false);
-    }
-}
-
-if global.inVehicle == true
-{
-    if instance_exists(obj_car)
-    {
-        with(obj_car)
-        {
-            draw_set_color(c_green)
-            draw_circle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s),3,false); 
-        }
     }
 
-    if instance_exists(obj_police_car)
-    {
-        with(obj_police_car)
-        {
-            draw_set_color(c_green)
-            draw_circle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s),3,false);
-        }
-    }
+    draw_circle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s),3,false);
 }
 
 //[MAP X] + x / [MAP SCALE]
