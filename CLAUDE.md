@@ -274,8 +274,9 @@ Background on how core systems actually work, based on an in-depth review
     and its own Draw GUI never runs again.
 - **A vehicle is only reachable if `obj_player_buruwasu` has a Collision
   event for its icon.** That is the entry point for all of them —
-  `instance_create` the vehicle, set `global.inVehicle`, destroy the
-  icon — and the icon objects existing and being placed in a room is not
+  `instance_create` the vehicle, set `global.inVehicle`, then
+  `with (other) instance_destroy()` to remove the icon that was actually
+  touched. The icon objects existing and being placed in a room is not
   enough on its own. The four civilian sedans shipped for a long time
   with icons placed in `rm_city_buruwasu` but no matching event, so they
   were completely undrivable; that is now wired up. `obj_taxi_icon` is
@@ -529,13 +530,15 @@ none of these were fixed.
   with no player marker at all (the on-foot marker is skipped while
   `global.inVehicle` is true). The new always-on minimap doesn't share
   this problem — it marks the player centrally regardless of vehicle.
-- **58. `with <object>` in the vehicle-entry collision events destroys
-  every instance of that icon, not the one touched.** All ten events use
-  `with obj_x_icon { instance_destroy() }` rather than `with (other)`.
-  Harmless today because only one of each icon is ever in a room at a
-  time, but a second parked car of the same model would vanish when you
-  got into the first. Worth fixing across all ten at once rather than
-  piecemeal, so they stay identical.
+- **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
+  setup — create call, physics, draw, exit — and is byte-identical to
+  the other nine, but nothing ever `instance_create`s it and it is
+  placed in no room, because the taxi is fast travel rather than a car
+  you drive (see #1). So all of that code is unreachable. Also note its
+  exit passes `obj_taxi_icon`, which is the fast-travel marker — if it
+  were ever made drivable, parking it would drop a fast-travel icon.
+  Either give it a real icon and an entry event, or delete the object;
+  leaving it as-is invites someone to "fix" the wrong end of it.
 
 ### Save/load & global state
 
