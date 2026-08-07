@@ -702,8 +702,19 @@ its own draw and off again afterwards** — `d3d_set_lighting(1)` → draw →
 nothing leaks onto whatever draws next. 68 of the drawing objects follow
 it. The only per-frame exception was `obj_alleyway_floor`, which turned
 lighting on and never turned it back off, lighting everything drawn after
-it that frame; that is fixed. `obj_control` still sets lighting on in its
-**Create**, but that runs once as engine setup rather than every frame.
+it that frame; that is fixed. **`obj_control` used to set lighting ON in
+its Create** — described here previously as harmless because it runs once
+as engine setup. It wasn't: running once was exactly the problem, because
+nothing was responsible for putting it back. Anywhere the player stood
+with no lighting-managing object in draw range, lighting simply stayed on
+from room start, and everything drawn after it — models, sprites, text
+and the entire Draw GUI including the minimap — rendered against the
+ambient light. `obj_weather_controller` sets that ambient to pure white
+(255,255,255) at 12:00, so at midday the screen washed out completely
+until the player walked near a building, whose own draw turned lighting
+off again. That is what made it look positional and self-correcting.
+`obj_control`'s Create now sets lighting **off**, so the resting state is
+off everywhere and consistently.
 
 The remaining draw-state issues:
 

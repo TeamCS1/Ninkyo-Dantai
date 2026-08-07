@@ -55,7 +55,19 @@ draw_set_alpha_test(true);
 draw_set_alpha_test_ref_value(128);
 
 //LIGHTING ENGINE SETUP
-d3d_set_lighting(true); //turns on lighting for level
+//Lighting starts OFF, and that is deliberate. Every object that wants it
+//turns it on for its own draw and off again afterwards, so "off" is the
+//resting state between objects.
+//
+//This used to be d3d_set_lighting(true), which left it on from room start
+//with nothing responsible for putting it back. Anywhere the player stood
+//with no lighting-managing object in draw range, it simply stayed on, and
+//everything drawn after - models, sprites, text and the whole Draw GUI
+//including the minimap - was rendered against the ambient light. At
+//midday that ambient is pure white (255,255,255), so the screen washed
+//out completely until you walked near a building, whose own draw turned
+//lighting off again.
+d3d_set_lighting(false);
 
 ztobe = 500; // Smooth Zoom
 bearing = 90;
