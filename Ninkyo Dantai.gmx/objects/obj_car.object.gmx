@@ -30,6 +30,8 @@
 scr_VehicleCreateEventBuruwasu(6, -2, 0.05, 0.05, "Block,Charger");
 
 // Civilian sedan - uses the shared default handling as-is
+
+scr_VehicleApplyCollisionSize();
 </string>
           </argument>
         </arguments>

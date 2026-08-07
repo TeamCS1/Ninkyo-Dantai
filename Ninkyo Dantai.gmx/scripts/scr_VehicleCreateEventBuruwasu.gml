@@ -98,6 +98,22 @@ brakePower = 0.12;      // braking force when slowing from forward movement
 drawXScale = 0.6;
 drawYScale = 0.7;
 
+// Collision box size, in pixels, applied below by scaling the 128x128
+// centred mask. Every vehicle used that mask at full size, giving a
+// 128x128 box around a car whose visible bodywork is only about 131 long
+// and 64 wide - so it collided with things 32px clear of either flank,
+// which reads as hitting nothing at all. The scooter was worse: no mask
+// set, so it fell back to its 623x280 sprite.
+//
+// Sized to the vehicle's WIDTH rather than its length on purpose.
+// GameMaker's bounding box does not rotate with image_angle, so a box
+// long enough to cover the car pointing north would stick out well past
+// its flanks pointing east. Using the width means the box never reaches
+// beyond the bodywork at any angle; the cost is that the nose can enter
+// a wall slightly before stopping, which is much the better failure for
+// something you drive.
+collisionSize = 64;
+
 // Readouts for the physics debug overlay, filled in by scr_VehicleStep
 dbgLongVel = 0;
 dbgLatVel = 0;
@@ -108,6 +124,8 @@ dbgRearForce = 0;
 dbgFrontMax = 0;
 dbgRearMax = 0;
 dbgRearSliding = false;
+dbgLastHit = "-";
+dbgLastHitTime = 0;
 
 // Speedometer / name plate state
 fakeSpeed = 0;

@@ -1113,6 +1113,7 @@
         <script>scripts\scr_VehicleDrawGUI.gml</script>
         <script>scripts\scr_VehicleExit.gml</script>
         <script>scripts\scr_VehicleCollide.gml</script>
+        <script>scripts\scr_VehicleApplyCollisionSize.gml</script>
         <script>scripts\scr_DrawVehicleDebugOverlay.gml</script>
       </scripts>
       <script>scripts\scr_BuruwasuEndGame.gml</script>

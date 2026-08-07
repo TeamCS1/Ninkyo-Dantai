@@ -46,6 +46,9 @@ drag = 0.997;                  // carries momentum
 brakePower = 0.09;             // worst brakes of the fleet
 axleFront = 30;                // long wheelbase
 axleRear = 30;
+collisionSize = 72;            // longer and wider than a car
+
+scr_VehicleApplyCollisionSize();
 </string>
           </argument>
         </arguments>

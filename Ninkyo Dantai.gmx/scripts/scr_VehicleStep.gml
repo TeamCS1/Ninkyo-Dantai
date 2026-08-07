@@ -202,6 +202,11 @@ dbgFrontMax = _frontMax;
 dbgRearMax = _rearMax;
 
 // The rear axle being at its limit is the definition of "drifting" here
+if dbgLastHitTime > 0
+{
+    dbgLastHitTime -= 1;
+}
+
 dbgRearSliding = false;
 
 if _rearMax > 0

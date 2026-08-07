@@ -46,6 +46,9 @@ axleFront = 8;                 // short wheelbase
 axleRear = 8;
 drawXScale = 1;                // sprite is authored at full size
 drawYScale = 1;
+collisionSize = 30;            // two wheels - much narrower than anything else
+
+scr_VehicleApplyCollisionSize();
 </string>
           </argument>
         </arguments>

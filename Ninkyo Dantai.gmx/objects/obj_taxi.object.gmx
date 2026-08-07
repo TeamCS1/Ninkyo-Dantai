@@ -37,6 +37,8 @@ steerSpeed = 1.1;
 steerReturn = 1.8;
 yawInertia = 100;
 lateralDamp = 0.972;
+
+scr_VehicleApplyCollisionSize();
 </string>
           </argument>
         </arguments>

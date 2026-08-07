@@ -22,3 +22,9 @@ vy *= -0.3;
 
 // Scrub the rotation as well, or it keeps pivoting while pinned
 yawRate *= -0.2;
+
+// What was hit, for the /physics overlay. "Invisible" collisions are
+// almost always a mask that doesn't match the bodywork, and naming the
+// object turns that from guesswork into a lookup.
+dbgLastHit = object_get_name(other.object_index);
+dbgLastHitTime = 90;

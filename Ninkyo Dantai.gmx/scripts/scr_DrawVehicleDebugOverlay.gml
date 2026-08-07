@@ -82,6 +82,18 @@ else
 
 _drawY += 24;
 
+var _hit = "nothing recently";
+
+if dbgLastHitTime > 0
+{
+    _hit = dbgLastHit;
+    draw_set_color(c_red);
+}
+
+draw_text(_drawX, _drawY, "Last collision: " + _hit + "   (box " + string(collisionSize) + "px)");
+draw_set_color(c_yellow);
+_drawY += 24;
+
 draw_text(_drawX, _drawY, "Tuning: frontGrip " + string(frontGrip) + "  rearGrip " + string(rearGrip) + "  lateralDamp " + string(lateralDamp));
 _drawY += 24;
 

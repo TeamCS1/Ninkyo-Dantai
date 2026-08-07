@@ -43,6 +43,9 @@ lateralDamp = 0.972;
 weightTransfer = 0.30;
 axleFront = 25;
 axleRear = 25;
+collisionSize = 70;
+
+scr_VehicleApplyCollisionSize();
 </string>
           </argument>
         </arguments>

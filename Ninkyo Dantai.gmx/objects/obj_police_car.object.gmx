@@ -44,6 +44,8 @@ handbrakeGrip = 0.18;          // breaks away readily for a handbrake turn
 brakePower = 0.15;             // strongest brakes
 axleFront = 19;
 axleRear = 19;
+
+scr_VehicleApplyCollisionSize();
 </string>
           </argument>
         </arguments>
