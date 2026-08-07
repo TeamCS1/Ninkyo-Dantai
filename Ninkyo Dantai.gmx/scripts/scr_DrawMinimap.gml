@@ -81,9 +81,16 @@ with (obj_construction_dirt)
     scr_MinimapMark(x, y, sprite_width / 2, c_maroon, false);
 }
 
+// Alleyways get a checkerboard rather than a flat block, so they read as
+// a different surface to the open road at a glance. The two colours and
+// the cell size are the whole look - change them here.
+var _alleyBrown = make_colour_rgb(138, 112, 84);
+var _alleyGrey = make_colour_rgb(92, 92, 98);
+var _alleyCell = 128;   // world pixels; tiles are 256, so this is a 2x2 check
+
 with (obj_alleyway_floor)
 {
-    scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(50, 50, 50), false);
+    scr_MinimapMarkChecker(x, y, sprite_width / 2, _alleyCell, _alleyBrown, _alleyGrey);
 }
 
 // ---- Pavement

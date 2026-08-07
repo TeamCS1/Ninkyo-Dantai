@@ -1121,6 +1121,8 @@
       <script>scripts\scr_minimap.gml</script>
       <script>scripts\scr_DrawMinimap.gml</script>
       <script>scripts\scr_MinimapMark.gml</script>
+      <script>scripts\scr_MinimapMarkRect.gml</script>
+      <script>scripts\scr_MinimapMarkChecker.gml</script>
       <script>scripts\scr_DrawMinimapBackdrop.gml</script>
       <script>scripts\scr_DrawMinimapFrame.gml</script>
       <script>scripts\scr_DrawMinimapArrow.gml</script>
