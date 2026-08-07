@@ -511,6 +511,25 @@ Background on how core systems actually work, based on an in-depth review
   back button, no horizontal navigation, no in-game or
   furniture-placement support (see #49), and no rebinding.
 
+### On-screen message boxes
+
+- **`scripts/scr_DrawNotificationBox.gml` draws every fading black message
+  box in the top-left**, and both `obj_notification_system_out` and
+  `obj_TutorialBoxRotateCamera` call it. They used to hold their own
+  copies of the same layout, which is precisely how the tutorial box got
+  left drawing underneath the minimap when the notification box was moved
+  clear of it. Any new prompt should call this rather than copy it.
+- It positions itself from `global.minimapPad` and `global.minimapSize`
+  rather than a fixed x, so resizing or moving the minimap doesn't put the
+  messages back underneath it, and falls back to the original position in
+  rooms with no minimap globals.
+- Two things worth knowing if the layout is ever changed: the text wraps
+  to the box *interior*, not the full box width (the original wrapped at
+  the full width while drawing 30px inside, so long messages ran past
+  their own right edge), and the height comes from `string_height_ext`
+  measured **after** the font is set, since it measures against whatever
+  font is current.
+
 ### HUD (`obj_gui_buruwasu`)
 
 - **"Default" HUD Elements mode now correctly re-shows before fading
@@ -725,10 +744,15 @@ The remaining draw-state issues:
   in the *out-of-range* branch, leaving alpha testing on indefinitely
   whenever the in-range branch draws instead.
 - **25.** Several menu/HUD objects (`obj_main_menu_options`,
-  `obj_notification_system_out`, `obj_dropdown_home_customisation`,
-  `obj_dropdown_slots`, `obj_vending_machine_ui`,
-  `obj_property_management_slots`) set font/color in their Draw GUI events
-  and never restore a default.
+  `obj_dropdown_home_customisation`, `obj_dropdown_slots`,
+  `obj_vending_machine_ui`, `obj_property_management_slots`) set
+  font/color in their Draw GUI events and never restore a default.
+  `obj_notification_system_out` and `obj_TutorialBoxRotateCamera` are
+  partly off this list now: `scr_DrawNotificationBox` restores colour and
+  alpha, but still leaves the font on `ft_map_editor_buruwasu`. Nothing
+  in the project defines what the font should be restored *to*, which is
+  the actual gap — there is no agreed resting font the way there is an
+  agreed resting lighting state.
 - Good examples already in the codebase to model fixes on:
   `scr_DrawCollisionBoxModel.gml` (resets alpha/color/transform at the end)
   and `obj_cursor_grab_64` (checks `instance_exists` before dereferencing
@@ -1073,6 +1097,9 @@ and in Architecture notes / Known Issues instead.
   you slide along it like every other object.
 - Getting into a car no longer makes a second parked car of the same
   model vanish.
+- On-screen messages — notifications and the camera tutorial prompt — no
+  longer draw underneath the minimap, and long ones no longer spill out
+  of their own background.
 - Big framerate improvement in the city, especially after driving. Two
   causes: the game was drawing far more of the world than it needed to
   after you'd been in a vehicle — and getting worse every time you got
