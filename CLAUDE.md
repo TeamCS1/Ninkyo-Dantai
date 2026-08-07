@@ -304,7 +304,7 @@ Background on how core systems actually work, based on an in-depth review
   enough on its own. The four civilian sedans shipped for a long time
   with icons placed in `rm_city_buruwasu` but no matching event, so they
   were completely undrivable; that is now wired up. `obj_taxi_icon` is
-  the deliberate exception (see Known Issues #1).
+  the deliberate exception (see As designed).
 - **Per-vehicle character comes from overriding the defaults after the
   create call**, not from separate code. A truck sets `yawInertia = 260`
   and `steerLockTop = 5`; a police car sets `frontGrip = 0.17` and
@@ -501,12 +501,6 @@ notes) rather than renumbering everything after it, so gaps are expected.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
-- **1. Taxi icon collision is a no-op stub — but deliberately so.** The
-  `obj_taxi_icon` collision event is just `x = x` / `y = y`, unlike every
-  other vehicle icon, which spawns a rideable vehicle. That is intended:
-  the taxi is fast travel, not a car you drive, and the actual fast-travel
-  interaction lives on `obj_taxi_corona`. Do not "fix" this by making it
-  spawn `obj_taxi`. The stub body itself is still dead code that could go.
 - **2. Parked taxi (`obj_taxi_static`) ignores the no-clip debug toggle.**
   Unlike every other solid prop, which gates its collision revert behind
   `if global.enablePlayerCollisionsInWorldBuruwasu == true`, the taxi's
@@ -558,7 +552,7 @@ none of these were fixed.
   setup — create call, physics, draw, exit — and is byte-identical to
   the other nine, but nothing ever `instance_create`s it and it is
   placed in no room, because the taxi is fast travel rather than a car
-  you drive (see #1). So all of that code is unreachable. Also note its
+  you drive (see As designed). So all of that code is unreachable. Also note its
   exit passes `obj_taxi_icon`, which is the fast-travel marker — if it
   were ever made drivable, parking it would drop a fast-travel icon.
   Either give it a real icon and an entry event, or delete the object;
@@ -848,6 +842,15 @@ from the code alone. Recorded so they don't get "fixed" again.
   sprite because it doesn't need one for collision: it's elevated
   (`z = 223` in Create) and out of the player's reach at ground level, the
   same reasoning that already applies to `obj_fire_escape_three_floors`.
+
+- **The `obj_taxi_icon` collision being a no-op stub is intentional.** Its
+  body in `obj_player_buruwasu` is just `x = x` / `y = y`, where every
+  other vehicle icon spawns a rideable vehicle and sets
+  `global.inVehicle`. That difference is the point: the taxi is fast
+  travel, not a car you drive, and the actual fast-travel interaction
+  lives on `obj_taxi_corona`. Do not "fix" this by making it spawn
+  `obj_taxi`, and **leave the stub body alone** — it reads as dead code
+  worth deleting, and that has been considered and declined.
 
 ## Reviewer's take
 
