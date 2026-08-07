@@ -611,9 +611,10 @@ y = y
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>x = xprevious;
-y = yprevious;
-
+            <string>if global.enablePlayerCollisionsInWorldBuruwasu == true
+{
+    scr_ResolvePlayerAxisCollision(other);
+}
 </string>
           </argument>
         </arguments>

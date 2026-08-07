@@ -129,6 +129,13 @@ Background on how core systems actually work, based on an in-depth review
   `scripts/scr_ResolvePlayerAxisCollision.gml` (falling back to reverting
   both axes only for genuine corner-clip cases), so the player slides along
   surfaces on diagonal contact instead of stopping dead.
+- **All 54 of the player's solid collision events are now identical:**
+  `if global.enablePlayerCollisionsInWorldBuruwasu == true` wrapping a
+  single `scr_ResolvePlayerAxisCollision(other)`. `obj_taxi_static` was
+  the last holdout on the original `x = xprevious; y = yprevious;` form,
+  which both ignored the no-clip toggle and stopped the player dead on
+  diagonal contact rather than sliding. Copy an existing event when
+  adding a new solid rather than writing the revert by hand.
 - Every object in the "Props" folder and every building/shop exterior, the
   elevator, the Chicken Licken dining booths, and the home-customisation
   furniture (`obj_bed`/`obj_cabinet`/`obj_fridge`) now have a matching
@@ -501,10 +508,6 @@ notes) rather than renumbering everything after it, so gaps are expected.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
-- **2. Parked taxi (`obj_taxi_static`) ignores the no-clip debug toggle.**
-  Unlike every other solid prop, which gates its collision revert behind
-  `if global.enablePlayerCollisionsInWorldBuruwasu == true`, the taxi's
-  collision event reverts unconditionally.
 - **3. `global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
   Set in `obj_global_buruwasu`'s Create event but read from player collision
   events; GMS1.4 doesn't guarantee Create-event order across differently
