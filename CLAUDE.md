@@ -861,141 +861,113 @@ from the code alone. Recorded so they don't get "fixed" again.
 
 ## Reviewer's take
 
-A personal, subjective assessment from the AI assistant that did the
-in-depth review and fixes recorded above (2026-08-03) — not a design
-document, just an honest read of the codebase after spending real time
-in nearly every system.
+An assessment of the codebase by an AI assistant, revised 2026-08-07. It
+makes judgements rather than only listing facts, but every judgement here
+should be traceable to something checkable in the project — the previous
+version of this section leaned on praise and impressions that weren't.
+Where something is inference rather than observation, it says so.
 
-**Overall.** This is an ambitious project for the engine it's built in.
-GameMaker Studio 1.4 is not really meant for what's being asked of it
-here — a multi-city open-ish world, real-time 3D-model props rendered
-inside a 2D top-down game via `d3d_model_draw`, a full save/load system
-with per-slot home customisation, a battle system, a dialogue system,
-NPC spawning/AI, a day/night clock, taxi fast-travel, and six independent
-graphics-quality sliders — and it mostly holds together. That's a genuine
-achievement for a solo/small-team GMS1.4 project, and it's clear a lot of
-real design thought went into the scope even where the implementation
-hasn't caught up yet.
+**What it's based on.** Two working passes: an in-depth read of nearly
+every system (2026-07-18), and a stretch of implementation work across
+vehicles, physics, rendering, performance, input and the map
+(2026-08-07). Both were code-only. Nobody writing this has played the
+game, which rules out any claim about pacing, narrative or how the cities
+feel to move through — which is most of what decides whether a game is
+good.
 
-**The good.**
-- The pseudo-3D prop rendering (real `.d3d` models drawn in a 2D engine)
-  is a clever, unusual technical choice, and the decision to measure
-  actual model bounding boxes from the model files instead of guessing
-  scale values (once that work started) is the kind of rigor that
-  separates "looks right" from "is right."
-- The home customisation system — per-save-slot persistence, stable
-  furniture identity across multiple instances of the same object,
-  build-mode collision gating — is more sophisticated than most small
-  GMS1.4 projects attempt, and it's now in a genuinely solid state.
-- Consistent naming conventions (`obj_`/`scr_`/camelCase scripts) across
-  ~250 objects and ~130 scripts suggests real discipline, not just size.
-- The built-in debug overlay (FPS, memory, camera/collision state) shows
-  a developer actively instrumenting their own work rather than debugging
-  blind — a good habit that made several fixes in this review much faster
-  to verify.
-- The project responds well to targeted fixes. Nothing found during this
-  review needed a rewrite — every issue, including the trickiest ones
-  (the bed's asymmetric collision box, the two-stage furniture-save
-  problem, the HUD fade's persistent-room blind spot), was fixable with a
-  small, scoped change once properly root-caused.
+**Measurable characteristics.** ~250 objects, ~130 scripts, ~190
+`global.*` variables, and a spawn room holding ~6,800 instances of which
+~93% is static scenery. Naming is consistent (`obj_`/`scr_`, camelCase
+scripts) across the whole tree. GameMaker Studio 1.4, using its 3D
+functions to draw real `.d3d` models inside a top-down 2D game.
 
-**The bad.**
-- **Global state is the single biggest structural risk in the codebase.**
-  ~190 `global.*` variables initialized ad-hoc across at least three
-  different places with no central entry point. Nearly every subtle "why
-  doesn't this work" bug traced back to this during the review — a global
-  that's read before it's set, set in two places with different values,
-  or (the HUD fade bug) left stale across a room transition because
-  nothing owns resetting it. This will keep generating this exact class
-  of bug for every new feature until it's consolidated.
-- **State-changing logic living in Draw events instead of Step.** The
-  battle system's state transitions and combat input both happen in Draw
-  GUI events, not Step — Draw isn't guaranteed to run under every
-  condition, so gameplay logic shouldn't depend on it firing. This is a
-  correctness risk hiding as a rendering concern.
-- **Systems are built for the single/happy-path case, not the general
-  case.** The battle system only supports one on-screen encounter at a
-  time (HUD and dialogue lookups aren't scoped per-encounter); the HUD
-  fade only worked the very first time a room was entered until this
-  session; the dialogue controller's message-count arrays have already
-  desynced once. The pattern is consistent: things work great in the
-  scenario the developer was actually testing, and quietly break outside
-  it.
-- **Copy-paste reuse without follow-through cleanup.** The furniture
-  dropdown UI started as a copy-pasted vending-machine UI with its
-  Pressed event entirely commented out; six of nine dropdown categories
-  still carry vending-machine flavor text. This isn't unique to one
-  place — it's a repeated pattern of "copy something similar, get the
-  happy path working, move on" without going back to finish the edges.
-- **Real leftover/dead code shipped in the project for an extended
-  period** (an entire unused platformer collision engine, assets from an
-  unrelated earlier game). Harmless at runtime since none of it was
-  wired up, but it's a sign nothing was auditing the project tree for
-  drift — which is exactly the kind of thing that erodes confidence when
-  a new contributor tries to understand what's actually load-bearing.
+**The strongest pattern, and the one I'd act on: systems are built for
+the case being tested and break outside it.** The battle system resolves
+its HUD and dialogue with `instance_exists` rather than per-encounter
+ids, so a second concurrent encounter misbehaves (#13, #20). The HUD fade
+worked only on a room's first entry. Nine of ten vehicles carried a copy
+of the older physics, and the Tab map only ever marked two of them. This
+is the best-supported observation in this file, and it's the one that
+predicts where the next bug will be.
 
-**What would make the biggest difference from here.** Not more features —
-the two structural debts above (global-state sprawl and
-logic-in-Draw-events) are the ones that keep resurfacing as "works for
-the simple case, breaks for the general case" bugs, and they'll only get
-more expensive to unwind the more gets built on top. A single
-`scr_globals.gml`-owned initialization pass, and moving battle-system
-state changes into Step, would probably prevent more future bugs than
-any individual feature fix in this file. Everything else — the TO DO
-list, the remaining known issues — is normal, healthy backlog for a game
-this size; the systemic stuff is the part worth prioritizing before it
-compounds.
+**Three other recurring patterns.**
 
-**On game design** (inferred from what the systems imply, not from
-playing — a real limitation, see below). The premise — a murder-mystery
-narrative JRPG with open-ish city exploration — is bolted onto a genuinely
-wide spread of other genre elements: a full home-decorating/life-sim
-layer (per-slot furniture persistence, a build mode, a furniture shop
-UI), real-time single-target combat, taxi fast-travel between five
-cities, a day/night/weekday clock, a fog/weather system, and a shrine
-collectible layer. That's a lot of different games' worth of systems for
-one project to carry at once, and from what I've read, most of them are
-currently shallow rather than deep — combat is a single mouse-click
-dealing damage to one on-screen enemy with a health bar, no visible
-abilities/inventory/combo depth; NPC "AI" is a small handful of states;
-dialogue is fixed, non-branching message sequences. Wide-but-shallow
-scope is a common trap for ambitious solo/small-team projects — every
-system present is a real feature, but none of them (from what's in the
-code) is pushed past a first pass, which tends to read to players as "a
-lot to do, not much depth to any of it."
+- *Copy-paste reuse without a follow-up pass.* The furniture dropdown
+  began as a duplicated vending-machine UI and six of nine rows still
+  carry vending-machine text (#41, #51). The vehicles held divergent
+  copies of the same event bodies. Both worked; the cost arrived later,
+  when one change had to be made in nine places.
+- *Draw-state leaking between instances.* Colour, alpha, font,
+  alpha-test and lighting get set without being restored in various
+  places (#18, #22, #23, #25). `global.drawOCRange` compounded across a
+  session because its only reset lived in an object that had already been
+  destroyed. Individually minor, collectively expensive, because the
+  symptoms are order-dependent and don't reproduce on demand.
+- *Gameplay logic in Draw events.* Battle state transitions and combat
+  input both live in Draw GUI (#15, #16). Draw isn't guaranteed to run
+  under all conditions, so this is a correctness problem wearing a
+  rendering costume.
 
-The bigger question mark, specifically because the premise is a *murder
-mystery*: I did not find anything in the dialogue, battle, or any other
-system I reviewed that reads as an investigation/deduction mechanic —
-no clue collection, evidence log, suspect tracking, or dialogue choices
-that branch based on what the player has learned. The dialogue
-controller is sequential fixed text with no player input beyond
-advancing lines. If investigation gameplay exists, it's in a system I
-didn't touch during this review; but if it doesn't exist yet, that's the
-single piece I'd consider most important to a game whose whole framing
-is "murder mystery" — right now the narrative delivery mechanism and the
-actual "solve the mystery" gameplay loop don't appear to be the same
-system, which is usually a bigger design risk than any individual bug.
-Two smaller, concrete design smells worth calling out on their own: the
-forced intro dialogue currently replaying verbatim on every single visit
-to 10+ rooms (Known Issues #31) is exactly the kind of repetition that
-playtesting normally catches fast, since it actively undercuts the
-narrative focus the genre choice implies; and the amount of engineering
-investment visible in rendering/performance tuning (six independent
-graphics-quality sliders, a memory/RAM debug overlay) looks
-disproportionate next to how shallow the combat and investigation loops
-currently are — reasonable if the plan is "get the tech pipeline solid
-first, deepen mechanics later," but worth being a deliberate choice
-rather than a byproduct of where effort happened to go.
+**On global state, including the case against my own criticism.** ~190
+globals initialised across `scr_globals.gml`, `obj_global_buruwasu` and
+per-object Create events, with no single owner, sits behind more "why
+doesn't this work" bugs here than anything else. But the count itself is
+a weak complaint: GMS 1.4 has no structs, no static state and no module
+scope, so globals are the idiomatic tool and a project this size will
+have many. The real, fixable problem is narrower — initialisation is
+split across three places with no defined order. That's what turns
+read-before-set and stale-value bugs from one-offs into a recurring
+class, and it's worth consolidating on its own merits.
 
-One honest limitation of both takes above: everything comes from reading
-code, not playing the game. I have no read on whether the murder-mystery
-narrative, the pacing, or the actual moment-to-moment feel of exploring
-the cities is any good — that's the part that ultimately decides whether
-this is a good game, and it's outside what a code review can tell you.
-If there's an investigation mechanic I missed, or the shallow systems
-above are early-access placeholders with a deeper pass already planned,
-that changes this assessment a fair amount.
+**What I'd prioritise, and why it's a judgement call.** I'd put the
+global-state consolidation and moving battle logic out of Draw ahead of
+any feature work, because both keep producing the same category of bug
+and get more expensive to unwind as more is built on them. The honest
+counterargument: neither is currently blocking anything a player would
+notice, and a game with shallow combat and no investigation mechanic
+arguably needs depth more than it needs internal tidiness. If the goal is
+shipping something people enjoy rather than something maintainable, that
+ordering flips.
+
+**Evidence about how the project responds to change.** Every issue
+addressed across both passes was fixable with a scoped change; none
+needed a rewrite. That's a real strength and worth stating plainly.
+Three cautions from the second pass, though, and they're the most useful
+part of this section:
+
+- A scripted rewrite of the ten vehicle objects silently discarded
+  collision events nine of them had. The parity checks missed it because
+  the events were removed from all ten equally — **consistency checks
+  confirm uniformity, not correctness**, and that distinction cost a
+  working feature for several commits.
+- Two entries in this file were wrong when acted on: #24 had the
+  lighting convention backwards, and #57 described a one-line fix for
+  what was actually an unwired feature. This file is load-bearing for
+  anyone working here, and it drifts.
+- A `draw_triangle` call failed silently for several iterations because
+  backface culling is on project-wide — invisible from the drawing code.
+  The 3D layer carries global state that isn't discoverable locally.
+
+**On design — inference from the code, not from playing.** The systems
+imply a wide scope: murder-mystery narrative, open-ish exploration, home
+customisation with per-slot persistence, real-time combat, fast travel, a
+day/night clock, weather, collectibles. From the code most sit at
+first-pass depth: combat is a click reducing one enemy's health, NPC AI
+is a small state machine, dialogue is fixed non-branching text. My
+opinion is that this is the project's biggest design risk, and more
+specifically: **no investigation or deduction mechanic exists in any
+system reviewed** — no clue collection, evidence log, or dialogue
+branching on what the player knows. For a game framed as a murder
+mystery, the thing the premise promises isn't in the code yet. That may
+be sequencing rather than oversight, and it may live in a system not
+reviewed, but it's the gap I'd close first on the design side.
+
+**What this can't establish.** Whether the game is enjoyable, whether the
+narrative works, whether the scope suits the team. It also can't
+reliably separate deliberate placeholders from unfinished work — several
+things recorded here as issues turned out on asking to be intentional
+(see As designed). Treat the judgements above as arguments to weigh, not
+findings to action unread.
 
 ## Update notes
 
