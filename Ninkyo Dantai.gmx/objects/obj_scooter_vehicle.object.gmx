@@ -27,7 +27,7 @@
             <kind>1</kind>
             <string>image_speed = 0;
 
-scr_VehicleCreateEventBuruwasu(4.65, -1, 0.05 / 9, 0.01, "Scooter");
+scr_VehicleCreateEventBuruwasu(4.65, -1, 0.033, 0.01, "Scooter");
 
 // Handling for this vehicle type - everything else is the shared default
 frontGrip = 0.20;              // two wheels and almost no mass - it just grips

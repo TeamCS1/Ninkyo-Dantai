@@ -341,6 +341,19 @@ Background on how core systems actually work, based on an in-depth review
   of the model rather than being special-cased. Rotation is a real yaw
   rate with inertia, and the steering wheel moves at a limited rate —
   those two are what stop it feeling like a turret on ice.
+- **`acc` and `forwardspd` are not independent — drag caps the top speed
+  reachable from a given `acc`.** Terminal velocity is
+  `acc * drag / (1 - drag)`, which at `drag = 0.995` is `acc * 199`, so
+  reaching a top speed of V needs **`acc >= V / 199`** with headroom on
+  top or it takes forever to get there. Five vehicles failed this after
+  the physics rewrite: the taxi and three civilian sedans were on
+  `0.05 / 3`, capping them at 3.3 against a `forwardspd` of 6, and the
+  scooter on `0.05 / 9`, capping it at 1.1 against a stated 4.65 — a
+  quarter of its intended speed. Those values were tuned for the old
+  built-in-speed model, where drag behaved differently, and were carried
+  over unchanged. All ten now clear it, ranging from 1.9s to top speed
+  (Stingray) to 5.1s (taxi). **Raise `acc` alongside `forwardspd`, and
+  check the 0-to-top time rather than assuming the number took effect.**
 - **Wheelbase has to be large relative to per-step travel.** The original
   numbers had `axleFront`/`axleRear` at 1.1 against a top speed of 6px a
   step, so the car covered 2.7 wheelbases per frame where a real one
@@ -568,21 +581,6 @@ none of these were fixed.
   but some quality branches of its Draw call `sprite_get_texture(...)`
   inline again rather than using `TEX1` — a per-frame lookup across
   1,294 instances for a value already sitting in a variable.
-- **59. Six vehicles can never reach their own stated top speed.** Under
-  the current model, drag alone caps speed at `acc * drag / (1 - drag)`,
-  which with `drag = 0.995` is `acc * 199`. Reaching a top speed of V
-  therefore needs `acc >= V / 199`. The taxi and the three remaining
-  civilian sedans pass `acc = 0.05 / 3`, capping them at **3.3** against
-  a `forwardspd` of 6; `obj_scooter_vehicle` passes `0.05 / 9`, capping
-  it at **1.1** against a stated 4.65. So they run at roughly half and a
-  quarter of their intended speeds respectively, and `forwardspd` is
-  doing nothing for them. Those `acc` values were tuned for the old
-  built-in-speed model, where drag worked differently; they were carried
-  over unchanged during the physics rewrite. `obj_car` (0.05), the police
-  car (0.07) and `obj_block_stingray` (0.09) all clear the threshold and
-  do reach their stated speeds. Fixing it means raising `acc` per
-  vehicle, which changes how they feel, so it is worth doing deliberately
-  rather than as a sweep.
 - **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
   setup — create call, physics, draw, exit — and is byte-identical to
   the other nine, but nothing ever `instance_create`s it and it is

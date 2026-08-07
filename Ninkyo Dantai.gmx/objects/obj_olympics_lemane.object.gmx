@@ -27,7 +27,7 @@
             <kind>1</kind>
             <string>image_speed = 0;
 
-scr_VehicleCreateEventBuruwasu(6, -2, 0.05 / 3, 0.01, "Olympics Lemane");
+scr_VehicleCreateEventBuruwasu(6, -2, 0.040, 0.01, "Olympics Lemane");
 
 // Civilian sedan - uses the shared default handling as-is
 

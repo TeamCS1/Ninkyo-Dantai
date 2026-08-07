@@ -27,7 +27,7 @@
             <kind>1</kind>
             <string>image_speed = 0;
 
-scr_VehicleCreateEventBuruwasu(6, -2, 0.05 / 3, 0.01, "Taxi");
+scr_VehicleCreateEventBuruwasu(6, -2, 0.038, 0.01, "Taxi");
 
 // Handling for this vehicle type - everything else is the shared default
 frontGrip = 0.13;              // soft, comfort-biased sedan
