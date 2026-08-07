@@ -38,6 +38,15 @@
 ///Create event.
 
 // ---- Once-per-hour decisions.
+//
+// Skipped entirely while global.fogForced is set, which is what the "/fog"
+// console command does. Without that, forcing a bank on for tuning would be
+// undone on the spot by the 10:00 guard below - and the middle of the day is
+// exactly when someone is going to be tuning it. "/fog auto" hands control
+// back to the schedule.
+if global.fogForced == false
+{
+
 // Guarded on the hour changing so the dice are rolled once, not every step.
 if global.fogLastHour != global.timeHour
 {
@@ -82,6 +91,8 @@ if global.fogActive == true
         global.fogActive = false;
     }
 }
+
+} //end of the scheduled behaviour skipped by global.fogForced
 
 // ---- Ramp toward the target thickness.
 // Separate speeds because fog rolling in and fog burning off are not

@@ -44,6 +44,7 @@ global.fogIntensity = 0;    //0 clear, 1 full thickness. Everything else derives
 global.fogActive = false;   //is a bank currently rolling in / holding?
 global.fogClearHour = -1;   //hour it will start lifting, picked when it starts
 global.fogLastHour = -1;    //so the once-per-hour dice are rolled once, not every step
+global.fogForced = false;   //debug override from the /fog console command - see scr_FogWeatherUpdate
 
 //Chance of a bank starting, in percent, checked on the hour
 global.fogChanceMidnight = 10;  //00:00

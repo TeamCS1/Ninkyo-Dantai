@@ -134,8 +134,8 @@ if keyboard_check_pressed(vk_enter) //When enter is pressed, the string is copie
         global.timeMinutes = 0;
         global.timeSeconds = 0;
 
-        global.startFog = 1200;
-        global.endFog = 1200;
+        //startFog/endFog used to be set here. scr_FogWeatherUpdate owns them
+        //now and rewrites them every step, so setting them did nothing.
         scr_ClockControl(global.timescaleSaved, 60); 
     }
 
@@ -146,8 +146,9 @@ if keyboard_check_pressed(vk_enter) //When enter is pressed, the string is copie
         global.timeMinutes = 0;
         global.timeSeconds = 0;
 
-        global.startFog = -2400;    //fog is used for the overall brightness of the game screen
-        global.endFog = 1200;
+        //startFog/endFog used to be set here too - same reason. The old note
+        //said "fog is used for the overall brightness of the game screen",
+        //which was true before lightingAmbience took that job over.
         scr_ClockControl(global.timescaleSaved, 60); 
     }
 
@@ -199,6 +200,33 @@ if keyboard_check_pressed(vk_enter) //When enter is pressed, the string is copie
     else if cmd == "/map"
     {
         instance_create(0,0,obj_debug_map_mode);
+    }
+
+    else if cmd == "/fog"
+    {
+        //Pins the fog on or off regardless of the clock, so it can be looked
+        //at without waiting for a 10% roll at midnight. "/fog auto" gives the
+        //schedule back. It still ramps in and out at the normal rate - that
+        //is the behaviour worth tuning, so forcing it fully on instantly
+        //would hide it.
+        global.fogForced = true;
+
+        if global.fogActive == true
+        {
+            global.fogActive = false;
+            scr_CreateNotifications("Fog lifting - about 45 game minutes to clear. /fog auto restores the schedule", 400);
+        }
+        else
+        {
+            global.fogActive = true;
+            scr_CreateNotifications("Fog rolling in - about 30 game minutes to full thickness. /fog auto restores the schedule", 400);
+        }
+    }
+
+    else if cmd == "/fog auto"
+    {
+        global.fogForced = false;
+        scr_CreateNotifications("Fog back on its schedule - 10% at 00:00, 5% at 02:00, lifts 04:00-09:00", 400);
     }
 
     else if cmd == "/minimap"
@@ -360,7 +388,7 @@ draw_text(x,y + 100,string(c_input) + c_cursor); //This is what is typed.
 
 if showHelp == true
 {
-    scr_glow_text(x + 100,y+140,"Found 12 commands",ft_map_editor_buruwasu,c_white,c_white,fa_top, fa_left,2,c_teal,1);
+    scr_glow_text(x + 100,y+140,"Found 14 commands",ft_map_editor_buruwasu,c_white,c_white,fa_top, fa_left,2,c_teal,1);
     draw_text(x,y + 160,string("/time set day"));
     draw_text(x,y + 190,string("/time set night"));
     draw_text(x,y + 220,string("/mute &lt;bool&gt;"));
@@ -373,6 +401,8 @@ if showHelp == true
     draw_text(x,y + 430,string("/physics"));
     draw_text(x,y + 460,string("/cull"));
     draw_text(x,y + 490,string("/minimap"));
+    draw_text(x,y + 520,string("/fog"));
+    draw_text(x,y + 550,string("/fog auto"));
 }
 
 
