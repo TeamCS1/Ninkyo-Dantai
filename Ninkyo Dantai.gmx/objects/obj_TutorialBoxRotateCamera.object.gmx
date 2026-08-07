@@ -108,12 +108,7 @@ if alpha &lt;= 0
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_font(ft_map_editor_buruwasu);
-draw_set_color(c_white);
-draw_set_alpha(alpha);
-draw_rectangle_colour(30,20,boxWidth + 30,100,c_black,c_black,c_black,c_black,false);
-draw_text_ext(60,20,"You can rotate the camera using Q and E.",20,boxWidth);
-draw_set_alpha(1.0);
+            <string>scr_DrawNotificationBox("You can rotate the camera using Q and E.", boxWidth, alpha);
 </string>
           </argument>
         </arguments>

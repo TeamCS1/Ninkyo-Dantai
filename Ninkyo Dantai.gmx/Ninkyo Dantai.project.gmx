@@ -1223,6 +1223,7 @@
     <script>scripts\scr_LastNamesReturn.gml</script>
     <script>scripts\draw_sprite_3d_animated.gml</script>
     <script>scripts\scr_CreateNotifications.gml</script>
+    <script>scripts\scr_DrawNotificationBox.gml</script>
     <script>scripts\scr_ActivateDebugTrigger.gml</script>
     <script>scripts\scr_TextureCleaner.gml</script>
     <script>scripts\scr_MainMenuOptionsClose.gml</script>

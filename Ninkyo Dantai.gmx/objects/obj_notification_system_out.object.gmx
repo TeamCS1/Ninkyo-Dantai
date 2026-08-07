@@ -109,47 +109,7 @@ if alpha &lt;= 0
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//Font first - string_height_ext below measures with whatever font is
-//currently set, so measuring before this would size the box wrong.
-draw_set_font(ft_map_editor_buruwasu);
-
-//Sit clear of the minimap instead of on top of it. Taken from the panel's
-//own size and padding rather than hardcoded, so moving or resizing the
-//minimap doesn't put this back underneath it. Falls back to the original
-//position in any room that has no minimap globals.
-var _left = 30;
-
-if variable_global_exists("minimapEnabled")
-{
-    if global.minimapEnabled == true
-    {
-        _left = global.minimapPad + global.minimapSize + 30;
-    }
-}
-
-var _top = 20;
-var _pad = 12;
-var _lineHeight = 20;
-
-//Wrap to the INTERIOR width. The text used to be drawn 30px inside the box
-//but still wrapped at the full boxWidth, so a long message ran 30px past
-//the right edge of its own background.
-var _wrap = boxWidth - (_pad * 2);
-
-//And size the box to the text rather than a fixed 80px. The longer
-//messages wrap to three or four lines and used to spill out of the bottom.
-var _height = string_height_ext(string(text), _lineHeight, _wrap);
-
-draw_set_alpha(alpha);
-draw_rectangle_colour(_left, _top,
-                      _left + boxWidth, _top + _height + (_pad * 2),
-                      c_black, c_black, c_black, c_black, false);
-
-draw_set_color(c_white);
-draw_text_ext(_left + _pad, _top + _pad, string(text), _lineHeight, _wrap);
-
-draw_set_alpha(1.0);
-draw_set_color(c_white);
+            <string>scr_DrawNotificationBox(text, boxWidth, alpha);
 </string>
           </argument>
         </arguments>
