@@ -73,6 +73,11 @@ z = 0;
             d3d_draw_floor(x, y + 256, z, x + 256, y, z +1, sprite_get_texture(spr_alleyway_floor_1024_1024,0), 1, 1);
             break;
     }
+    
+    //Back off again. Every object turns lighting on for its own draw and
+    //off afterwards; leaving it on here lit everything drawn after this
+    //floor in the same frame.
+    d3d_set_lighting(0);
 }
 
 else

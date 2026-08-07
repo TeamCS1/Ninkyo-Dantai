@@ -664,7 +664,18 @@ GameMaker's draw state (`draw_set_color`/`colour`, `draw_set_alpha`,
 `d3d_set_lighting`) persists across instances and frames until something
 else changes it. This project has many places that change it and never
 change it back, which makes bugs order-dependent and hard to reproduce
-consistently:
+consistently.
+
+**Lighting has an established convention: each object turns it on for
+its own draw and off again afterwards** — `d3d_set_lighting(1)` → draw →
+`d3d_set_lighting(0)` — so the resting state between objects is off and
+nothing leaks onto whatever draws next. 68 of the drawing objects follow
+it. The only per-frame exception was `obj_alleyway_floor`, which turned
+lighting on and never turned it back off, lighting everything drawn after
+it that frame; that is fixed. `obj_control` still sets lighting on in its
+**Create**, but that runs once as engine setup rather than every frame.
+
+The remaining draw-state issues:
 
 - (Same issue as #18) `obj_battle_enemy_hud` leaves color set to `c_aqua`.
 - **22.** `obj_waypoint_controller_buruwasu`'s Draw GUI event sets
@@ -672,13 +683,6 @@ consistently:
 - **23.** `obj_car_icon` / `obj_taxi_icon` only call `draw_set_alpha_test(false)`
   in the *out-of-range* branch, leaving alpha testing on indefinitely
   whenever the in-range branch draws instead.
-- **24.** `obj_bin_ashtray_buruwasu` and `obj_street_lamp_post` toggle
-  `d3d_set_lighting` off for their own draw and don't reliably restore it —
-  the dev's own code comment on the ashtray ("make sure house lighting is
-  false. Somehow lighting works when off lmao") shows this is already known
-  to be fragile. Lighting is only re-enabled once per frame centrally by
-  `obj_control`, so any lit object drawn after a lamp/ashtray at a lower
-  depth in the same frame renders flat/unlit until the next frame's reset.
 - **25.** Several menu/HUD objects (`obj_main_menu_options`,
   `obj_notification_system_out`, `obj_dropdown_home_customisation`,
   `obj_dropdown_slots`, `obj_vending_machine_ui`,

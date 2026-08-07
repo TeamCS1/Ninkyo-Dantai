@@ -60,7 +60,7 @@ image_yscale = 1.0;
     draw_set_color(c_white);
     //turn on texture repeating so our UV's work right
     texture_set_repeat(true);
-    d3d_set_lighting(false); //make sure house lighting is false. Somehow lighting works when off lmao
+    d3d_set_lighting(1); //enable lighting
     draw_set_alpha(1);
     d3d_transform_add_scaling(0.25, 0.25, 0.25);
     d3d_transform_add_rotation_z(0);
@@ -85,7 +85,9 @@ image_yscale = 1.0;
             break;
     }
     
-    draw_set_alpha(1)
+    //reset settings
+    draw_set_alpha(1);
+    d3d_set_lighting(0);
     d3d_transform_set_identity();
     //scr_DrawCollisionBoxModel(c_red,0,64)
 }
