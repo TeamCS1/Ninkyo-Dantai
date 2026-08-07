@@ -1036,8 +1036,43 @@ and in Architecture notes / Known Issues instead.
   slower. The truck is heavy and stubborn and has to slow right down for
   a corner, the police car is the sharpest thing on the road, the
   ambulance leans, and the scooter is light and flickable.
+- The Block Stingray is now a proper sports car — the fastest and
+  quickest-accelerating thing on the road, and it grips harder through
+  corners to match.
+- Fog is now real weather rather than a fixed setting. Some nights a bank
+  rolls in after midnight, thickens gradually, and burns off some time
+  between four and nine in the morning. It comes in as a thin grey haze
+  and turns white as it deepens, and when it's thick you genuinely lose
+  sight of the far end of the street. Most nights are clear, so it stays
+  something you notice.
+- Alleyways and the shopping mall floor now show as checkered patterns on
+  the minimap, so you can tell them apart from the open road at a glance.
 
 **Fixes**
+- Fixed the screen washing out white in the modern mall. It was worst
+  around midday and you could sometimes clear it by walking back and
+  forth. The same fault could wash out the minimap and the on-screen
+  objective text anywhere in the game.
+- You can no longer drive through most of the city. Vehicles now collide
+  with every building, lamp post, bench, bin, fence, pillar, tree and
+  shop front that you already collided with on foot — previously it was
+  three types of object and nothing else.
+- Fixed vehicles bouncing off thin air. Their collision was twice as wide
+  as the car itself, so you'd hit invisible walls driving down an open
+  road. The scooter's was far larger again.
+- Fixed the taxi, the scooter and three of the civilian cars never
+  reaching their own top speed. The scooter was the worst — it was
+  managing about a quarter of what it was meant to, so it's dramatically
+  faster now.
+- The options menu can now be opened from the modern mall and from the
+  other cities. It only worked in three rooms before.
+- The map now shows where you are whatever you're driving. Previously it
+  only marked you in the car and the police car, so the other eight
+  vehicles left you with no marker at all.
+- Fixed walking into the parked taxi stopping you dead instead of letting
+  you slide along it like every other object.
+- Getting into a car no longer makes a second parked car of the same
+  model vanish.
 - Big framerate improvement in the city, especially after driving. Two
   causes: the game was drawing far more of the world than it needed to
   after you'd been in a vehicle — and getting worse every time you got
