@@ -933,6 +933,71 @@ The remaining draw-state issues:
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
 
+## Planned features (not built yet)
+
+Design intent recorded so it isn't lost, kept separate from Known Issues
+on purpose: those are findings checked against the source and carry stable
+reference numbers, these are things that don't exist yet. Nothing below has
+any code behind it.
+
+### Expanded JRPG-style equipment and attributes
+
+A real equipment and stat layer. Nothing exists today beyond
+`global.weapon` (an integer, set in `obj_global_buruwasu`) and the
+health/stamina pair the HUD draws, so this is a system to build rather
+than one to extend.
+
+### Introductory story cutscenes
+
+Cutscenes that open the game and deepen the narrative. Worth knowing
+before starting: the dialogue controller is fixed, non-branching text with
+no "already seen" flag, which is why the intro line currently replays on
+every entry to 10+ rooms (#31). Cutscenes that should play once will need
+that solved first, since it's the same missing piece.
+
+### Enemy Groups
+
+Randomly spawned around Buruwasu, attackable at any time for rewards.
+
+| Group | Health | Damage | Money | Notes |
+|---|---|---|---|---|
+| Delinquents | Low | — | — | Lowest tier, easy to defeat |
+| Yakuza | Low | **High** | — | Glass cannon — hits hard, dies fast |
+| Thugs | Normal | — | — | Run of the mill |
+| Nouveau Riche | — | — | **Substantial** | Gold suits. Rare spawn. **Needs a new sprite/model** |
+| Homeless People | — | — | **None** | Deliberately drops no money |
+| Racers | Normal | — | — | Standard |
+| Bikers | Normal | — | — | Standard |
+| Loan Sharks | Normal | — | — | Standard |
+| Pickpockets | Normal | — | — | Standard |
+| Drunkards | Normal | — | — | Standard |
+| Scammers | Normal | — | — | Standard |
+| Extortionists | Normal | — | — | Standard |
+| Corrupt Cops | Normal | — | — | Standard |
+| Arsonists | Normal | — | — | Standard |
+| Vandals | Normal | — | — | Standard |
+
+Three things worth deciding before building this, all of them recorded
+here rather than discovered halfway through:
+
+- **11 of the 15 are specified identically** — standard health, no other
+  distinguishing trait. As written they differ only by name and sprite, so
+  either they need something mechanical to tell them apart (weapons,
+  behaviour, where and when they spawn, what they drop) or the list is
+  really four enemy types plus eleven skins. Both are legitimate; it's
+  worth being the deliberate choice.
+- **The battle system currently supports exactly one encounter at a time.**
+  `obj_battle_encounter` resolves its HUD and dialogue with
+  `instance_exists` rather than per-encounter ids (#13, #20), so a second
+  concurrent fight misbehaves. Enemies spawning freely around a city means
+  concurrent encounters by definition, so #13 and #20 are prerequisites,
+  not tidy-ups. `obj_battle_hud` is also orphaned (#19).
+- **The NPC spawner has two live bugs** (#10, #11) — it tests the spawner's
+  own position instead of the candidate point, and its `with createNPC`
+  targets the object rather than the new instance, so it can destroy
+  unrelated NPCs. Anything reusing that machinery to place enemy groups
+  inherits both.
+
 ## As designed
 
 Things that look like bugs on first read but are intentional — confirmed by
