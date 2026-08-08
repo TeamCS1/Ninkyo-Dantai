@@ -148,6 +148,15 @@ Background on how core systems actually work, based on an in-depth review
   (`obj_floor3d`, `obj_roof_modular_buruwasu`,
   `obj_fire_escape_three_floors` — elevated on a building facade, not
   reachable at ground level).
+- **A sprite used as a texture on 3D geometry needs its "Used for 3D"
+  flag set** (`<For3D>-1</For3D>` in the `.sprite.gmx`). GameMaker packs
+  normal sprites onto shared texture pages, which is wrong for a texture
+  sampled by `d3d_model_draw` or `d3d_draw_floor`: it needs its own page,
+  power-of-two sized, or the UVs address a sub-rectangle of the atlas and
+  the texture renders wrong or tiles incorrectly. `spr_coronas` was set to
+  `0` and was fixed by hand. Worth checking on any new 3D texture, since
+  nothing in the project flags it and the symptom looks like a modelling
+  or UV problem rather than a sprite setting.
 - **Real 3D-model bounding boxes, computed from the model file itself.**
   `.d3d` model files in this project turn out to be plain text (GameMaker's
   own `d3d_model_save` format: version / vertex count / primitive-flags
@@ -1055,6 +1064,14 @@ and in Architecture notes / Known Issues instead.
 ### August 8, 2026
 
 **Fixes**
+- Tidied up the options menu. The Gamepad Settings section no longer says
+  "No settings found" above the setting that is actually there, and the
+  Debug Gamepad row now sits directly under its heading like every other
+  section.
+- Fixed the coronas (the glowing markers over the gun shop and the taxi
+  rank) rendering wrong.
+- Straightened out some road junctions in the city that were rotated or
+  placed slightly off.
 - Another framerate pass on the city, all behind the scenes. The game was
   constantly unloading and reloading textures for anything beyond the
   draw distance (thousands of times a frame), every building was

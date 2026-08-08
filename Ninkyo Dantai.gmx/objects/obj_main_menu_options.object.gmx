@@ -63,9 +63,10 @@ draw_set_font(ft_map_editor_buruwasu);
 //encounters toggle
 draw_text(1303,675,string("On"));
 
-//gamepad settings - label for the debug overlay toggle, sits under "No settings found"
+//gamepad settings - label for the debug overlay toggle. First row under the
+//heading, matching where Enable Enemy Encounters sits under Gameplay Settings.
 draw_set_font(ft_options);
-draw_text(592,717,string("Debug Gamepad:"));
+draw_text(592,671,string("Debug Gamepad:"));
 draw_set_font(ft_map_editor_buruwasu);
 
 if obj_city_population_input.openPopup == false
