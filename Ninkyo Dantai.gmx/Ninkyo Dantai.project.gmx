@@ -1149,7 +1149,7 @@
       <script>scripts\scr_call_input.gml</script>
       <scripts name="Weather">
         <script>scripts\scr_FogSystemBuruwasu.gml</script>
-      <script>scripts\scr_FogWeatherUpdate.gml</script>
+        <script>scripts\scr_FogWeatherUpdate.gml</script>
       </scripts>
       <script>scripts\scr_ClockControl.gml</script>
       <scripts name="Options Menu">

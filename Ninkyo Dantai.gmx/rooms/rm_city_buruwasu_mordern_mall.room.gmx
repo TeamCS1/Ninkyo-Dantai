@@ -294,7 +294,7 @@
     <instance objName="obj_vending_machine" x="2400" y="1312" name="inst_7F262374" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_pillar1_buruwasu" x="2432" y="1920" name="inst_3525D3E1" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_exit_mall_trigger" x="2560" y="1312" name="inst_D4A777DD" locked="0" code="" scaleX="3.5" scaleY="3.5" colour="4294967295" rotation="0"/>
-        <instance objName="obj_options_menu_trigger" x="352" y="-288" name="inst_0PT00000" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_options_menu_trigger" x="352" y="-288" name="inst_0PT00000" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
