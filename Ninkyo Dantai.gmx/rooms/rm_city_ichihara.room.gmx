@@ -588,7 +588,7 @@
     <instance objName="obj_side_walk_snow_buruwasu" x="13568" y="11008" name="inst_4178D92B" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_side_walk_snow_buruwasu" x="13824" y="11008" name="inst_A165B630" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_side_walk_snow_buruwasu" x="14080" y="11008" name="inst_9FDDBBAC" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-        <instance objName="obj_options_menu_trigger" x="352" y="-288" name="inst_0PT00000" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_options_menu_trigger" x="352" y="-288" name="inst_0PT00000" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
