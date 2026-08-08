@@ -1086,12 +1086,11 @@ and in Architecture notes / Known Issues instead.
   rank) rendering wrong.
 - Straightened out some road junctions in the city that were rotated or
   placed slightly off.
-- Another framerate pass on the city, all behind the scenes. The game was
-  constantly unloading and reloading textures for anything beyond the
-  draw distance (thousands of times a frame), every building was
-  re-deciding which texture quality to use every single frame, and the
-  water was doing busywork that had no visible effect. All three are
-  gone; nothing looks any different, it just costs less.
+- Another framerate pass on the city. The game was constantly unloading
+  and reloading textures for anything beyond the draw distance.
+- Optimised every building was prior re-deciding which texture quality to
+  use every single frame.
+- Water animation was doing busywork that had no visible effect.
 
 ### August 7, 2026
 
