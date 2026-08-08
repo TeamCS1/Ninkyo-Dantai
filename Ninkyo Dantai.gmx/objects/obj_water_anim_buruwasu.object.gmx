@@ -25,62 +25,15 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>image_index_animation = 0;
-
-alarm[0] = room_speed * 0.0625;
-</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event eventtype="2" enumb="0">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>image_index_animation++;
-
-if image_index_animation &gt; 16
-{
-    image_index_animation = 0;
-}
-
-alarm[0] = room_speed * 0.0625;
-</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event eventtype="3" enumb="0">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>image_index_animation = image_index;
+            <string>//The animation is GameMaker's own: the sprite has 16 frames and
+//image_speed is left at its default, so image_index advances by itself and
+//the Draw event uses it directly.
+//
+//There used to be an image_index_animation variable, an Alarm incrementing
+//it, and a Step copying image_index over the top of it. The Step won every
+//time, so the Alarm was doing nothing except re-arming itself - across 615
+//instances in the spawn room. All three are gone; the water animates
+//exactly as before.
 </string>
           </argument>
         </arguments>
@@ -107,7 +60,7 @@ alarm[0] = room_speed * 0.0625;
 {
     draw_set_alpha_test(false);
     draw_set_alpha_test_ref_value(128);
-    draw_sprite_ext(sprite_index,image_index_animation,x,y,1.0,1.0,0,c_white,1.0)
+    draw_sprite_ext(sprite_index,image_index,x,y,1.0,1.0,0,c_white,1.0)
 }
 
 else

@@ -96,14 +96,12 @@ if point_distance(x, y, global.playerX, global.playerY) &lt; global.drawOCRange
 }
 
 //garbage collection
-else
-{
-    sprite_flush(uv_euro_pallet_64);
-    sprite_flush(uv_euro_pallet_128);
-    sprite_flush(uv_euro_pallet_256);
-    sprite_flush(uv_euro_pallet_512);
-    sprite_flush(uv_euro_pallet_1024);
-}
+
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 </string>
           </argument>
         </arguments>

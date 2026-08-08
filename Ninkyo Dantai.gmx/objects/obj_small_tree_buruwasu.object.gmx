@@ -72,10 +72,11 @@ image_yscale = 1.0;
     d3d_transform_set_identity();
 }
 
-else
-{
-    sprite_flush(uv_tree001);
-}
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 </string>
           </argument>
         </arguments>

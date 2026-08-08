@@ -25,7 +25,17 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//Removes all previous texture pages
+            <string>//Seed the RNG once for the whole session. This object is in
+//rm_buruwasu_murder_mystery_initiation, the first room in the project, so
+//this provably runs before any room containing pavement exists.
+//
+//It used to be called in obj_side_walk_buruwasu's Create instead - 2,029
+//reseeds on entering the spawn room. Putting it in obj_global_buruwasu
+//would have been no better: that shares a room with the pavement, and
+//GMS 1.4 does not guarantee Create order between different objects.
+randomize();
+
+//Removes all previous texture pages
 gml_release_mode(0);
 draw_texture_flush();
 cleanmem_init(0);   //Inits DLL

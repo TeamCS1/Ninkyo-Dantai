@@ -84,10 +84,11 @@ offset = -80;
     draw_set_alpha_test(false);
 }
 
-else
-{
-    //sprite_flush(bill_poster002);   
-}
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 </string>
           </argument>
         </arguments>
@@ -116,10 +117,11 @@ else
     draw_set_alpha_test(false);
 }
 
-else
-{
-    //sprite_flush(bill_poster002);   
-}
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 </string>
           </argument>
         </arguments>

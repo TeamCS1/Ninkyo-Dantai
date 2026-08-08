@@ -92,14 +92,11 @@ image_yscale = 1.0;
     //scr_DrawCollisionBoxModel(c_red,0,64)
 }
 
-else
-{
-    sprite_flush(uv_bin_ashtray_buruwasu_1024_1024);
-    sprite_flush(uv_bin_ashtray_buruwasu_512_512);
-    sprite_flush(uv_bin_ashtray_buruwasu_256_256);
-    sprite_flush(uv_bin_ashtray_buruwasu_128_128);
-    sprite_flush(uv_bin_ashtray_buruwasu_64_64);
-}
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 
 draw_set_alpha(1);
 //draw_rectangle_colour(bbox_left,bbox_top,bbox_right,bbox_bottom,c_red,c_red,c_red,c_red,false);

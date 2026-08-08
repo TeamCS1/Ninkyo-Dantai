@@ -91,14 +91,11 @@ TEX2 = sprite_get_texture(spr_warehouse_roof_256,0);
     d3d_set_lighting(0);
 }
 
-else
-{
-    sprite_flush(spr_warehouse_64);
-    sprite_flush(spr_warehouse_128);
-    sprite_flush(spr_warehouse_256);
-    sprite_flush(spr_warehouse_512);
-    sprite_flush(spr_warehouse_1024);
-}
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 </string>
           </argument>
         </arguments>

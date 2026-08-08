@@ -25,7 +25,10 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>randomize();
+            <string>//randomize() used to be here. This object has 2,029 instances in the
+//spawn room, so that was 2,029 reseeds of the RNG at room load -
+//randomize() is meant to be called once. obj_global_buruwasu does it
+//now, before any of these are created.
 rotation = 0;
 z = 0;
 

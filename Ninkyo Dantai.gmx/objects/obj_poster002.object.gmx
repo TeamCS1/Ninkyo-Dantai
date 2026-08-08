@@ -57,10 +57,11 @@ zIsTwoPoints = false; //used for map editor
     draw_sprite_3d(bill_poster002,0,0.25,0.25,x,y,z,-90,1,180);
 }
 
-else
-{
-    //sprite_flush(bill_poster002);   
-}
+//The out-of-range branch used to sprite_flush these textures.
+//That ran EVERY frame the instance was out of draw range, not once -
+//and sprite_flush unloads a whole texture page, which every sprite in
+//this project shares. It was evicting pages that other objects were
+//still drawing from, forcing a reload on the next frame.
 </string>
           </argument>
         </arguments>
