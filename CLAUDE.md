@@ -619,6 +619,20 @@ none of these were fixed.
   the RNG at room load. `randomize()` is meant to be called once at
   startup; doing it per instance is both a load-time cost and a way to
   defeat any deterministic seeding.
+- **59. TO DO: `obj_burning_barrel` wears the oil lamp's texture at four
+  of its five quality settings.** Its quality switch resolves to
+  `uv_burning_barrel_512` at quality 3, but to
+  `uv_wall_mounted_oil_lamp_64_64` / `_128_128` / `_512_512` /
+  `_1024_1024` at qualities 1, 2, 4 and 5 — so the barrel only looks
+  right on the middle setting and is wearing a lamp everywhere else.
+  `uv_burning_barrel_512` is the *only* barrel texture that exists, so
+  this is not a wiring mistake that can be corrected in code: the other
+  four sizes have to be authored first. Reads as a copy-paste from
+  `obj_wall_mounted_oil_lamp`, whose switch uses exactly those four
+  sprites. The mapping now lives in
+  `scripts/scr_UpdateQualityTextureCache.gml` rather than the object's
+  Draw event; it was carried across unchanged and deliberately, since
+  correcting it means new art, not new code.
 - **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
   setup — create call, physics, draw, exit — and is byte-identical to
   the other nine, but nothing ever `instance_create`s it and it is
