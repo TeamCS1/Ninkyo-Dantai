@@ -1088,8 +1088,8 @@ and in Architecture notes / Known Issues instead.
   placed slightly off.
 - Another framerate pass on the city. The game was constantly unloading
   and reloading textures for anything beyond the draw distance.
-- Optimised every building was prior re-deciding which texture quality to
-  use every single frame.
+- Optimised the buildings, which were previously re-deciding which texture
+  quality to use every single frame.
 - Water animation was doing busywork that had no visible effect.
 
 ### August 7, 2026
