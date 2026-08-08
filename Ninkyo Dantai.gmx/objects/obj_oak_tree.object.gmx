@@ -66,7 +66,9 @@ image_yscale = 1.0;
     d3d_transform_set_scaling(1,1,1);
     d3d_transform_add_rotation_z(zDirection);
     d3d_transform_add_translation(x, y, z);
-    d3d_model_draw(tree, 0, 0, 0,sprite_get_texture(spr_transparent_texture_buruwasu,0));
+    //Transparent so the player is not hidden while under the canopy;
+    //texture cached by scr_UpdateQualityTextureCache
+    d3d_model_draw(tree, 0, 0, 0, global.texTransparent);
     //d3d_set_culling(0);
     draw_set_alpha(1)
     d3d_transform_set_identity();
@@ -84,24 +86,9 @@ else if point_distance(x, y, global.playerX, global.playerY) &lt; global.drawOCR
     d3d_transform_add_rotation_z(zDirection);
     d3d_transform_add_translation(x, y, z);
     
-    switch(global.treeQuality)
-    {
-        case 1 :
-            d3d_model_draw(tree, 0, 0, 0, sprite_get_texture(uv_oak_tree_64_64,0));
-            break;
-        case 2 :
-            d3d_model_draw(tree, 0, 0, 0, sprite_get_texture(uv_oak_tree_128_128,0));
-            break;
-        case 3 :
-            d3d_model_draw(tree, 0, 0, 0, sprite_get_texture(uv_oak_tree_256_256,0));
-            break;
-        case 4 :
-            d3d_model_draw(tree, 0, 0, 0, sprite_get_texture(uv_oak_tree_512_512,0));
-            break;
-        case 5 :
-            d3d_model_draw(tree, 0, 0, 0, sprite_get_texture(uv_oak_tree_1024_1024,0));
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(tree, 0, 0, 0, global.texOakTree);
     
     //d3d_set_culling(0);
     draw_set_alpha(1)

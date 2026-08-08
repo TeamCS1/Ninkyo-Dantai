@@ -69,24 +69,9 @@ if point_distance(x, y, global.playerX, global.playerY) &lt; global.drawOCRange
     d3d_set_lighting(setLighting);
     
     //texture control
-    switch(global.propsQuality)
-    {
-        case 1 :
-            d3d_model_draw(bench, 0 + 52, -32, z, sprite_get_texture(uv_modern_bench_64_64,0));
-            break;
-        case 2 :
-            d3d_model_draw(bench, 0 + 52, -32, z, sprite_get_texture(uv_modern_bench_128_128,0));
-            break;
-        case 3 :
-            d3d_model_draw(bench, 0 + 52, -32, z, sprite_get_texture(uv_modern_bench_256_256,0));
-            break;
-        case 4 :
-            d3d_model_draw(bench, 0 + 52, -32, z, sprite_get_texture(uv_modern_bench_512_512,0));
-            break;
-        case 5 :
-            d3d_model_draw(bench, 0 + 52, -32, z, sprite_get_texture(uv_modern_bench_1024_1024,0));
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(bench, 0 + 52, -32, z, global.texModernBench);
     
     d3d_set_lighting(false);
     d3d_transform_set_identity();

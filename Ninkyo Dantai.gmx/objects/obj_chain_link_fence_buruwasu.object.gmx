@@ -68,24 +68,9 @@ if point_distance(x, y, global.playerX, global.playerY) &lt; global.drawOCRange
     d3d_transform_add_translation(x, y, z);
     
     //texture control
-    switch(global.propsQuality)
-    {
-        case 1 :
-            d3d_model_draw(fence, 0, 0, 0, sprite_get_texture(uv_chain_link_fence_64,0));
-            break;
-        case 2 :
-            d3d_model_draw(fence, 0, 0, 0, sprite_get_texture(uv_chain_link_fence_128,0));
-            break;
-        case 3 :
-            d3d_model_draw(fence, 0, 0, 0, sprite_get_texture(uv_chain_link_fence_256,0));
-            break;
-        case 4 :
-            d3d_model_draw(fence, 0, 0, 0, sprite_get_texture(uv_chain_link_fence_512,0));
-            break;
-        case 5 :
-            d3d_model_draw(fence, 0, 0, 0, sprite_get_texture(uv_chain_link_fence_1024,0));
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(fence, 0, 0, 0, global.texChainLinkFence);
     
     //reset settings
     //d3d_set_culling(0);

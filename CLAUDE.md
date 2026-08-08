@@ -398,6 +398,21 @@ Background on how core systems actually work, based on an in-depth review
   `global.drawOCRangeBase` that the current range is always set *from*,
   never multiplied into.
 - Toggle culling in game with `/cull` to A/B it.
+- **All quality-switched textures are resolved centrally by
+  `scripts/scr_UpdateQualityTextureCache.gml`**, called from
+  `obj_control`'s Begin Step, into `global.tex*` pointers the drawing
+  objects read. 25 objects (~1,700 instances) used to run a
+  `switch(global.*Quality)` with a `sprite_get_texture` lookup in their
+  Draw every frame; now it is four integer compares per frame, with the
+  lookups re-run only when a quality setting changes. **A new
+  quality-switched object must be added to that script, not given its own
+  switch.** The trackers are forced to `-1` in `obj_control`'s Create so
+  the cache rebuilds on the first frame of every room — `cleanmem()` on
+  room transitions can unload texture pages, and a texture pointer cached
+  in the previous room dies with them. Skipping that reset turns the
+  cache into an intermittent white-model bug. (This also retired old
+  issue #55, the house block's dead `TEX1` — that and four siblings were
+  deleted as part of the sweep.)
 
 ### Minimap
 
@@ -595,11 +610,6 @@ none of these were fixed.
   the RNG at room load. `randomize()` is meant to be called once at
   startup; doing it per instance is both a load-time cost and a way to
   defeat any deterministic seeding.
-- **55. `obj_house_block001` caches a texture it then doesn't use.** Its
-  Create stores `TEX1 = sprite_get_texture(spr_block_house_64_64, 0)`,
-  but some quality branches of its Draw call `sprite_get_texture(...)`
-  inline again rather than using `TEX1` — a per-frame lookup across
-  1,294 instances for a value already sitting in a variable.
 - **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
   setup — create call, physics, draw, exit — and is byte-identical to
   the other nine, but nothing ever `instance_create`s it and it is
@@ -1041,6 +1051,16 @@ copy-pasted straight into an itch.io devlog/update post. Add a new dated
 entry here each time a Known Issue is fixed or a piece of work lands;
 keep the technical specifics (scripts, object names) out of this section
 and in Architecture notes / Known Issues instead.
+
+### August 8, 2026
+
+**Fixes**
+- Another framerate pass on the city, all behind the scenes. The game was
+  constantly unloading and reloading textures for anything beyond the
+  draw distance (thousands of times a frame), every building was
+  re-deciding which texture quality to use every single frame, and the
+  water was doing busywork that had no visible effect. All three are
+  gone; nothing looks any different, it just costs less.
 
 ### August 7, 2026
 

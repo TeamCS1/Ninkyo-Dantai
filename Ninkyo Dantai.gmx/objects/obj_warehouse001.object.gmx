@@ -32,7 +32,6 @@ BLOCKMOD2 = d3d_model_create();
 d3d_model_block(BLOCKMOD2,-128,-128,z + 256,128,128,z + 260,1,1);
 
 //assign textures
-TEX1 = sprite_get_texture(spr_warehouse_512,0);
 TEX2 = sprite_get_texture(spr_warehouse_roof_256,0);
 
 //instance_create(x,y,obj_roof_modular_buruwasu);
@@ -64,29 +63,10 @@ TEX2 = sprite_get_texture(spr_warehouse_roof_256,0);
     draw_set_color(c_white);
     draw_set_alpha(1);
     
-    switch(global.buildingQuality)
-    {
-        case 1 :
-            d3d_model_draw(BLOCKMOD,x,y,z, sprite_get_texture(spr_warehouse_64,0));
-            d3d_model_draw(BLOCKMOD2,x,y,z,TEX2);
-            break;
-        case 2 :
-            d3d_model_draw(BLOCKMOD,x,y,z, sprite_get_texture(spr_warehouse_128,0));
-            d3d_model_draw(BLOCKMOD2,x,y,z,TEX2);
-            break;
-        case 3 :
-            d3d_model_draw(BLOCKMOD,x,y,z, sprite_get_texture(spr_warehouse_256,0));
-            d3d_model_draw(BLOCKMOD2,x,y,z,TEX2);
-            break;
-        case 4 :
-            d3d_model_draw(BLOCKMOD,x,y,z, sprite_get_texture(spr_warehouse_512,0));
-            d3d_model_draw(BLOCKMOD2,x,y,z,TEX2);
-            break;
-        case 5 :
-            d3d_model_draw(BLOCKMOD,x,y,z, sprite_get_texture(spr_warehouse_1024,0));
-            d3d_model_draw(BLOCKMOD2,x,y,z,TEX2);
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(BLOCKMOD,x,y,z, global.texWarehouse001);
+    d3d_model_draw(BLOCKMOD2,x,y,z,TEX2);
     
     d3d_set_lighting(0);
 }

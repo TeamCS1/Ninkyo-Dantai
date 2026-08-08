@@ -1173,6 +1173,7 @@
         <script>scripts\scr_DrawGamepadDebugOverlay.gml</script>
       </scripts>
       <script>scripts\scr_CullDistantScenery.gml</script>
+      <script>scripts\scr_UpdateQualityTextureCache.gml</script>
       <script>scripts\scr_MoveLightDebug.gml</script>
       <script>scripts\scr_globals.gml</script>
       <script>scripts\scr_check_nearby_shrines.gml</script>

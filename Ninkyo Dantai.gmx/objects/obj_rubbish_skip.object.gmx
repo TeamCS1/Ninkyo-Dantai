@@ -66,24 +66,9 @@ image_yscale = 1.0;
     d3d_transform_add_rotation_z(zDirection);
     d3d_transform_add_translation(x, y, z);
     
-    switch(global.propsQuality)
-    {
-        case 1 :
-            d3d_model_draw(skip, 0, 0, 0, sprite_get_texture(uv_skip_texture_64,0));
-            break;
-        case 2 :
-            d3d_model_draw(skip, 0, 0, 0, sprite_get_texture(uv_skip_texture_128,0));
-            break;
-        case 3 :
-            d3d_model_draw(skip, 0, 0, 0, sprite_get_texture(uv_skip_texture_256,0));
-            break;
-        case 4 :
-            d3d_model_draw(skip, 0, 0, 0, sprite_get_texture(uv_skip_texture_512,0));
-            break;
-        case 5 :
-            d3d_model_draw(skip, 0, 0, 0, sprite_get_texture(uv_skip_texture_1024,0));
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(skip, 0, 0, 0, global.texRubbishSkip);
     
     //d3d_set_culling(0);
     draw_set_alpha(1)

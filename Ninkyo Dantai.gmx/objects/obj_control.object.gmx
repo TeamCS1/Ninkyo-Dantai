@@ -92,6 +92,16 @@ d3d_set_fog(true, make_colour_rgb(global.fogR,global.fogG,global.fogB), global.s
 draw_set_alpha_test(true);
 draw_set_alpha_test_ref_value(128);
 
+//Quality-texture cache (scr_UpdateQualityTextureCache). Forced dirty on
+//every room entry: cleanmem() runs on room transitions and can unload
+//texture pages, which kills any texture pointer cached in the previous
+//room. -1 never equals a real quality setting, so the first Begin Step of
+//the room rebuilds everything before anything draws.
+global.texCacheBuildingQ = -1;
+global.texCachePropsQ = -1;
+global.texCacheEnvironmentQ = -1;
+global.texCacheTreeQ = -1;
+
 //LIGHTING ENGINE SETUP
 //Lighting starts OFF, and that is deliberate. Every object that wants it
 //turns it on for its own draw and off again afterwards, so "off" is the
@@ -155,7 +165,11 @@ sprite_prefetch(uv_drop_bag_of_money_512);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>///Scenery culling - deactivates distant static geometry so its events
+            <string>//Refresh the quality-texture cache. Cheap (four compares) unless a
+//quality setting changed or we just entered the room.
+scr_UpdateQualityTextureCache();
+
+///Scenery culling - deactivates distant static geometry so its events
 //stop running. Deliberately never touches NPCs; see the script header.
 scr_CullDistantScenery();
 

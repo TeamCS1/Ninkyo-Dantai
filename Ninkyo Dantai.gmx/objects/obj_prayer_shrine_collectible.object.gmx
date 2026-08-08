@@ -147,24 +147,9 @@ if (obj_prayer_shrine_collectible.doPrayerShrineInteraction)
     d3d_transform_add_rotation_z(0);
     d3d_transform_add_translation(x, y, z);
     //LODs
-    switch(global.propsQuality)
-    {
-        case 1 :
-            d3d_model_draw(prayer1, 0, 0, 0, sprite_get_texture(uv_prayer_shrine_stand_64,0));
-            break;
-        case 2 :
-            d3d_model_draw(prayer1, 0, 0, 0, sprite_get_texture(uv_prayer_shrine_stand_128,0));
-            break;
-        case 3 :
-            d3d_model_draw(prayer1, 0, 0, 0, sprite_get_texture(uv_prayer_shrine_stand_256,0));
-            break;
-        case 4 :
-            d3d_model_draw(prayer1, 0, 0, 0, sprite_get_texture(uv_prayer_shrine_stand_512,0));
-            break;
-        case 5 :
-            d3d_model_draw(prayer1, 0, 0, 0, sprite_get_texture(uv_prayer_shrine_stand_1024,0));
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(prayer1, 0, 0, 0, global.texPrayerShrineStand);
     draw_set_alpha(1)
     d3d_transform_set_identity();
 }

@@ -66,24 +66,9 @@ image_yscale = 1.0;
     d3d_transform_add_rotation_z(0);
     d3d_transform_add_translation(x, y, z);
     
-    switch(global.propsQuality)
-    {
-        case 1 :
-            d3d_model_draw(bin, 0, 0, 0, sprite_get_texture(uv_bin_ashtray_buruwasu_64_64,0));
-            break;
-        case 2 :
-            d3d_model_draw(bin, 0, 0, 0, sprite_get_texture(uv_bin_ashtray_buruwasu_128_128,0));
-            break;
-        case 3 :
-            d3d_model_draw(bin, 0, 0, 0, sprite_get_texture(uv_bin_ashtray_buruwasu_256_256,0));
-            break;
-        case 4 :
-            d3d_model_draw(bin, 0, 0, 0, sprite_get_texture(uv_bin_ashtray_buruwasu_512_512,0));
-            break;
-        case 5 :
-            d3d_model_draw(bin, 0, 0, 0, sprite_get_texture(uv_bin_ashtray_buruwasu_1024_1024,0));
-            break;
-    }
+    //Texture picked once by scr_UpdateQualityTextureCache when the quality
+    //setting changes - not a sprite_get_texture lookup here every frame.
+    d3d_model_draw(bin, 0, 0, 0, global.texBinAshtray);
     
     //reset settings
     draw_set_alpha(1);
