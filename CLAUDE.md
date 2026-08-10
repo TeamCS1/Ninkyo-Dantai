@@ -555,6 +555,36 @@ Background on how core systems actually work, based on an in-depth review
   measured **after** the font is set, since it measures against whatever
   font is current.
 
+### Curved panels drawn in code
+
+- **`scripts/scr_DrawCurvedPanel.gml`** draws the fast-travel loading
+  screen's text panel — dark interior, edge lifting to white — sized to
+  the text it wraps. It replaced a full-screen 1920x1080
+  `spr_curved_rectangle` that **never existed as a resource** and crashed
+  fast travel to every city. Worth remembering the failure mode: GML
+  resolves an unknown name as an undefined *variable*, so a missing sprite
+  reports as "not set before reading it" rather than naming the sprite,
+  and it can't be guarded with `sprite_exists` because the identifier
+  itself is what fails.
+- **`scripts/scr_DrawCurvedRect.gml`** is the shape primitive underneath
+  it, built from `draw_rectangle` and `draw_circle` rather than
+  `draw_roundrect`. Two reasons, both worth keeping: those are the shapes
+  this project already knows survive its standing `d3d_set_culling(1)`
+  (see the `draw_triangle` note under Minimap), and `draw_roundrect` gives
+  no control over corner radius while the `_ext` variants that do aren't
+  guaranteed across 1.4 builds.
+- **It draws opaque deliberately.** Its shapes overlap, so below alpha 1
+  the overlaps blend twice and show as darker seams. Avoiding that needs
+  arcs, which is exactly the hand-wound geometry the culling state
+  discards — so the gradient in `scr_DrawCurvedPanel` is a stack of
+  opaque rings rather than anything transparent.
+- The panel measures with `string_width_ext`/`string_height_ext` **after**
+  setting the font, the same ordering `scr_DrawNotificationBox` needs, and
+  takes its width from the text rather than the wrap limit so a short
+  description doesn't get a screen-wide box. Two city descriptions
+  (`CITY_NAGASEGAI_DESC`, `CITY_BURUWASU_DESC`) are still the placeholder
+  `"GG"`, which is what made that matter.
+
 ### HUD (`obj_gui_buruwasu`)
 
 - **"Default" HUD Elements mode now correctly re-shows before fading

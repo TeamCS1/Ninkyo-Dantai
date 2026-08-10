@@ -163,18 +163,41 @@ if drawLoadingScreen == true
     draw_set_font(ft_speedometer_buruwasu)
     draw_set_color(c_white)
     draw_text(200,200,"Loading... " + string(loadingPercentage) + " " + string(loadingString));
-    //RESTORE THIS once spr_curved_rectangle exists as a registered sprite:
-    //draw_sprite(spr_curved_rectangle,0,0,0);
+
+    //The city description sits in a curved panel drawn in code by
+    //scr_DrawCurvedPanel. This used to be draw_sprite(spr_curved_rectangle),
+    //a full-screen 1920x1080 image, and it crashed fast travel to every
+    //city because that sprite has never existed as a resource. GML reads an
+    //unknown name as an undefined VARIABLE, which is why the error said
+    //"not set before reading it" instead of naming a missing sprite.
     //
-    //It crashed fast travel to every city, not just one. The sprite has
-    //never existed as a resource, so GML read the name as an undefined
-    //VARIABLE ("not set before reading it") rather than reporting a missing
-    //sprite - and it cannot be guarded with sprite_exists, because the
-    //identifier itself is what fails to resolve. Dropping the .png in is
-    //not enough: it needs a .sprite.gmx and an entry in the project's
-    //<sprites> list, which is what adding it through the IDE does.
+    //Set the font BEFORE measuring: string_height_ext measures against
+    //whatever font is current, so measuring first sizes the panel to the
+    //wrong one. Same trap as scr_DrawNotificationBox.
     draw_set_font(ft_map_editor_buruwasu);
-    draw_text_ext(70,900,string(loadingStringLocale),30,1750);
+
+    var _textX = 70;
+    var _textY = 900;
+    var _textWrap = 1750;
+    var _textLine = 30;
+    var _textPad = 26;
+    var _textHeight = string_height_ext(string(loadingStringLocale), _textLine, _textWrap);
+
+    //Width comes from the text actually drawn, not the wrap limit, so the
+    //panel hugs a short description instead of always spanning 1750px.
+    //Two of the city descriptions are still the placeholder "GG", which a
+    //fixed-width panel would frame in a box the width of the screen.
+    var _textWidth = string_width_ext(string(loadingStringLocale), _textLine, _textWrap);
+
+    scr_DrawCurvedPanel(_textX - _textPad,
+                        _textY - _textPad,
+                        _textX + _textWidth + _textPad,
+                        _textY + _textHeight + _textPad,
+                        28,
+                        14);
+
+    draw_set_colour(c_white);
+    draw_text_ext(_textX, _textY, string(loadingStringLocale), _textLine, _textWrap);
 }
 </string>
           </argument>
