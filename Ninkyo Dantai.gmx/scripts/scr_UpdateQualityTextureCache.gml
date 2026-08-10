@@ -112,7 +112,7 @@ switch (global.propsQuality)
     case 1:
         global.texBaseballBat = sprite_get_texture(uv_baseball_bat_64_64_ninkyo, 0);
         global.texBinAshtray = sprite_get_texture(uv_bin_ashtray_buruwasu_64_64, 0);
-        global.texBurningBarrel = sprite_get_texture(uv_wall_mounted_oil_lamp_64_64, 0);
+        global.texBurningBarrel = sprite_get_texture(uv_burning_barrel_64, 0);
         global.texChainLinkFence = sprite_get_texture(uv_chain_link_fence_64, 0);
         global.texDiningBooth00 = sprite_get_texture(uv_dining_booth00_64, 0);
         global.texDiningBooth01 = sprite_get_texture(uv_dining_booth01_64, 0);
@@ -132,7 +132,7 @@ switch (global.propsQuality)
     case 2:
         global.texBaseballBat = sprite_get_texture(uv_baseball_bat_128_128_ninkyo, 0);
         global.texBinAshtray = sprite_get_texture(uv_bin_ashtray_buruwasu_128_128, 0);
-        global.texBurningBarrel = sprite_get_texture(uv_wall_mounted_oil_lamp_128_128, 0);
+        global.texBurningBarrel = sprite_get_texture(uv_burning_barrel_128, 0);
         global.texChainLinkFence = sprite_get_texture(uv_chain_link_fence_128, 0);
         global.texDiningBooth00 = sprite_get_texture(uv_dining_booth00_128, 0);
         global.texDiningBooth01 = sprite_get_texture(uv_dining_booth01_128, 0);
@@ -152,7 +152,7 @@ switch (global.propsQuality)
     case 3:
         global.texBaseballBat = sprite_get_texture(uv_baseball_bat_256_256_ninkyo, 0);
         global.texBinAshtray = sprite_get_texture(uv_bin_ashtray_buruwasu_256_256, 0);
-        global.texBurningBarrel = sprite_get_texture(uv_burning_barrel_512, 0);
+        global.texBurningBarrel = sprite_get_texture(uv_burning_barrel_256, 0);
         global.texChainLinkFence = sprite_get_texture(uv_chain_link_fence_256, 0);
         global.texDiningBooth00 = sprite_get_texture(uv_dining_booth00_256, 0);
         global.texDiningBooth01 = sprite_get_texture(uv_dining_booth01_256, 0);
@@ -172,7 +172,7 @@ switch (global.propsQuality)
     case 4:
         global.texBaseballBat = sprite_get_texture(uv_baseball_bat_512_512_ninkyo, 0);
         global.texBinAshtray = sprite_get_texture(uv_bin_ashtray_buruwasu_512_512, 0);
-        global.texBurningBarrel = sprite_get_texture(uv_wall_mounted_oil_lamp_512_512, 0);
+        global.texBurningBarrel = sprite_get_texture(uv_burning_barrel_512, 0);
         global.texChainLinkFence = sprite_get_texture(uv_chain_link_fence_512, 0);
         global.texDiningBooth00 = sprite_get_texture(uv_dining_booth00_512, 0);
         global.texDiningBooth01 = sprite_get_texture(uv_dining_booth01_512, 0);
@@ -192,7 +192,7 @@ switch (global.propsQuality)
     case 5:
         global.texBaseballBat = sprite_get_texture(uv_baseball_bat_1024_1024_ninkyo, 0);
         global.texBinAshtray = sprite_get_texture(uv_bin_ashtray_buruwasu_1024_1024, 0);
-        global.texBurningBarrel = sprite_get_texture(uv_wall_mounted_oil_lamp_1024_1024, 0);
+        global.texBurningBarrel = sprite_get_texture(uv_burning_barrel_1024, 0);
         global.texChainLinkFence = sprite_get_texture(uv_chain_link_fence_1024, 0);
         global.texDiningBooth00 = sprite_get_texture(uv_dining_booth00_1024, 0);
         global.texDiningBooth01 = sprite_get_texture(uv_dining_booth01_1024, 0);

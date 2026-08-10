@@ -533,7 +533,8 @@ Background on how core systems actually work, based on an in-depth review
   against the calling instance.
 - **Not built yet:** any gamepad input outside the main menu — no cancel/
   back button, no horizontal navigation, no in-game or
-  furniture-placement support (see #49), and no rebinding.
+  furniture-placement support (see #43, no controller support for
+  furniture placement), and no rebinding.
 
 ### On-screen message boxes
 
@@ -621,24 +622,9 @@ none of these were fixed.
   the RNG at room load. `randomize()` is meant to be called once at
   startup; doing it per instance is both a load-time cost and a way to
   defeat any deterministic seeding.
-- **5. TO DO: `obj_burning_barrel` wears the oil lamp's texture at four
-  of its five quality settings.** Its quality switch resolves to
-  `uv_burning_barrel_512` at quality 3, but to
-  `uv_wall_mounted_oil_lamp_64_64` / `_128_128` / `_512_512` /
-  `_1024_1024` at qualities 1, 2, 4 and 5 — so the barrel only looks
-  right on the middle setting and is wearing a lamp everywhere else.
-  `uv_burning_barrel_512` is the *only* barrel texture that exists, so
-  this is not a wiring mistake that can be corrected in code: the other
-  four sizes have to be authored first. Reads as a copy-paste from
-  `obj_wall_mounted_oil_lamp`, whose switch uses exactly those four
-  sprites. The mapping now lives in
-  `scripts/scr_UpdateQualityTextureCache.gml` rather than the object's
-  Draw event; it was carried across unchanged and deliberately, since
-  correcting it means new art, not new code.
-
 ### Save/load & global state
 
-- **6. ~190 distinct `global.*` variables** are initialized ad-hoc across at
+- **5. ~190 distinct `global.*` variables** are initialized ad-hoc across at
   least three places (`scr_globals.gml`, `obj_splash_screen_buruwasu`'s
   Create event, and scattered per-object Create events) with no single
   authoritative init entry point. This is the standing risk factor for
@@ -832,45 +818,45 @@ The remaining draw-state issues:
   draws that value directly in GUI space — the marker lands in the wrong
   spot whenever the view scrolls/zooms.
 
-- **34.** No fast-travel/unlock validation exists to check — the only
+- **33.** No fast-travel/unlock validation exists to check — the only
   destination-selection mechanic found is an in-city waypoint marker, no
   cross-city travel code path was located.
 
 ### Home customisation system
 
-- **35. Dropdown menu leaks 9 UI instances per click.**
+- **34. Dropdown menu leaks 9 UI instances per click.**
   `obj_dropdown_home_customisation`'s Pressed event calls
   `scr_CreateDropdownItems()` unconditionally on every click (both open and
   close), which always creates 9 `obj_dropdown_slots` rows with nothing
   anywhere destroying the previous batch first.
-- **36. No placement validation at all.** `obj_placerParent`'s Draw GUI event
+- **35. No placement validation at all.** `obj_placerParent`'s Draw GUI event
   moves `global.selectedTarget` by keyboard nudge with no `place_meeting`,
   no room-bounds clamp, and no check against other placed items — furniture
   can be pushed off-room or stacked infinitely in one spot.
-- **37. "Nearest object" selection doesn't actually sort by distance.**
+- **36. "Nearest object" selection doesn't actually sort by distance.**
   `ds_list_sort(tempList, true)` sorts the raw ds_list *handles* stored in
   `tempList`, not the `dist` field inside each entry — selection order is
   effectively creation order, not proximity order.
-- **38. Leftover copy-paste flavor text (partially fixed).** The
+- **37. Leftover copy-paste flavor text (partially fixed).** The
   Bedroom/Kitchen/Living rows now have real furniture descriptions (see
   Architecture notes, Home customisation system), but the other 6
   category rows in `obj_dropdown_slots` still carry verbatim
   vending-machine descriptions (e.g. *"A carbonated Cola derived from
   fruit ingredients"*) — moot until those categories have a matching
   furniture type to describe (see #45).
-- **39. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
+- **38. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
   Create with no Destroy event to free it; `obj_wall_mounted_oil_lamp_custom`
   creates a child light instance and loads a model in Create with no
   Destroy event to clean either up.
-- **40.** The visible placement grid is purely cosmetic — there is no actual
+- **39.** The visible placement grid is purely cosmetic — there is no actual
   grid-snapping/world-to-cell math anywhere; movement is a raw per-keypress
   pixel nudge.
-- **41. TO DO: no slot-picker UI.** `global.currentSaveSlot` (1-5) exists
+- **40. TO DO: no slot-picker UI.** `global.currentSaveSlot` (1-5) exists
   and `scr_SaveHomeFurniture`/`scr_ApplyHomeFurniturePositions` are fully
   slot-aware, but nothing in the game lets the player choose or see which
   slot is active — it always stays at its default of `1` until a picker
   is built (e.g. in the options/save menu).
-- **42. Minor: shipped default furniture layout is hardcoded in two
+- **41. Minor: shipped default furniture layout is hardcoded in two
   places.** `scripts/scr_SaveHomeFurniture.gml` and
   `scripts/scr_LoadHomeFurniture.gml` both independently hardcode the same
   three `ini_write_string` lines —
@@ -880,7 +866,7 @@ The remaining draw-state issues:
   between them. If the room's default layout is ever changed (or a
   fourth default piece added), both files need updating by hand or
   they'll silently disagree about what "defaults" means.
-- **43. TO DO: no rotation support in the placement UI.**
+- **42. TO DO: no rotation support in the placement UI.**
   `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
   `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
   for changing a selected piece's rotation. Even if there were,
@@ -888,9 +874,10 @@ The remaining draw-state issues:
   with (their Draw events hardcode `d3d_transform_add_rotation_z(0)`) —
   only `obj_bed` supports rotation today, and only via room creation code
   set once at placement time, not interactively.
-- **49. TO DO: no controller/joypad support for furniture placement.**
+- **43. TO DO: no controller/joypad support for furniture placement.**
   Gamepad support now exists, but only in the main menu — see Architecture
-  notes, Gamepad input. Selecting, moving, and (per #44) any future
+  notes, Gamepad input. Selecting, moving, and (per #42, no rotation
+  support in the placement UI) any future
   rotating of furniture is still keyboard/mouse-only
   (`keyboard_check_pressed`, `mouse_wheel_up`/`down`). The reusable
   scripts to wire this up are already there; `obj_placerParent` just
@@ -1062,7 +1049,7 @@ predicts where the next bug will be.
 
 - *Copy-paste reuse without a follow-up pass.* The furniture dropdown
   began as a duplicated vending-machine UI and six of nine rows still
-  carry vending-machine text (#38, #45). The vehicles held divergent
+  carry vending-machine text (#37, #45). The vehicles held divergent
   copies of the same event bodies. Both worked; the cost arrived later,
   when one change had to be made in nine places.
 - *Draw-state leaking between instances.* Colour, alpha, font,
@@ -1146,151 +1133,11 @@ entry here each time a Known Issue is fixed or a piece of work lands;
 keep the technical specifics (scripts, object names) out of this section
 and in Architecture notes / Known Issues instead.
 
-### August 8, 2026
+### August 10, 2026
 
 **Fixes**
-- Tidied up the options menu. The Gamepad Settings section no longer says
-  "No settings found" above the setting that is actually there, and the
-  Debug Gamepad row now sits directly under its heading like every other
-  section.
-- Fixed the coronas (the glowing markers over the gun shop and the taxi
-  rank) rendering wrong.
-- Straightened out some road junctions in the city that were rotated or
-  placed slightly off.
-- Another framerate pass on the city. The game was constantly unloading
-  and reloading textures for anything beyond the draw distance.
-- Optimised the buildings, which were previously re-deciding which texture
-  quality to use every single frame.
-- Water animation was doing busywork that had no visible effect.
-
-### August 7, 2026
-
-**New**
-- Four more cars are now drivable — the Block Stingray, Olympics Lemane,
-  Opera Windsor and Titan Gresley. They were parked around the city
-  already but you couldn't get into any of them.
-- There's now a minimap on screen at all times, showing the streets
-  around you with an arrow for where you're facing. The full map is
-  still on Tab.
-- Every vehicle now drives on the same, much more convincing physics.
-  Cars lean on their tyres instead of sliding around: brake into a
-  corner and the back steps out, get on the power too early and you run
-  wide, and a handbrake turn now actually rotates the car and can be
-  caught with opposite lock.
-- Each vehicle type feels genuinely different rather than just faster or
-  slower. The truck is heavy and stubborn and has to slow right down for
-  a corner, the police car is the sharpest thing on the road, the
-  ambulance leans, and the scooter is light and flickable.
-- The Block Stingray is now a proper sports car — the fastest and
-  quickest-accelerating thing on the road, and it grips harder through
-  corners to match.
-- Fog is now real weather rather than a fixed setting. Some nights a bank
-  rolls in after midnight, thickens gradually, and burns off some time
-  between four and nine in the morning. It comes in as a thin grey haze
-  and turns white as it deepens, and when it's thick you genuinely lose
-  sight of the far end of the street. Most nights are clear, so it stays
-  something you notice.
-- Alleyways and the shopping mall floor now show as checkered patterns on
-  the minimap, so you can tell them apart from the open road at a glance.
-
-**Fixes**
-- Fixed the screen washing out white in the modern mall. It was worst
-  around midday and you could sometimes clear it by walking back and
-  forth. The same fault could wash out the minimap and the on-screen
-  objective text anywhere in the game.
-- You can no longer drive through most of the city. Vehicles now collide
-  with every building, lamp post, bench, bin, fence, pillar, tree and
-  shop front that you already collided with on foot — previously it was
-  three types of object and nothing else.
-- Fixed vehicles bouncing off thin air. Their collision was twice as wide
-  as the car itself, so you'd hit invisible walls driving down an open
-  road. The scooter's was far larger again.
-- Fixed the taxi, the scooter and three of the civilian cars never
-  reaching their own top speed. The scooter was the worst — it was
-  managing about a quarter of what it was meant to, so it's dramatically
-  faster now.
-- The options menu can now be opened from the modern mall and from the
-  other cities. It only worked in three rooms before.
-- The map now shows where you are whatever you're driving. Previously it
-  only marked you in the car and the police car, so the other eight
-  vehicles left you with no marker at all.
-- Fixed walking into the parked taxi stopping you dead instead of letting
-  you slide along it like every other object.
-- Getting into a car no longer makes a second parked car of the same
-  model vanish.
-- On-screen messages — notifications and the camera tutorial prompt — no
-  longer draw underneath the minimap, and long ones no longer spill out
-  of their own background.
-- Big framerate improvement in the city, especially after driving. Two
-  causes: the game was drawing far more of the world than it needed to
-  after you'd been in a vehicle — and getting worse every time you got
-  into another one — and it was also keeping thousands of distant
-  scenery objects fully active when they were nowhere near you.
-- Corners can no longer be taken flat out. Vehicles now have a realistic
-  turning circle at speed, so you have to actually slow down.
-- Fixed a handful of vehicles you could get into that behaved
-  differently from the rest, including the scooter, which used different
-  controls to everything else. All vehicles now use the arrow keys and I
-  to get out.
-- Fixed the truck's gear display skipping numbers at certain speeds.
-- Fixed the wrong vehicle name showing on the speedometer when driving
-  anything other than the car.
-
-### August 6, 2026
-
-**New**
-- Controller support has started landing! You can now scroll the main
-  menu with a controller — either the D-pad or the left stick. Tested
-  with a DualSense connected over Bluetooth, with no extra software
-  needed.
-- You can now select a main menu item with the Cross button, instead of
-  having to reach for Enter.
-- Added a "Debug Gamepad" option under Gamepad Settings in the options
-  menu. Turn it on to see exactly what the game detects about your
-  controller — handy if yours isn't working and you're reporting it.
-
-Note the controller doesn't do anything outside the main menu yet, and
-there's no way to rebind the buttons.
-
-### August 3, 2026
-
-**Fixes**
-- Fixed the elevator in Shinji's Home looking like a plain house block at
-  every graphics quality setting except the highest — it now shows the
-  proper elevator texture at every setting.
-- Fixed the HUD (money, compass, clock, health/stamina bars) staying
-  invisible after backing out of the options menu when "HUD Elements" is
-  set to "Default" — it now reappears and fades out again as intended
-  instead of just staying hidden.
-
-**Behind the scenes**
-- Removed a large amount of unused leftover code that shipped in the
-  project but was never actually part of the game (an old platformer
-  collision system and some assets from an unrelated earlier project).
-  No gameplay impact, just a cleaner codebase.
-
-### August 2, 2026
-
-**New**
-- Furniture you move around in Shinji's Home now actually saves! Move
-  your bed, fridge, or cabinet and it'll still be there next time you
-  load up.
-- You can now add an extra bed, fridge, or cabinet from the furniture
-  menu instead of only rearranging the ones you start with.
-
-**Fixes**
-- Fixed walking diagonally into a wall or object stopping you dead
-  instead of letting you slide along it.
-- Fixed a huge number of things around the city you could previously
-  walk straight through, including building exteriors, the elevator,
-  street lamps, wall lamps, benches, bins, fences, pillars, and the
-  dining booths at Chicken Licken.
-- Fixed the chain-link fence's collision not matching how it actually
-  looks, so it now blocks you where you'd expect instead of letting you
-  clip into or through it.
-- Fixed being able to walk through part of the bed's south side.
-- Fixed being able to get stuck on your own furniture while trying to
-  rearrange your room — it's walk-through only while you're actively
-  placing it, solid the rest of the time.
-- Fixed a small memory leak from repeatedly opening and closing the
-  furniture placement menu.
+- The burning barrel now has its own artwork at every graphics quality
+  setting. It was wearing the wall lamp's texture on four of the five
+  settings, so it only looked right on Medium.
+- Moved the taxi rank marker so it lines up with the rank itself.
+- New texture for the taxi.

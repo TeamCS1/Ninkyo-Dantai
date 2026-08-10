@@ -1,0 +1,10 @@
+# A full copy of the project once got committed inside itself, at
+# "Ninkyo Dantai.gmx/Ninkyo Dantai.gmx/" - 1,387 duplicate files that
+# shadowed every real resource. Nothing legitimately lives there, so it is
+# ignored outright rather than left to be spotted by eye in a diff.
+Ninkyo Dantai.gmx/Ninkyo Dantai.gmx/
+
+# GameMaker Studio 1.4 local build/cache output
+*.gmx.bak
+*.bak
+tmp/
