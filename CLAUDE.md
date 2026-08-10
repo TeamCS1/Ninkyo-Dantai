@@ -588,12 +588,12 @@ notes) rather than renumbering everything after it, so gaps are expected.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
-- **3. `global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
+- **1. `global.enablePlayerCollisionsInWorldBuruwasu` initialization order.**
   Set in `obj_global_buruwasu`'s Create event but read from player collision
   events; GMS1.4 doesn't guarantee Create-event order across differently
   named objects, so this is a latent "read before set" risk if instance
   order ever changes.
-- **4. `obj_land_mask` and `object192` are suspicious but left untouched.**
+- **2. `obj_land_mask` and `object192` are suspicious but left untouched.**
   Both are placed only in `rm_city_ichihara`, and both have **identical**
   Create-event code loading the same `TERRAIN/hill.d3d` model. `object192`
   is GameMaker's auto-generated default name for a never-renamed object —
@@ -606,7 +606,7 @@ notes) rather than renumbering everything after it, so gaps are expected.
 Found while unifying the vehicles and chasing the spawn-area framerate;
 none of these were fixed.
 
-- **53. The water animation is broken, not just idle.**
+- **3. The water animation is broken, not just idle.**
   `obj_water_anim_buruwasu`'s alarm increments `image_index_animation`,
   and then its Step event immediately does
   `image_index_animation = image_index`, overwriting what the alarm just
@@ -614,12 +614,12 @@ none of these were fixed.
   achieve nothing. (It is in the culling allowlist, which is safe — the
   worst case is off-screen water holding a frame — but the animation
   wouldn't play even if it weren't.)
-- **54. `obj_side_walk_buruwasu` calls `randomize()` in its Create
+- **4. `obj_side_walk_buruwasu` calls `randomize()` in its Create
   event** — 2,029 instances in `rm_city_buruwasu`, so 2,029 reseeds of
   the RNG at room load. `randomize()` is meant to be called once at
   startup; doing it per instance is both a load-time cost and a way to
   defeat any deterministic seeding.
-- **59. TO DO: `obj_burning_barrel` wears the oil lamp's texture at four
+- **5. TO DO: `obj_burning_barrel` wears the oil lamp's texture at four
   of its five quality settings.** Its quality switch resolves to
   `uv_burning_barrel_512` at quality 3, but to
   `uv_wall_mounted_oil_lamp_64_64` / `_128_128` / `_512_512` /
@@ -636,7 +636,7 @@ none of these were fixed.
 
 ### Save/load & global state
 
-- **5. ~190 distinct `global.*` variables** are initialized ad-hoc across at
+- **6. ~190 distinct `global.*` variables** are initialized ad-hoc across at
   least three places (`scr_globals.gml`, `obj_splash_screen_buruwasu`'s
   Create event, and scattered per-object Create events) with no single
   authoritative init entry point. This is the standing risk factor for
@@ -767,7 +767,7 @@ The remaining draw-state issues:
 - **23.** `obj_car_icon` / `obj_taxi_icon` only call `draw_set_alpha_test(false)`
   in the *out-of-range* branch, leaving alpha testing on indefinitely
   whenever the in-range branch draws instead.
-- **25.** Several menu/HUD objects (`obj_main_menu_options`,
+- **24.** Several menu/HUD objects (`obj_main_menu_options`,
   `obj_dropdown_home_customisation`, `obj_dropdown_slots`,
   `obj_vending_machine_ui`, `obj_property_management_slots`) set
   font/color in their Draw GUI events and never restore a default.
@@ -781,26 +781,26 @@ The remaining draw-state issues:
   `scr_DrawCollisionBoxModel.gml` (resets alpha/color/transform at the end)
   and `obj_cursor_grab_64` (checks `instance_exists` before dereferencing
   its target).
-- **26.** `scripts/DrawArrowWaypoint.gml` line 16 reads `_maxDistance`, which is
+- **25.** `scripts/DrawArrowWaypoint.gml` line 16 reads `_maxDistance`, which is
   never declared — the actual variable is `_maxLength`. Dead code today,
   but will throw immediately if ever wired up.
-- **27.** `obj_gui_buruwasu`'s Draw GUI event computes health/stamina bar
+- **26.** `obj_gui_buruwasu`'s Draw GUI event computes health/stamina bar
   percentages with no guard against a zero max — a real divide-by-zero
   risk if either max stat is ever zeroed elsewhere.
-- **28.** `draw_text_shadow_tooltips.gml` hardcodes its draw position to
+- **27.** `draw_text_shadow_tooltips.gml` hardcodes its draw position to
   `(20, 1000)` regardless of caller-supplied coordinates, so if two
   interactables are ever in range at once, their prompts overwrite each
   other at the same spot.
 ### Dialogue controller (`obj_masterDialogueControllerBuruwasu`)
 
-- **30. Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
+- **28. Hardcoded `message[]`/`message_end` desync risk, already bitten once.**
   Both this object and its near-clone `obj_battle_start_dialogue` define
   only `message[0]` with `message_end = 0`. The counts match today, but the
   code's own comment — *"if there are more messages left to show (0 -> 6,
   in our case)"* — is leftover from a 7-line template, i.e. this exact
   desync has already happened once before. Adding a new line without
   bumping `message_end` will make it silently unreachable.
-- **31. Forced intro dialogue replays every time on 10+ rooms.** The same
+- **29. Forced intro dialogue replays every time on 10+ rooms.** The same
   instance (identical hardcoded text) is placed non-persistently across
   most city/interior rooms. Its Draw GUI event shows the box unconditionally
   on room load with no "already seen" flag, so re-entering any of these
@@ -811,7 +811,7 @@ The remaining draw-state issues:
 
 ### Map system
 
-- **32. `obj_buruwasu_map`'s Room Start event calls
+- **30. `obj_buruwasu_map`'s Room Start event calls
   `room_instance_add(global.newRoomCityBuruwasuMap, 0, 0,
   obj_draw_map_buruwasu)`** — `obj_draw_map_buruwasu` is not a defined
   object anywhere in the project. `scr_BuruwasuDrawMap.gml` (unreferenced
@@ -819,59 +819,59 @@ The remaining draw-state issues:
   meant to run, and it also references an undeclared variable `gsc` (the
   rest of the project uses `gui_scale`) — this looks like an
   abandoned/broken refactor.
-- **33.** The `room_instance_add(...)` call above also runs **outside** the
+- **31.** The `room_instance_add(...)` call above also runs **outside** the
   `if global.newRoomCityBuruwasuisGenerated == false` guard that correctly
   wraps the preceding `room_duplicate` — so it re-runs (and re-appends) on
   every map visit even though the room duplication itself is correctly
   gated to happen once.
-- **34. Room-space/GUI-space mismatch for the debug map marker.** The middle
+- **32. Room-space/GUI-space mismatch for the debug map marker.** The middle
   mouse-press handler in `obj_buruwasu_map` stores room-space
   `mouse_x`/`mouse_y` into `global.targetedX/Y`, but the Draw GUI event then
   draws that value directly in GUI space — the marker lands in the wrong
   spot whenever the view scrolls/zooms.
-- **35. `obj_ichihara_temp_map` is invisible.** Its Create event sets
+- **33. `obj_ichihara_temp_map` is invisible.** Its Create event sets
   `image_alpha = 0` and nothing in the project ever restores it, yet it's
   placed as the background in `rm_city_ichihara` — that city's backdrop
   currently renders fully transparent.
-- **36.** No fast-travel/unlock validation exists to check — the only
+- **34.** No fast-travel/unlock validation exists to check — the only
   destination-selection mechanic found is an in-city waypoint marker, no
   cross-city travel code path was located.
 
 ### Home customisation system
 
-- **38. Dropdown menu leaks 9 UI instances per click.**
+- **35. Dropdown menu leaks 9 UI instances per click.**
   `obj_dropdown_home_customisation`'s Pressed event calls
   `scr_CreateDropdownItems()` unconditionally on every click (both open and
   close), which always creates 9 `obj_dropdown_slots` rows with nothing
   anywhere destroying the previous batch first.
-- **39. No placement validation at all.** `obj_placerParent`'s Draw GUI event
+- **36. No placement validation at all.** `obj_placerParent`'s Draw GUI event
   moves `global.selectedTarget` by keyboard nudge with no `place_meeting`,
   no room-bounds clamp, and no check against other placed items — furniture
   can be pushed off-room or stacked infinitely in one spot.
-- **40. "Nearest object" selection doesn't actually sort by distance.**
+- **37. "Nearest object" selection doesn't actually sort by distance.**
   `ds_list_sort(tempList, true)` sorts the raw ds_list *handles* stored in
   `tempList`, not the `dist` field inside each entry — selection order is
   effectively creation order, not proximity order.
-- **41. Leftover copy-paste flavor text (partially fixed).** The
+- **38. Leftover copy-paste flavor text (partially fixed).** The
   Bedroom/Kitchen/Living rows now have real furniture descriptions (see
   Architecture notes, Home customisation system), but the other 6
   category rows in `obj_dropdown_slots` still carry verbatim
   vending-machine descriptions (e.g. *"A carbonated Cola derived from
   fruit ingredients"*) — moot until those categories have a matching
   furniture type to describe (see #51).
-- **42. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
+- **39. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
   Create with no Destroy event to free it; `obj_wall_mounted_oil_lamp_custom`
   creates a child light instance and loads a model in Create with no
   Destroy event to clean either up.
-- **43.** The visible placement grid is purely cosmetic — there is no actual
+- **40.** The visible placement grid is purely cosmetic — there is no actual
   grid-snapping/world-to-cell math anywhere; movement is a raw per-keypress
   pixel nudge.
-- **44. TO DO: no slot-picker UI.** `global.currentSaveSlot` (1-5) exists
+- **41. TO DO: no slot-picker UI.** `global.currentSaveSlot` (1-5) exists
   and `scr_SaveHomeFurniture`/`scr_ApplyHomeFurniturePositions` are fully
   slot-aware, but nothing in the game lets the player choose or see which
   slot is active — it always stays at its default of `1` until a picker
   is built (e.g. in the options/save menu).
-- **46. Minor: shipped default furniture layout is hardcoded in two
+- **42. Minor: shipped default furniture layout is hardcoded in two
   places.** `scripts/scr_SaveHomeFurniture.gml` and
   `scripts/scr_LoadHomeFurniture.gml` both independently hardcode the same
   three `ini_write_string` lines —
@@ -881,7 +881,7 @@ The remaining draw-state issues:
   between them. If the room's default layout is ever changed (or a
   fourth default piece added), both files need updating by hand or
   they'll silently disagree about what "defaults" means.
-- **48. TO DO: no rotation support in the placement UI.**
+- **43. TO DO: no rotation support in the placement UI.**
   `obj_placerParent`'s Draw GUI event only reads `vk_up`/`vk_down`/
   `vk_left`/`vk_right` for `move_dx`/`move_dy` — there's no input at all
   for changing a selected piece's rotation. Even if there were,
@@ -896,12 +896,12 @@ The remaining draw-state issues:
   (`keyboard_check_pressed`, `mouse_wheel_up`/`down`). The reusable
   scripts to wire this up are already there; `obj_placerParent` just
   doesn't call them yet.
-- **50. TO DO: still no way to remove furniture once placed.** Adding is
+- **44. TO DO: still no way to remove furniture once placed.** Adding is
   now possible (see Architecture notes, Home customisation system), but
   `obj_placerParent` has no delete action at all — only select and
   reposition. A misclicked or unwanted piece can only be nudged
   off-screen, not actually removed.
-- **51. Only 3 of the 9 dropdown categories have a matching furniture
+- **45. Only 3 of the 9 dropdown categories have a matching furniture
   type.** `obj_dropdown_slots` still lists "Structure & Painting",
   "Doors & Windows", "General", "Bathroom", "Office", "Outdoor &
   Farming", and "Decorations" as categories, but no placeable object
@@ -914,7 +914,7 @@ The remaining draw-state issues:
   resolves to `noone` and that `with` block silently does nothing. Not
   currently harmful (`with (noone)` is a no-op), but worth knowing before
   adding a 10th row expecting it to work.
-- **52. TO DO: adding furniture is free.** Each dropdown row already
+- **46. TO DO: adding furniture is free.** Each dropdown row already
   carries `price`/`upkeep` fields (left over from the vending-machine
   code this UI was copied from), and `global.yenAmount` already exists
   and is tracked/saved elsewhere, but nothing in the new add-furniture
