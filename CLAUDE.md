@@ -960,6 +960,21 @@ The remaining draw-state issues:
   flow reads `price` or deducts it — every add is currently instant and
   free, with no funds check at all.
 
+### Fast travel & city content
+
+- **47. TO DO: two of the five cities have no description written.**
+  The taxi loading screen draws `CITY_*_DESC`, defined as constants in
+  `Configs/Default.config.gmx` (not in `.project.gmx` — that's why they
+  don't turn up when grepping the usual places). Konan, Yokyohama and
+  Ichihara have real prose; **`CITY_BURUWASU_DESC` and
+  `CITY_NAGASEGAI_DESC` are both still the placeholder `"GG"`**, which is
+  what the player sees on the loading screen when travelling to either.
+  Checked against the file's whole git history — no other version of the
+  Buruwasu text has ever been committed, so if one was written it lives
+  outside the project. Now that the loading panel sizes itself to its
+  text, a two-character description also draws a very small box, so this
+  reads as broken rather than unfinished.
+
 No `argument_count`/optional-argument bugs, and no `ds_list`/`ds_map`/
 `ds_grid` leaks, were found beyond what's explicitly called out above.
 
@@ -1197,6 +1212,7 @@ and in Architecture notes / Known Issues instead.
   were there in the world the whole time, just missing from the map.
   Ichihara's snow pavement now reads as its own cold blue-grey rather
   than ordinary kerb.
+- Nagasegai has a minimap. It was the only city without one.
 - Fast travel no longer crashes the game. Picking any destination from the
   taxi menu and confirming it would drop straight to an error on the next
   frame — every city was affected, not just the one being travelled to.

@@ -311,6 +311,7 @@
     <instance objName="obj_house_green_block001" x="5376" y="2688" name="inst_F7BBE35E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_global_buruwasu" x="96" y="16" name="inst_D73D9E35" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_gui_buruwasu" x="128" y="16" name="inst_FD2ED72E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_map_buruwasu_controller" x="16" y="-48" name="inst_557C2832" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_weapon_choice" x="160" y="16" name="inst_10A304F3" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_car_icon" x="3735" y="2175" name="inst_B2CFF22C" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_weather_controller" x="192" y="16" name="inst_CA16831E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
