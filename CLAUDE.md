@@ -957,11 +957,11 @@ Randomly spawned around Buruwasu, attackable at any time for rewards.
 | Thugs | Normal | — | — | Run of the mill |
 | Nouveau Riche | High | Medium | **Substantial** | Gold suits. Rare spawn. **Needs a new sprite/model** |
 | Homeless People | Low | Low | **None** | Deliberately drops no money |
-| Racers | Normal | — | — | Standard |
-| Bikers | Normal | — | — | Standard |
+| Racers | Normal | — | — | A rare 5% chance to drop an accessory item (Racing Helmet) |
+| Bikers | Normal | — | — | A rare 5% chance to drop an accessory item (Biker Jacket) |
 | Loan Sharks | Normal | High | High | Standard |
 | Pickpockets | Normal | Normal | Normal | A rare 5% chance to drop an accessory item |
-| Drunkards | Normal | — | — | Standard | A rare 5% chance to drop a Sake bottle item |
+| Drunkards | Low | Normal | Low | A rare 5% chance to drop a Sake bottle item |
 | Scammers | Normal | Medium | Low | Standard |
 | Extortionists | Normal | — | — | Standard |
 | Corrupt Cops | Normal | — | — | Standard |
