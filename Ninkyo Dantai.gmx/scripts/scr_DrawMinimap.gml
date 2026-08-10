@@ -94,9 +94,30 @@ with (obj_alleyway_floor)
 }
 
 // ---- Pavement
+//
+// EVERY sidewalk variant has to be listed here, not just the Buruwasu one.
+// The city-specific variants are separate objects rather than one object
+// with a texture switch, so a new city's pavement is invisible on this
+// panel until its type is added below. That is what happened to Ichihara
+// (88 snow tiles against 73 ordinary ones, so half its pavement vanished)
+// and to Yokyohama, which lost all 91 of its own.
 with (obj_side_walk_buruwasu)
 {
     scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(150, 150, 150), false);
+}
+
+with (obj_sidewalk_yokyohama)
+{
+    scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(150, 150, 150), false);
+}
+
+// Ichihara's snow pavement gets a cold tint rather than the ordinary grey,
+// so a snowed-in street reads as different ground at a glance. Deliberately
+// not near-white: buildings are already pure white on this panel, and a
+// pale snow would blur into them.
+with (obj_side_walk_snow_buruwasu)
+{
+    scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(176, 198, 219), false);
 }
 
 // Mall floor is checkered black and white, which separates it from the

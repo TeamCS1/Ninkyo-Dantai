@@ -107,9 +107,28 @@ with(obj_parking_lot_empty)
 
 }
 
+//Every sidewalk variant needs its own with() here - the city-specific
+//pavements are separate objects, so one missing type means that city's
+//pavement is simply absent from this map. scr_DrawMinimap carries the
+//same list; keep the two in step or the panel and this map disagree.
 with(obj_side_walk_buruwasu)
 {
     draw_set_color(make_colour_rgb(200,200,200))
+    draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), 0)
+
+}
+
+with(obj_sidewalk_yokyohama)
+{
+    draw_set_color(make_colour_rgb(200,200,200))
+    draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), 0)
+
+}
+
+//Cold tint for Ichihara's snow pavement, matching scr_DrawMinimap
+with(obj_side_walk_snow_buruwasu)
+{
+    draw_set_color(make_colour_rgb(176,198,219))
     draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), 0)
 
 }

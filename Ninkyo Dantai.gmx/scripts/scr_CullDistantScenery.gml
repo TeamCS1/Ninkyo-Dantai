@@ -61,7 +61,13 @@ global.cullLastY = global.playerY;
 // Put all of it to sleep, then wake what's near the player. Sleeping an
 // already-sleeping instance is harmless, and doing it this way means the
 // active set is always exactly "what's in range" with no bookkeeping.
+//Every sidewalk variant, not just the Buruwasu one - the city-specific
+//pavements are separate objects, so each has to be listed by name. Both
+//of these are Create+Draw only, same as the original, so there is no
+//behaviour to lose by sleeping them.
 instance_deactivate_object(obj_side_walk_buruwasu);
+instance_deactivate_object(obj_side_walk_snow_buruwasu);
+instance_deactivate_object(obj_sidewalk_yokyohama);
 instance_deactivate_object(obj_house_block001);
 instance_deactivate_object(obj_grass_buruwasu);
 instance_deactivate_object(obj_roadh);
