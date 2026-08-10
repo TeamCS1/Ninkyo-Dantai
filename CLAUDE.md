@@ -633,15 +633,6 @@ none of these were fixed.
   `scripts/scr_UpdateQualityTextureCache.gml` rather than the object's
   Draw event; it was carried across unchanged and deliberately, since
   correcting it means new art, not new code.
-- **58. `obj_taxi` is orphaned.** It carries the full shared vehicle
-  setup — create call, physics, draw, exit — and is byte-identical to
-  the other nine, but nothing ever `instance_create`s it and it is
-  placed in no room, because the taxi is fast travel rather than a car
-  you drive (see As designed). So all of that code is unreachable. Also note its
-  exit passes `obj_taxi_icon`, which is the fast-travel marker — if it
-  were ever made drivable, parking it would drop a fast-travel icon.
-  Either give it a real icon and an entry event, or delete the object;
-  leaving it as-is invites someone to "fix" the wrong end of it.
 
 ### Save/load & global state
 
@@ -961,17 +952,17 @@ Randomly spawned around Buruwasu, attackable at any time for rewards.
 
 | Group | Health | Damage | Money | Notes |
 |---|---|---|---|---|
-| Delinquents | Low | — | — | Lowest tier, easy to defeat |
+| Delinquents | Low | Normal | Normal | Lowest tier, easy to defeat |
 | Yakuza | Low | **High** | — | Glass cannon — hits hard, dies fast |
 | Thugs | Normal | — | — | Run of the mill |
-| Nouveau Riche | — | — | **Substantial** | Gold suits. Rare spawn. **Needs a new sprite/model** |
-| Homeless People | — | — | **None** | Deliberately drops no money |
+| Nouveau Riche | High | Medium | **Substantial** | Gold suits. Rare spawn. **Needs a new sprite/model** |
+| Homeless People | Low | Low | **None** | Deliberately drops no money |
 | Racers | Normal | — | — | Standard |
 | Bikers | Normal | — | — | Standard |
-| Loan Sharks | Normal | — | — | Standard |
-| Pickpockets | Normal | — | — | Standard |
-| Drunkards | Normal | — | — | Standard |
-| Scammers | Normal | — | — | Standard |
+| Loan Sharks | Normal | High | High | Standard |
+| Pickpockets | Normal | Normal | Normal | A rare 5% chance to drop an accessory item |
+| Drunkards | Normal | — | — | Standard | A rare 5% chance to drop a Sake bottle item |
+| Scammers | Normal | Medium | Low | Standard |
 | Extortionists | Normal | — | — | Standard |
 | Corrupt Cops | Normal | — | — | Standard |
 | Arsonists | Normal | — | — | Standard |
@@ -998,13 +989,13 @@ here rather than discovered halfway through:
   unrelated NPCs. Anything reusing that machinery to place enemy groups
   inherits both.
 
-## As designed
+## As Designed (Not Changing)
 
 Things that look like bugs on first read but are intentional — confirmed by
 the person who actually knows the design intent, not something inferable
 from the code alone. Recorded so they don't get "fixed" again.
 
-- **`obj_line_of_ladies` having no `spriteName`/`maskName` is intentional,
+- **1. `obj_line_of_ladies` having no `spriteName`/`maskName` is intentional,
   not missing.** It draws its own `lineofladies.d3d` model directly via
   `d3d_model_draw` in its Draw event (same pattern as every other 3D-model
   prop), completely independent of the sprite/mask system — it does
@@ -1013,7 +1004,7 @@ from the code alone. Recorded so they don't get "fixed" again.
   (`z = 223` in Create) and out of the player's reach at ground level, the
   same reasoning that already applies to `obj_fire_escape_three_floors`.
 
-- **The `obj_taxi_icon` collision being a no-op stub is intentional.** Its
+- **2. The `obj_taxi_icon` collision being a no-op stub is intentional.** Its
   body in `obj_player_buruwasu` is just `x = x` / `y = y`, where every
   other vehicle icon spawns a rideable vehicle and sets
   `global.inVehicle`. That difference is the point: the taxi is fast
@@ -1021,6 +1012,15 @@ from the code alone. Recorded so they don't get "fixed" again.
   lives on `obj_taxi_corona`. Do not "fix" this by making it spawn
   `obj_taxi`, and **leave the stub body alone** — it reads as dead code
   worth deleting, and that has been considered and declined.
+
+  **3. `obj_taxi` is orphaned.** It carries the full shared vehicle
+  setup — create call, physics, draw, exit — and is byte-identical to
+  the other nine, but nothing ever `instance_create`s it and it is
+  placed in no room, because the taxi is fast travel rather than a car
+  you drive (see As designed). So all of that code is unreachable. Also note its
+  exit passes `obj_taxi_icon`, which is the fast-travel marker — if it
+  were ever made drivable, parking it would drop a fast-travel icon.
+  
 
 ## Reviewer's take
 
