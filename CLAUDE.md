@@ -447,19 +447,29 @@ Background on how core systems actually work, based on an in-depth review
   later. The Tab map used to branch per vehicle type and only listed
   `obj_car` and `obj_police_car`, so the other eight left it with no
   marker at all while you drove them.
-- **Every city-specific scenery variant has to be listed by name, in
-  three places.** The pavements are separate objects per city
-  (`obj_side_walk_buruwasu`, `obj_side_walk_snow_buruwasu`,
-  `obj_sidewalk_yokyohama`, `obj_sidewalk_mall_buruwasu`) rather than one
-  object with a texture switch, so each needs its own `with()` in
-  `scr_DrawMinimap` **and** in `scr_minimap` (the Tab map), plus an
-  `instance_deactivate_object` in `scr_CullDistantScenery`. Miss one and
-  that city's pavement is simply absent from the map while rendering
-  perfectly in the world — which is exactly how it presented: Ichihara
-  showed 73 of its 161 pavement tiles (the snow variant was missing) and
-  Yokyohama showed none of its 91. The snow pavement is drawn a cold
-  `rgb(176,198,219)` rather than the ordinary grey, deliberately not
-  near-white, since buildings are already pure white on both maps.
+- **Every scenery variant has to be listed by name, in three places.**
+  Ground and structure are separate objects per city and per orientation
+  rather than one object with a texture switch, so each needs its own
+  `with()` in `scr_DrawMinimap` **and** in `scr_minimap` (the Tab map),
+  plus an `instance_deactivate_object` in `scr_CullDistantScenery`. Miss
+  one and it is simply absent from the map while rendering perfectly in
+  the world, which is what makes it look like a rendering bug. Found this
+  way, all at once: Ichihara drew 73 of its 161 pavement tiles (the snow
+  variant was missing), Yokyohama drew none of its 91 and only the
+  east-west half of its highway (`obj_roadv_highway` was never listed
+  while `obj_roadh_highway` was), and every interior was near-blank
+  because the mall floor and interior wall blocks were on no list at all.
+  **The pattern to watch is paired or per-city objects** — an `h`/`v`
+  pair, or a per-city variant, where only one member got added.
+- **Minimap colours and what they mean.** Pavement is grey
+  `rgb(150,150,150)`; Ichihara's snow pavement a cold `rgb(176,198,219)`,
+  deliberately not near-white since exterior buildings are already pure
+  white; mall and interior floors the same black/white checker as the
+  mall pavement outside, so the surface reads as continuous through the
+  entrance; interior walls (`obj_modern_mall_interior_block`, used by the
+  mall, Chicken Licken and Shinji's home alike) a slate
+  `rgb(96,112,150)`, because white walls would vanish into the pale floor
+  they stand on. Interior walls must be drawn **after** the floor.
 - **It is only affordable because of the scenery culling**: `with()`
   skips deactivated instances, so its ~25 loops touch what's nearby
   rather than all ~6,800 instances. Turning culling off with `/cull`
@@ -1179,11 +1189,14 @@ and in Architecture notes / Known Issues instead.
 ### August 10, 2026
 
 **Fixes**
-- Pavement now shows up on both maps in every city. Ichihara was drawing
-  only its non-snowy pavement and Yokyohama none of its own, on the
-  minimap and the full map alike — the streets were there in the world,
-  just missing from the map. Ichihara's snow pavement now reads as its
-  own cold blue-grey rather than ordinary kerb.
+- The maps now show what's actually there. Ichihara was drawing only its
+  non-snowy pavement, Yokyohama none of its own and only half its
+  highway, and indoor areas — the mall, Chicken Licken, your home — were
+  nearly blank because floors and interior walls were never drawn at all.
+  All fixed on the minimap and the full map alike; the streets and rooms
+  were there in the world the whole time, just missing from the map.
+  Ichihara's snow pavement now reads as its own cold blue-grey rather
+  than ordinary kerb.
 - Fast travel no longer crashes the game. Picking any destination from the
   taxi menu and confirming it would drop straight to an error on the next
   frame — every city was affected, not just the one being travelled to.

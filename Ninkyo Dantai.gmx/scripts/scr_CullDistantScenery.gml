@@ -82,6 +82,14 @@ instance_deactivate_object(obj_alleyway_floor);
 instance_deactivate_object(obj_canal_buruwasu);
 instance_deactivate_object(obj_construction_dirt);
 instance_deactivate_object(obj_sidewalk_mall_buruwasu);
+//Mall/interior floor and walls, and both highway halves. All Draw-only
+//(the wall block adds a Create), so nothing is lost by sleeping them.
+//These matter here as well as for framerate: scr_DrawMinimap walks each
+//of these types every frame, and with() skips deactivated instances.
+instance_deactivate_object(obj_block_modern_mall_floor1);
+instance_deactivate_object(obj_modern_mall_interior_block);
+instance_deactivate_object(obj_roadh_highway);
+instance_deactivate_object(obj_roadv_highway);
 
 var _size = global.cullRange * 2;
 

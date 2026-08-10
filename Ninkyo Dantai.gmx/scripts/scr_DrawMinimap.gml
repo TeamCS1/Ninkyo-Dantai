@@ -152,10 +152,38 @@ with (obj_parking_lot_empty)
     scr_MinimapMark(x, y, sprite_width / 2, c_yellow, true);
 }
 
-// ---- Highway stands out from ordinary road
+// ---- Highway stands out from ordinary road.
+// BOTH halves. These are a horizontal and a vertical object, and only the
+// horizontal one used to be listed, so Yokyohama's highway was drawn on
+// its east-west runs and vanished on its north-south ones.
+var _highway = make_colour_rgb(90, 60, 60);
+
 with (obj_roadh_highway)
 {
-    scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(90, 60, 60), false);
+    scr_MinimapMark(x, y, sprite_width / 2, _highway, false);
+}
+
+with (obj_roadv_highway)
+{
+    scr_MinimapMark(x, y, sprite_width / 2, _highway, false);
+}
+
+// ---- Mall and interior floors, same checkerboard as the mall pavement
+// outside so the surface reads as continuous through the entrance.
+with (obj_block_modern_mall_floor1)
+{
+    scr_MinimapMarkChecker(x, y, sprite_width / 2, _mallCell, _mallWhite, _mallBlack);
+}
+
+// ---- Interior walls. Used by the mall, Chicken Licken and Shinji's home
+// alike, so this is "interior structure" generally, not a mall-only colour.
+//
+// A slate blue rather than the white used for exterior buildings: the
+// floor beneath it is a white-and-near-black check, so white walls would
+// disappear into the pale squares and near-black ones into the dark.
+with (obj_modern_mall_interior_block)
+{
+    scr_MinimapMark(x, y, sprite_width / 2, make_colour_rgb(96, 112, 150), false);
 }
 
 // ---- Buildings

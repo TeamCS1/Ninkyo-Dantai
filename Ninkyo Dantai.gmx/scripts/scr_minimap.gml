@@ -58,7 +58,17 @@ with(obj_t_junction_right)
 
 }
 
+//BOTH highway halves - horizontal and vertical are separate objects, and
+//listing only one drew Yokyohama's highway on its east-west runs while it
+//vanished on the north-south ones.
 with(obj_roadh_highway)
+{
+    draw_set_color(c_maroon)
+    draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), false)
+
+}
+
+with(obj_roadv_highway)
 {
     draw_set_color(c_maroon)
     draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), false)
@@ -82,6 +92,25 @@ with(obj_grass_old)
 with(obj_sidewalk_mall_buruwasu)
 {
     draw_set_color(c_white)
+    draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), 0)
+
+}
+
+//Mall and interior floor, matching the mall pavement above so the surface
+//reads as continuous through the entrance.
+with(obj_block_modern_mall_floor1)
+{
+    draw_set_color(c_white)
+    draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), 0)
+
+}
+
+//Interior walls, drawn after the floor so they sit on top of it. Slate
+//blue rather than the white used for exterior buildings, or they would
+//disappear into the pale floor they stand on. Matches scr_DrawMinimap.
+with(obj_modern_mall_interior_block)
+{
+    draw_set_color(make_colour_rgb(96,112,150))
     draw_rectangle(_x + x / _s - sprite_width / (2 * _s), _y + y / _s - sprite_width / (2 * _s), _x + x / _s + sprite_width / (2 * _s), _y + y / _s + sprite_width / (2 * _s), 0)
 
 }
