@@ -829,10 +829,7 @@ The remaining draw-state issues:
   `mouse_x`/`mouse_y` into `global.targetedX/Y`, but the Draw GUI event then
   draws that value directly in GUI space — the marker lands in the wrong
   spot whenever the view scrolls/zooms.
-- **33. `obj_ichihara_temp_map` is invisible.** Its Create event sets
-  `image_alpha = 0` and nothing in the project ever restores it, yet it's
-  placed as the background in `rm_city_ichihara` — that city's backdrop
-  currently renders fully transparent.
+
 - **34.** No fast-travel/unlock validation exists to check — the only
   destination-selection mechanic found is an in-city waypoint marker, no
   cross-city travel code path was located.
@@ -1020,6 +1017,9 @@ from the code alone. Recorded so they don't get "fixed" again.
   you drive (see As designed). So all of that code is unreachable. Also note its
   exit passes `obj_taxi_icon`, which is the fast-travel marker — if it
   were ever made drivable, parking it would drop a fast-travel icon.
+
+  - **4. `obj_ichihara_temp_map` is invisible.** Its Create event sets
+  `image_alpha = 0` and in `rm_city_ichihara` — Used for making the city layout in the room editor. Never rendered in-game.
   
 
 ## Reviewer's take
