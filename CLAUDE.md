@@ -420,7 +420,7 @@ Background on how core systems actually work, based on an in-depth review
   room transitions can unload texture pages, and a texture pointer cached
   in the previous room dies with them. Skipping that reset turns the
   cache into an intermittent white-model bug. (This also retired old
-  issue #55, the house block's dead `TEX1` — that and four siblings were
+  the house block's dead `TEX1` issue — that and four siblings were
   deleted as part of the sweep.)
 
 ### Minimap
@@ -582,9 +582,11 @@ Background on how core systems actually work, based on an in-depth review
 
 Remaining open findings, ranked most severe first within each area. Every
 finding below was independently spot-checked against the actual source
-before being recorded here. Numbers are stable references, not a count —
-a fixed item is removed and its number retired (moved to Architecture
-notes) rather than renumbering everything after it, so gaps are expected.
+before being recorded here. The list is renumbered contiguously when items
+are removed, so a number identifies an item only within the version of
+this file you are reading — **if you cite one somewhere else, cite the
+title too**, or the reference will quietly point at a different issue the
+next time the list is compacted. That has already happened once.
 
 ### Player & collision (`obj_player_buruwasu.object.gmx`)
 
@@ -855,7 +857,7 @@ The remaining draw-state issues:
   category rows in `obj_dropdown_slots` still carry verbatim
   vending-machine descriptions (e.g. *"A carbonated Cola derived from
   fruit ingredients"*) — moot until those categories have a matching
-  furniture type to describe (see #51).
+  furniture type to describe (see #45).
 - **39. Minor leaks:** `obj_custom_waypoint_buruwasu` creates a d3d model in
   Create with no Destroy event to free it; `obj_wall_mounted_oil_lamp_custom`
   creates a child light instance and loads a model in Create with no
@@ -888,7 +890,7 @@ The remaining draw-state issues:
   set once at placement time, not interactively.
 - **49. TO DO: no controller/joypad support for furniture placement.**
   Gamepad support now exists, but only in the main menu — see Architecture
-  notes, Gamepad input. Selecting, moving, and (per #48) any future
+  notes, Gamepad input. Selecting, moving, and (per #44) any future
   rotating of furniture is still keyboard/mouse-only
   (`keyboard_check_pressed`, `mouse_wheel_up`/`down`). The reusable
   scripts to wire this up are already there; `obj_placerParent` just
@@ -940,7 +942,7 @@ than one to extend.
 Cutscenes that open the game and deepen the narrative. Worth knowing
 before starting: the dialogue controller is fixed, non-branching text with
 no "already seen" flag, which is why the intro line currently replays on
-every entry to 10+ rooms (#31). Cutscenes that should play once will need
+every entry to 10+ rooms (#29). Cutscenes that should play once will need
 that solved first, since it's the same missing piece.
 
 ### Enemy Groups
@@ -1010,16 +1012,19 @@ from the code alone. Recorded so they don't get "fixed" again.
   `obj_taxi`, and **leave the stub body alone** — it reads as dead code
   worth deleting, and that has been considered and declined.
 
-  **3. `obj_taxi` is orphaned.** It carries the full shared vehicle
-  setup — create call, physics, draw, exit — and is byte-identical to
-  the other nine, but nothing ever `instance_create`s it and it is
-  placed in no room, because the taxi is fast travel rather than a car
-  you drive (see As designed). So all of that code is unreachable. Also note its
-  exit passes `obj_taxi_icon`, which is the fast-travel marker — if it
-  were ever made drivable, parking it would drop a fast-travel icon.
+- **3. `obj_taxi` is orphaned, and that is fine.** It carries the full
+  shared vehicle setup — create call, physics, draw, exit — and is
+  byte-identical to the other nine, but nothing ever `instance_create`s
+  it and it is placed in no room, because the taxi is fast travel rather
+  than a car you drive (see item 2 above). So all of that code is
+  unreachable. Note its exit passes `obj_taxi_icon`, which is the
+  fast-travel marker — so if it were ever made drivable, parking it would
+  drop a fast-travel icon.
 
-  - **4. `obj_ichihara_temp_map` is invisible.** Its Create event sets
-  `image_alpha = 0` and in `rm_city_ichihara` — Used for making the city layout in the room editor. Never rendered in-game.
+- **4. `obj_ichihara_temp_map` being invisible is intentional.** Its
+  Create event sets `image_alpha = 0`, and it is placed in
+  `rm_city_ichihara` purely as a reference image for laying the city out
+  in the room editor. It is never meant to render in-game.
   
 
 ## Reviewer's take
@@ -1057,12 +1062,12 @@ predicts where the next bug will be.
 
 - *Copy-paste reuse without a follow-up pass.* The furniture dropdown
   began as a duplicated vending-machine UI and six of nine rows still
-  carry vending-machine text (#41, #51). The vehicles held divergent
+  carry vending-machine text (#38, #45). The vehicles held divergent
   copies of the same event bodies. Both worked; the cost arrived later,
   when one change had to be made in nine places.
 - *Draw-state leaking between instances.* Colour, alpha, font,
   alpha-test and lighting get set without being restored in various
-  places (#18, #22, #23, #25). `global.drawOCRange` compounded across a
+  places (#18, #22, #23, #24). `global.drawOCRange` compounded across a
   session because its only reset lived in an object that had already been
   destroyed. Individually minor, collectively expensive, because the
   symptoms are order-dependent and don't reproduce on demand.
@@ -1103,8 +1108,9 @@ part of this section:
   the events were removed from all ten equally — **consistency checks
   confirm uniformity, not correctness**, and that distinction cost a
   working feature for several commits.
-- Two entries in this file were wrong when acted on: #24 had the
-  lighting convention backwards, and #57 described a one-line fix for
+- Two entries in this file were wrong when acted on: the lighting
+  draw-state entry had the convention backwards, and the civilian-sedan
+  pickup-icon entry described a one-line fix for
   what was actually an unwired feature. This file is load-bearing for
   anyone working here, and it drifts.
 - A `draw_triangle` call failed silently for several iterations because
