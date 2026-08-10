@@ -163,7 +163,16 @@ if drawLoadingScreen == true
     draw_set_font(ft_speedometer_buruwasu)
     draw_set_color(c_white)
     draw_text(200,200,"Loading... " + string(loadingPercentage) + " " + string(loadingString));
-    draw_sprite(spr_curved_rectangle,0,0,0);
+    //RESTORE THIS once spr_curved_rectangle exists as a registered sprite:
+    //draw_sprite(spr_curved_rectangle,0,0,0);
+    //
+    //It crashed fast travel to every city, not just one. The sprite has
+    //never existed as a resource, so GML read the name as an undefined
+    //VARIABLE ("not set before reading it") rather than reporting a missing
+    //sprite - and it cannot be guarded with sprite_exists, because the
+    //identifier itself is what fails to resolve. Dropping the .png in is
+    //not enough: it needs a .sprite.gmx and an entry in the project's
+    //<sprites> list, which is what adding it through the IDE does.
     draw_set_font(ft_map_editor_buruwasu);
     draw_text_ext(70,900,string(loadingStringLocale),30,1750);
 }

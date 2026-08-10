@@ -1136,6 +1136,9 @@ and in Architecture notes / Known Issues instead.
 ### August 10, 2026
 
 **Fixes**
+- Fast travel no longer crashes the game. Picking any destination from the
+  taxi menu and confirming it would drop straight to an error on the next
+  frame — every city was affected, not just the one being travelled to.
 - The burning barrel now has its own artwork at every graphics quality
   setting. It was wearing the wall lamp's texture on four of the five
   settings, so it only looked right on Medium.
