@@ -837,7 +837,7 @@
     <instance objName="obj_roadh" x="2560" y="2432" name="inst_92E89396" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_roadh" x="2304" y="2432" name="inst_2FCA9EB6" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_sidewalk_mall_buruwasu" x="3840" y="3712" name="inst_6D0EF20E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="obj_taxi_corona" x="1344" y="2240" name="inst_8A18F255" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="obj_taxi_corona" x="1344" y="2304" name="inst_8A18F255" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_sidewalk_mall_buruwasu" x="4096" y="3712" name="inst_C932726E" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_roadv" x="3456" y="9728" name="inst_1A19C722" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="obj_roadh" x="5120" y="7552" name="inst_12359CD7" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
