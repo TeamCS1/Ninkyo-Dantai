@@ -799,8 +799,11 @@
         <sprite>sprites\spr_stair_well</sprite>
       </sprites>
       <sprites name="Burning Barrel">
-        <sprite>sprites\sprite185</sprite>
+        <sprite>sprites\uv_burning_barrel_1024</sprite>
         <sprite>sprites\uv_burning_barrel_512</sprite>
+        <sprite>sprites\uv_burning_barrel_256</sprite>
+        <sprite>sprites\uv_burning_barrel_128</sprite>
+        <sprite>sprites\uv_burning_barrel_64</sprite>
       </sprites>
       <sprites name="Electrical Box with Stop Wires">
         <sprite>sprites\uv_electrical_box_with_stop_wires_1024</sprite>
