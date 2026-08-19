@@ -563,10 +563,7 @@ Background on how core systems actually work, based on an in-depth review
 
 - **`scripts/scr_DrawNotificationBox.gml` draws every fading black message
   box in the top-left**, and both `obj_notification_system_out` and
-  `obj_TutorialBoxRotateCamera` call it. They used to hold their own
-  copies of the same layout, which is precisely how the tutorial box got
-  left drawing underneath the minimap when the notification box was moved
-  clear of it. Any new prompt should call this rather than copy it.
+  `obj_TutorialBoxRotateCamera` call it. Any new prompt should call this rather than copy it.
 - It positions itself from `global.minimapPad` and `global.minimapSize`
   rather than a fixed x, so resizing or moving the minimap doesn't put the
   messages back underneath it, and falls back to the original position in
