@@ -1204,20 +1204,4 @@ and in Architecture notes / Known Issues instead.
 ### August 10, 2026
 
 **Fixes**
-- The maps now show what's actually there. Ichihara was drawing only its
-  non-snowy pavement, Yokyohama none of its own and only half its
-  highway, and indoor areas — the mall, Chicken Licken, your home — were
-  nearly blank because floors and interior walls were never drawn at all.
-  All fixed on the minimap and the full map alike; the streets and rooms
-  were there in the world the whole time, just missing from the map.
-  Ichihara's snow pavement now reads as its own cold blue-grey rather
-  than ordinary kerb.
-- Nagasegai has a minimap. It was the only city without one.
-- Fast travel no longer crashes the game. Picking any destination from the
-  taxi menu and confirming it would drop straight to an error on the next
-  frame — every city was affected, not just the one being travelled to.
-- The burning barrel now has its own artwork at every graphics quality
-  setting. It was wearing the wall lamp's texture on four of the five
-  settings, so it only looked right on Medium.
-- Moved the taxi rank marker so it lines up with the rank itself.
-- New texture for the taxi.
+- New update released
